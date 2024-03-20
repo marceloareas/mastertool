@@ -26,7 +26,6 @@ export class ClassComponent {
 
   onChange(event: any) {
     const file: File = event.target.files[0];
-    console.log("file ", file)
     if (file) {
       this.class.patchValue({
         turma: file,
@@ -41,8 +40,8 @@ export class ClassComponent {
     formData.append('periodo', this.class.value.periodo);
     formData.append('arquivo', this.class.value.turma);
 
-    this.classService.post(formData).subscribe(() => {
-      console.log('Arquivo enviado com sucesso!');
+    this.classService.post(formData).subscribe((response) => {
+      console.log('Arquivo enviado com sucesso!', response);
     });
   }
 }
