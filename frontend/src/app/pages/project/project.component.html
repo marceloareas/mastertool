@@ -1,0 +1,28 @@
+<section>
+  <app-top-bar [title]="'Projeto'" />
+  <div class="teste">
+    <div class="a"></div>
+
+    <div class="lower__content">
+      <hr />
+      <div class="lower__content__form">
+        <button class="lower__content__button" (click)="setShowUpload()">
+          Cadastrar Projeto
+        </button>
+
+        @if(showUpload){
+        <div class="upload">
+          <label for="avatar">Subir arquivo:</label>
+
+          <input
+            type="file"
+            id="avatar"
+            name="avatar"
+            accept="image/png, image/jpeg"
+          />
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

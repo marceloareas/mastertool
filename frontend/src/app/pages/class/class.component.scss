@@ -1,0 +1,52 @@
+section {
+  height: 100%;
+  background: white;
+}
+
+.teste{
+  padding: 20px;
+}
+
+.a {
+  height: 70%;
+}
+
+.lower__content {
+
+  hr{
+    margin-bottom: 40px;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  &__button {
+    border: none;
+    background: #7a7a7a;
+    height: 55px;
+    border-radius: 12px;
+    font-size: 16px;
+    color: white;
+    width: 130px;
+  }
+
+  .upload{
+    display: flex;
+    gap: 15px;
+  }
+}
+
+::ng-deep{
+  .mat-drawer-side {
+    border: none;
+  }
+}
+
+form{
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,20 @@
+<mat-drawer-container class="container">
+  <mat-drawer mode="side" opened class="container__menu">
+    <ul>
+      @for (page of pages; track page.title ) {
+      <li class="container__menu__itens">
+        <a
+          [routerLink]="page.route"
+          class="container__menu__links"
+        >
+          <mat-icon>{{ page.icon }}</mat-icon>
+          {{ page.title }}
+        </a>
+      </li>
+      }
+    </ul>
+  </mat-drawer>
+  <mat-drawer-content class="container__content">
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
+</mat-drawer-container>

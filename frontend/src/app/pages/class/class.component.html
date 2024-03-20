@@ -1,0 +1,44 @@
+<section>
+  <app-top-bar [title]="'Turma'" />
+  <div class="teste">
+    <div class="a"></div>
+
+    <div class="lower__content">
+      <hr />
+      <div class="lower__content__form">
+        <button class="lower__content__button" (click)="setShowUpload()">
+          Cadastrar Turma
+        </button>
+
+        @if(showUpload){
+        <form class="upload" [formGroup]="class" (ngSubmit)="onSubmit()">
+
+          <label for="nome">Nome:</label>
+          <input
+            type="text"
+            id="name"
+            required
+            size="20"
+            formControlName="nome"
+          />
+
+          <label for="name">Período:</label>
+          <input
+            type="text"
+            id="name"
+            required
+            size="20"
+            formControlName="periodo"
+          />
+
+          <label for="avatar">Subir arquivo:</label>
+          <input type="file" id="avatar" (change)="onChange($event)" />
+
+          <button type="submit" [disabled]="!class.valid">Enviar</button>
+        </form>
+        }
+
+      </div>
+    </div>
+  </div>
+</section>
