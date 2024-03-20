@@ -5,8 +5,8 @@ from .apis import cadastro_txt
 
 @api_view(['POST'])
 def cadastrar_turma(request):
-    if request.method == 'POST' and request.FILES['turma']:
-        sucess = cadastro_txt(request.FILES['turma'], 'pcs')
+    if request.method == 'POST' and request.data['arquivo']:
+        sucess = cadastro_txt(request.data)
 
         if sucess:
             return HttpResponse(f'Arquivo processado com sucesso.')
