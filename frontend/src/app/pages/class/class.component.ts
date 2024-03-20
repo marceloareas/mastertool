@@ -40,7 +40,7 @@ export class ClassComponent {
     formData.append('periodo', this.class.value.periodo);
     formData.append('arquivo', this.class.value.turma);
 
-    this.classService.post(formData).subscribe((response) => {
+    this.classService.post(formData).subscribe((response: any) => {
       console.log('Arquivo enviado com sucesso!', response);
     });
   }
