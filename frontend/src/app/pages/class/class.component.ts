@@ -12,6 +12,7 @@ import { ClassService } from '../../services/class/class.service';
 })
 export class ClassComponent {
   private classService = inject(ClassService);
+  alunos:string[] = [];
 
   class: FormGroup = new FormGroup({
     nome: new FormControl(),
@@ -42,6 +43,8 @@ export class ClassComponent {
 
     this.classService.post(formData).subscribe((response: any) => {
       console.log('Arquivo enviado com sucesso!', response);
+
+      this.alunos = response.alunos_criados
     });
   }
 }
