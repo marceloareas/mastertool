@@ -8,7 +8,7 @@ from django.contrib.auth import login as login_django
 from django.contrib.auth.decorators import login_required
 
 
-@login_required()
+# @login_required()
 @api_view(['POST'])
 def cadastrar_turma(request):
     if request.method == 'POST' and request.data['arquivo']:
