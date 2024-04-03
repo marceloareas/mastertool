@@ -1,28 +1,12 @@
-<section>
-  <app-top-bar [title]="'Projeto'" />
-  <div class="teste">
-    <div class="a"></div>
+<section class="class">
+  <app-top-bar [title]="'Projetos'" class="bar" />
 
-    <div class="lower__content">
-      <hr />
-      <div class="lower__content__form">
-        <button class="lower__content__button" (click)="setShowUpload()">
-          Cadastrar Projeto
-        </button>
+  <div class="class__content"></div>
 
-        @if(showUpload){
-        <div class="upload">
-          <label for="avatar">Subir arquivo:</label>
-
-          <input
-            type="file"
-            id="avatar"
-            name="avatar"
-            accept="image/png, image/jpeg"
-          />
-        </div>
-        }
-      </div>
-    </div>
+  <div class="bottom__content">
+    <button class="bottom__content__button" (click)="openModal()">
+      Cadastrar Projetos
+    </button>
   </div>
+
 </section>

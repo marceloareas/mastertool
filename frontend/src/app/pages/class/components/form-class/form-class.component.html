@@ -1,0 +1,15 @@
+<form [formGroup]="class">
+  <div class="container__top">
+    <mat-form-field appearance="outline">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="nome" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Período</mat-label>
+      <input matInput formControlName="periodo" />
+    </mat-form-field>
+  </div>
+
+  <label for="avatar">Subir arquivo:</label>
+  <input type="file" id="avatar" formControlName="turma" (change)="onFileChange($event)" />
+</form>
