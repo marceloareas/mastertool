@@ -2,16 +2,26 @@
   <app-top-bar [title]="'Alunos'" class="bar" />
 
   <div class="class__content">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <mat-form-field appearance="outline">
+      <mat-label>Pesquisar</mat-label>
+      <input matInput (keyup)="filter($event)" />
+    </mat-form-field>
 
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="nome">
-        <th mat-header-cell *matHeaderCellDef> Alunos </th>
-        <td mat-cell *matCellDef="let element"> {{element.nome}} </td>
+        <th mat-header-cell *matHeaderCellDef>Alunos</th>
+        <td mat-cell *matCellDef="let element">{{ element.nome }}</td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
+
+    <mat-paginator
+    [pageSizeOptions]="[5, 10, 15]"
+    showFirstLastButtons
+    aria-label="Select page of periodic elements"
+  ></mat-paginator>
   </div>
 
   <div class="bottom__content">
@@ -19,5 +29,4 @@
       Cadastrar Alunos
     </button>
   </div>
-
 </section>
