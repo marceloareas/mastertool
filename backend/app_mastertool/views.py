@@ -11,8 +11,9 @@ from django.contrib.auth.decorators import login_required
 # @login_required()
 @api_view(['POST'])
 def cadastrar_turma(request):
-    if request.method == 'POST' and request.data['arquivo']:
-        alunos_criados = cadastro_txt(request.data)
+    if request.method == 'POST' and request.FILES.get('file'):
+        uploaded_file = request.FILES['file']
+        alunos_criados = cadastro_txt(uploaded_file)
 
         if alunos_criados:
             return JsonResponse({'mensagem': 'Arquivo processado com sucesso.', 'alunos_criados': alunos_criados})

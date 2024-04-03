@@ -3,12 +3,8 @@ import re
 
 def cadastro_txt(data):
     alunos_criados = []
-    conteudo_arquivo = data['arquivo'].read().decode('utf-8')
+    conteudo_arquivo = data.read().decode('utf-8')
     alunos = conteudo_arquivo.splitlines()
-
-    turma = Turma(nome=data['nome'], periodo=data['periodo'])
-    turma.save()    
-    turma = Turma.objects.get(nome=data['nome'])
 
     for aluno in alunos:
         partes = aluno.split(',')
@@ -16,6 +12,5 @@ def cadastro_txt(data):
         nome = partes[1].strip()
         aluno = Aluno(nome=nome, matricula=matricula)
         aluno.save()
-        turma.aluno.add(aluno)
         alunos_criados.append(nome)
     return alunos_criados
