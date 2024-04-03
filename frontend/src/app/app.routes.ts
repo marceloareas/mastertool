@@ -5,20 +5,30 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
+      import('./pages/login/login.component').then((c) => c.LoginComponent),
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
       import('./pages/user/user.component').then((c) => c.UserComponent),
     children: [
       {
         path: 'class',
         loadComponent: () =>
-          import('./pages/class/class.component').then(
-            (c) => c.ClassComponent
-          ),
+          import('./pages/class/class.component').then((c) => c.ClassComponent),
       },
       {
         path: 'project',
         loadComponent: () =>
           import('./pages/project/project.component').then(
             (c) => c.ProjectComponent
+          ),
+      },
+      {
+        path: 'student',
+        loadComponent: () =>
+          import('./pages/student/student.component').then(
+            (c) => c.StudentComponent
           ),
       },
     ],

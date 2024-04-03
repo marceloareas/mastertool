@@ -1,46 +1,39 @@
-section {
-  height: 100%;
+.class {
+  display: grid;
+  grid-template-areas:
+    "bar"
+    "class"
+    "bottom";
+  grid-template-rows: 0fr 1fr 0fr;
   background: white;
-}
+  height: 100%;
 
-.teste{
-  padding: 20px;
-}
-
-.a {
-  height: 70%;
-}
-
-.lower__content {
-
-  hr{
-    margin-bottom: 40px;
+  &__content {
+    padding: 20px;
   }
 
-  &__form {
+  .bottom__content {
+    grid-area: bottom;
     display: flex;
     flex-direction: column;
+    margin: 0 20px 20px;
+    padding-top: 15px;
+    border-top: 1px solid gray;
     align-items: center;
-    gap: 30px;
-  }
 
-  &__button {
-    border: none;
-    background: #7a7a7a;
-    height: 55px;
-    border-radius: 12px;
-    font-size: 16px;
-    color: white;
-    width: 130px;
-  }
-
-  .upload{
-    display: flex;
-    gap: 15px;
+    &__button {
+      border: none;
+      background: #7a7a7a;
+      border-radius: 12px;
+      width: 130px;
+      height: 55px;
+      font-size: 16px;
+      color: white;
+    }
   }
 }
 
-::ng-deep{
+::ng-deep {
   .mat-drawer-side {
     border: none;
   }

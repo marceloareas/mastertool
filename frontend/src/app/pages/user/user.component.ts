@@ -20,7 +20,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 export class UserComponent {
   pages = [
     {
-      title: 'Turma',
+      title: 'Turmas',
       icon: 'school',
       route: 'class',
     },
@@ -28,6 +28,11 @@ export class UserComponent {
       title: 'Projetos',
       icon: 'library_books',
       route: 'project',
+    },
+    {
+      title: 'Alunos',
+      icon: 'person',
+      route: 'student',
     },
   ];
 }
