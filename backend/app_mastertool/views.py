@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 
 # @login_required()
 @api_view(['POST'])
-def cadastrar_turma(request):
+def cadastrar_alunos(request):
     if request.method == 'POST' and request.FILES.get('file'):
         uploaded_file = request.FILES['file']
         alunos_criados = cadastro_txt(uploaded_file)
