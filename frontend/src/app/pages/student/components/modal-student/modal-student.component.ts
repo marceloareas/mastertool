@@ -4,6 +4,7 @@ import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, Ma
 import { ClassService } from '../../../../services/class/class.service';
 import { DialogRef } from '@angular/cdk/dialog';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { EventEmitter } from 'stream';
 
 @Component({
   selector: 'app-modal-student',
@@ -34,7 +35,7 @@ export class ModalStudentComponent {
       data.append('file', this.files);
 
       this.classService.post(data).subscribe((response: any) => {
-        console.log('Arquivo enviado com sucesso!', response);
+        this.dialogRef.close(true)
       });
     }
 

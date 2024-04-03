@@ -7,10 +7,11 @@ import { Injectable, inject } from '@angular/core';
 export class ClassService {
   private http = inject(HttpClient)
 
-  url = 'http://127.0.0.1:8000/cadastrar-turma/'
+  url = 'http://127.0.0.1:8000/cadastrar-alunos/'
+  url2 = 'http://127.0.0.1:8000/alunos/'
 
   get = () =>{
-    return this.http.get<any>(this.url)
+    return this.http.get<any>(this.url2)
   }
 
   post = (dados: any) => {
