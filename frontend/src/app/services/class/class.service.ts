@@ -9,6 +9,10 @@ export class ClassService {
 
   url = 'http://127.0.0.1:8000/cadastrar-turma/'
 
+  get = () =>{
+    return this.http.get<any>(this.url)
+  }
+
   post = (dados: any) => {
     return this.http.post<any>(this.url, dados);
   }

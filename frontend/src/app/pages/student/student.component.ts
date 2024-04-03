@@ -4,6 +4,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalStudentComponent } from './components/modal-student/modal-student.component';
 import {MatTableModule} from '@angular/material/table';
 import { FormControl, FormGroup } from '@angular/forms';
+import { ClassService } from '../../services/class/class.service';
 
 @Component({
   selector: 'app-student',
@@ -14,10 +15,16 @@ import { FormControl, FormGroup } from '@angular/forms';
 })
 export class StudentComponent {
   private dialog = inject(MatDialog)
+  private classService = inject(ClassService)
   showUpload: boolean = false;
   displayedColumns: string[] = ['nome'];
-  dataSource = [
-  ];
+  dataSource: any;
+
+/*   ngOnInit(){
+    this.classService.get().subscribe( data => {
+      this.dataSource = data;
+    })
+  } */
 
   openModal(){
     this.dialog.open(ModalStudentComponent,{

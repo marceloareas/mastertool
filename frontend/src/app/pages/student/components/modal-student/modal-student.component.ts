@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { ClassService } from '../../../../services/class/class.service';
 import { DialogRef } from '@angular/cdk/dialog';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-modal-student',
@@ -14,6 +15,7 @@ import { DialogRef } from '@angular/cdk/dialog';
     MatDialogClose,
     MatButtonModule,
     MatDialogModule,
+    ReactiveFormsModule
   ],
   templateUrl: './modal-student.component.html',
   styleUrl: './modal-student.component.scss',
@@ -28,7 +30,10 @@ export class ModalStudentComponent {
     }
 
     upload() {
-      this.classService.post(this.files).subscribe((response: any) => {
+      const data = new FormData();
+      data.append('file', this.files);
+
+      this.classService.post(data).subscribe((response: any) => {
         console.log('Arquivo enviado com sucesso!', response);
       });
     }
