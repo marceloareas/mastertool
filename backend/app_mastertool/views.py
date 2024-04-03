@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as login_django
 from django.contrib.auth.decorators import login_required
-
+from .models import *
 
 # @login_required()
 @api_view(['POST'])
@@ -16,7 +16,7 @@ def cadastrar_alunos(request):
         alunos_criados = cadastro_txt(uploaded_file)
 
         if alunos_criados:
-            return JsonResponse({'mensagem': 'Arquivo processado com sucesso.', 'alunos_criados': alunos_criados})
+            return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
 
@@ -56,5 +56,9 @@ def login(request):
         else:
             return JsonResponse({'erro': 'usuario ou senha invalidos'}, status=400)
 
-
-
+@api_view(['GET'])
+def get_alunos(request):
+    if request.method == 'GET':
+        alunos = Aluno.objects.all()
+        alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome, 'atividade': aluno.atividade} for aluno in alunos]
+        return JsonResponse(alunos_json, safe=False)
