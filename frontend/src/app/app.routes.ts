@@ -8,10 +8,23 @@ export const routes: Routes = [
       import('./pages/login/login.component').then((c) => c.LoginComponent),
   },
   {
+    path: 'register',
+    loadComponent: () =>
+      import('./pages/cadastro/cadastro.component').then(
+        (c) => c.CadastroComponent
+      ),
+  },
+
+  {
     path: 'admin',
     loadComponent: () =>
       import('./pages/user/user.component').then((c) => c.UserComponent),
     children: [
+      {
+        path: '',
+        redirectTo: 'class',
+        pathMatch: 'full',
+      },
       {
         path: 'class',
         loadComponent: () =>

@@ -1,0 +1,19 @@
+<section class="login">
+  <div class="login__content">
+
+    <h1>Criar conta</h1>
+
+    <div class="login__form">
+      <form (ngSubmit)="onSubmit()">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="form.email"/>
+
+        <label>Senha</label>
+        <input type="text" [(ngModel)]="form.senha"/>
+      </form>
+    </div>
+    <div class="login__buttons">
+      <button type="submit">Cadastrar</button>
+    </div>
+  </div>
+</section>
