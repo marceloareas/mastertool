@@ -3,10 +3,12 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from django.contrib.auth import login as login_django
+from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from .apis import *
 from .models import *
+import jwt
 
 @api_view(['POST'])
 def cadastrar_usuario(request):
@@ -29,16 +31,16 @@ def cadastrar_usuario(request):
 @api_view(['POST'])
 def login(request):
     if request.method == 'POST':
-        email = request.data['email']
-        senha = request.data['senha']
-
-        usuario = authenticate(username=email, password=senha)
-
-        if usuario:
+        novo_cadastro = request.data
+        
+        usuario = authenticate(username=novo_cadastro['email'], password=novo_cadastro['senha'])
+        if usuario is not None:
             login_django(request, usuario)
-            return JsonResponse({'mensagem': 'Autenticado'}, status=200)
+            
+            token = jwt.encode({'user_id': usuario.id}, settings.SECRET_KEY, algorithm='HS256')
+            return JsonResponse({'mensagem': 'Autenticado com sucesso', 'token': token}, status=200)
         else:
-            return JsonResponse({'erro': 'usuario ou senha invalidos'}, status=400)
+            return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
 
 @login_required()
 @api_view(['POST'])
