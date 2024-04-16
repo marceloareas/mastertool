@@ -11,4 +11,8 @@ private http = inject(HttpClient);
   post = (dados: any) => {
     return this.http.post<any>('http://127.0.0.1:8000/cadastrar-usuario/', dados);
   }
+
+  post_login = (dados: any) => {
+    return this.http.post<any>('http://127.0.0.1:8000/login/', dados);
+  }
 }

@@ -8,14 +8,14 @@
     <div class="login__form">
       <form>
         <label>Usuário</label>
-        <input />
+        <input type="email" [(ngModel)]="form.email" name="campo1"/>
 
         <label>Senha</label>
-        <input />
+        <input type="text" [(ngModel)]="form.senha" name="campo2"/>
       </form>
     </div>
     <div class="login__buttons">
-      <button>Entrar</button>
+      <button (click)="onSubmit()">Entrar</button>
       <a [routerLink]="rota">Criar Conta</a>
     </div>
   </div>
