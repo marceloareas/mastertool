@@ -4,16 +4,16 @@
     <h1>Criar conta</h1>
 
     <div class="login__form">
-      <form (ngSubmit)="onSubmit()">
+      <form>
         <label>Email</label>
-        <input type="email" [(ngModel)]="form.email"/>
+        <input type="email" [(ngModel)]="form.email" name="campo1"/>
 
         <label>Senha</label>
-        <input type="text" [(ngModel)]="form.senha"/>
+        <input type="text" [(ngModel)]="form.senha" name="campo2"/>
       </form>
     </div>
     <div class="login__buttons">
-      <button type="submit">Cadastrar</button>
+      <button (click)="onSubmit()">Cadastrar</button>
     </div>
   </div>
 </section>

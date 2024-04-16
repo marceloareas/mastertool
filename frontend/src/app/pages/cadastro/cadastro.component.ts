@@ -18,6 +18,7 @@ export class CadastroComponent {
   };
 
   onSubmit(){
+    console.log(this.form)
     this._auth.post(this.form).subscribe(() => {
       alert('Cadastrado com sucesso')
     })
