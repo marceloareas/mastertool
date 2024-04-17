@@ -8,8 +8,13 @@ import { catchError, map, tap, throwError } from 'rxjs';
 export class AuthenticationService {
   private http = inject(HttpClient);
   isLogged = signal(false);
-  token!: any;
-  constructor() {}
+
+  constructor() {
+    const authToken = this.getToken();
+    if (authToken) {
+      this.isLogged.set(true);
+    }
+  }
 
   post = (dados: any) => {
     return this.http.post<any>(
@@ -29,19 +34,18 @@ export class AuthenticationService {
         }
       }),
       catchError((error) => {
-        // Aqui você pode tratar o erro da maneira que preferir
         console.error('Erro ao fazer login:', error);
-        // Retorna um observable de erro para que o fluxo não seja interrompido
         return throwError('Erro ao fazer login. Por favor, tente novamente.');
       })
     );
   };
 
+  getToken(): string | null {
+    return localStorage.getItem('authToken')
+  }
+
   logout(): void {
-    // Limpar credenciais de autenticação ou informações de sessão
-    // Por exemplo, se você estiver usando JWT, pode limpar o token armazenado no localStorage
     localStorage.removeItem('authToken');
-    // Atualizar o estado de autenticação para não autenticado
     this.isLogged.set(false);
   }
 }

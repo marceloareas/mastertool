@@ -7,7 +7,6 @@ import {MatCardModule} from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SingleClassComponent } from './components/single-class/single-class.component';
-import { Class } from './class.interface';
 
 @Component({
   selector: 'app-class',
