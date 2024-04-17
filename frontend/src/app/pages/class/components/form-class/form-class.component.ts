@@ -1,7 +1,8 @@
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { ClassService } from '../../../../services/class/class.service';
 
 @Component({
   selector: 'app-form-class',
@@ -11,6 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   styleUrl: './form-class.component.scss',
 })
 export class FormClassComponent {
+  private classService = inject(ClassService);
   @Output() formClass: EventEmitter<any> = new EventEmitter();
 
   class: FormGroup = new FormGroup({
@@ -18,17 +20,20 @@ export class FormClassComponent {
     periodo: new FormControl(),
     turma: new FormControl(),
   });
+  file!: any;
 
   onFileChange(event: any) {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.class.patchValue({
-        turma: file,
-      });
-    }
+    this.file = event.target.files[0];
   }
 
-  save() {
+  save(){
+    const formData = new FormData();
+    formData.append('file', this.file);
+
+    this.classService.post(formData).subscribe();
+  }
+
+  /*  save() {
     const formData = new FormData();
     formData.append('nome', this.class.value.nome);
     formData.append('periodo', this.class.value.periodo);
@@ -45,5 +50,5 @@ export class FormClassComponent {
     };
 
     this.formClass.emit(formDataToSend);
-  }
+  } */
 }

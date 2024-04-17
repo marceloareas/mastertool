@@ -8,11 +8,11 @@ export class StudentService {
   private http = inject(HttpClient)
   constructor() { }
 
-  get = () =>{
-    return this.http.get<any>('http://127.0.0.1:8000/cadastrar-alunos/')
+  post = (dados: any) =>{
+    return this.http.post<any>('http://127.0.0.1:8000/cadastrar-alunos/', dados)
   }
 
-  post = (dados: any) => {
-    return this.http.post<any>('http://127.0.0.1:8000/alunos/', dados);
+  get = () => {
+    return this.http.get<any>('http://127.0.0.1:8000/alunos/');
   }
 }

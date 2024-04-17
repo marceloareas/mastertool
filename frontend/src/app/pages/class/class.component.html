@@ -1,22 +1,18 @@
 <section class="class">
   <app-top-bar [title]="'Turmas'" class="bar" />
 
-  <div class="class__content">
-    @if(!isOpen){
-      @for (class of classes; track class ) {
-        <mat-card class="example-card" (click)="openClass(class)">
-          <mat-card-content>
-            <mat-icon> menu_book </mat-icon>
-            <h3>
-              {{ class }}
-            </h3>
-          </mat-card-content>
-        </mat-card>
-        }
-    }
+  <div class="class__content" [ngClass]="isOpen ? 'teste': ''">
+    @if(!isOpen){ @for (class of classes; track class ) {
 
-    @if(isOpen){
-      <app-single-class (closeClassEvent)="openClass()" [class]="dataClass"/>
+    <mat-card class="example-card" (click)="openClass(class)">
+      <mat-card-content>
+        <mat-icon> menu_book </mat-icon>
+        <h3>{{ class.nome }}</h3>
+      </mat-card-content>
+    </mat-card>
+
+    } } @if(isOpen){
+    <app-single-class (closeClassEvent)="openClass()" [class]="dataClass" />
     }
   </div>
 

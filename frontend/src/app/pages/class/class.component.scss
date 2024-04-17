@@ -12,6 +12,10 @@
     display: flex;
     gap: 25px;
     padding: 20px;
+
+    &.teste{
+      display: initial;
+    }
   }
 
   .bottom__content {
@@ -49,3 +53,4 @@
   text-align: center;
   cursor: pointer;
 }
+

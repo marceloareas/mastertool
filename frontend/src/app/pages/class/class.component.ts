@@ -7,6 +7,8 @@ import {MatCardModule} from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SingleClassComponent } from './components/single-class/single-class.component';
+import { ClassService } from '../../services/class/class.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-class',
@@ -19,16 +21,23 @@ import { SingleClassComponent } from './components/single-class/single-class.com
     MatCardModule,
     MatIcon,
     MatButtonModule,
-    SingleClassComponent
+    SingleClassComponent,
+    CommonModule
   ],
   templateUrl: './class.component.html',
   styleUrl: './class.component.scss',
 })
 export class ClassComponent {
-  constructor(public dialog: MatDialog) {}
+  private classService = inject(ClassService);
   classes!: any;
   isOpen= false
   dataClass!: any;
+
+  constructor(public dialog: MatDialog) {
+    this.classService.get().subscribe(data =>{
+      this.classes = data
+    })
+  }
 
   openModal() {
     this.dialog.open(ModalClassComponent, {

@@ -6,6 +6,7 @@ import { DialogRef } from '@angular/cdk/dialog';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { EventEmitter } from 'stream';
 import { AuthenticationService } from '../../../../services/authentication/authentication.service';
+import { StudentService } from '../../../../services/student/student.service';
 
 @Component({
   selector: 'app-modal-student',
@@ -23,7 +24,7 @@ import { AuthenticationService } from '../../../../services/authentication/authe
   styleUrl: './modal-student.component.scss',
 })
 export class ModalStudentComponent {
-  private classService = inject(ClassService);
+  private studentService = inject(StudentService);
   private dialogRef = inject(DialogRef);
   files!: any;
 
@@ -35,7 +36,7 @@ export class ModalStudentComponent {
       const data = new FormData();
       data.append('file', this.files);
 
-      this.classService.post(data).subscribe((response: any) => {
+      this.studentService.post(data).subscribe((response: any) => {
         this.dialogRef.close(true)
       });
     }
