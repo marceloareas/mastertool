@@ -59,10 +59,10 @@ def cadastrar_alunos(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def cadastrar_turma(request):
-    if request.method == 'POST' and request.FILES.get('file'):
+    if request.method == 'POST':
         uploaded_file = request.FILES['file']
         usuario = request.user
-        alunos_criados = cadastro_turma_txt(uploaded_file, request.POST, usuario)
+        alunos_criados = cadastro_turma_txt(uploaded_file, request.data, usuario)
 
         if alunos_criados:
             return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})

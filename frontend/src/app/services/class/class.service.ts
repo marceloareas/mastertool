@@ -7,11 +7,11 @@ import { Injectable, inject } from '@angular/core';
 export class ClassService {
   private http = inject(HttpClient)
 
-  get = () =>{
-    return this.http.get<any>('http://127.0.0.1:8000/cadastrar-turma/')
+  post = (dados: any) =>{
+    return this.http.post<any>('http://127.0.0.1:8000/cadastrar-turma/', dados)
   }
 
-  post = (dados: any) => {
-    return this.http.post<any>('http://127.0.0.1:8000/turmas/', dados);
+  get = () => {
+    return this.http.get<any>('http://127.0.0.1:8000/turmas/');
   }
 }
