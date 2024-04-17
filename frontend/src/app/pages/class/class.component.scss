@@ -9,6 +9,8 @@
   height: 100%;
 
   &__content {
+    display: flex;
+    gap: 25px;
     padding: 20px;
   }
 
@@ -37,4 +39,13 @@
   .mat-drawer-side {
     border: none;
   }
+}
+
+.example-card {
+  width: 150px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
 }

@@ -9,10 +9,11 @@ export function AuthenticationInterceptor(
   next: HttpHandlerFn
 ) {
     const authService = inject(AuthenticationService);
-    const token = localStorage.getItem('authToken');
-    if (token != null) {
-      const router = inject(Router)
-      console.log(router)
+    const token = authService.getToken();
+    const router = inject(Router)
+
+    if (token) {
+      authService.isLogged.set(true)
       const clonedRequest = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,

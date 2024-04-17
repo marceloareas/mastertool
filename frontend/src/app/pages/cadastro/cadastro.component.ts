@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthenticationService } from '../../services/authentication/authentication.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cadastro',
@@ -11,6 +12,7 @@ import { AuthenticationService } from '../../services/authentication/authenticat
 })
 export class CadastroComponent {
   private _auth = inject(AuthenticationService);
+  private router = inject(Router)
 
   form = {
     email: '',
@@ -21,6 +23,7 @@ export class CadastroComponent {
     console.log(this.form)
     this._auth.post(this.form).subscribe(() => {
       alert('Cadastrado com sucesso')
+      this.router.navigate([''])
     })
   }
 }
