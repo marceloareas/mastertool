@@ -5,7 +5,7 @@ class Aluno(models.Model):
     matricula = models.CharField(primary_key=True, max_length=100)
     nome = models.CharField(max_length=100)
     atividade = models.TextField(blank=True)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='alunos', default=1)
+    usuario = models.ManyToManyField(User, related_name='alunos', default=1)
 
     def __str__(self):
         return self.nome
