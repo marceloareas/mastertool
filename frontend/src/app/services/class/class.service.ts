@@ -11,6 +11,7 @@ export class ClassService {
   url2 = 'http://127.0.0.1:8000/alunos/'
 
   get = () =>{
+
     return this.http.get<any>(this.url2)
   }
 
