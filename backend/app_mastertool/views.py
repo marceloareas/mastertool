@@ -77,3 +77,29 @@ def get_alunos(request):
         alunos = Aluno.objects.filter(usuario=usuario)
         alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome, 'atividade': aluno.atividade} for aluno in alunos]
         return JsonResponse(alunos_json, safe=False)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_turmas(request):
+    if request.method == 'GET':
+        usuario = request.user
+
+        turmas = Turma.objects.filter(usuario=usuario)
+        turmas_json = []
+
+        for turma in turmas:
+            alunos_json = []
+            for aluno in turma.aluno.all():
+                alunos_json.append({
+                    'matricula': aluno.matricula,
+                    'nome': aluno.nome,
+                    'atividade': aluno.atividade,
+                })
+            turma_dict = {
+                'nome': turma.nome,
+                'periodo': turma.periodo,
+                'alunos': alunos_json,
+            }
+            turmas_json.append(turma_dict)
+
+        return JsonResponse(turmas_json, safe=False)
