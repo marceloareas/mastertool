@@ -10,8 +10,9 @@ def cadastro_alunos_txt(data, usuario):
         partes = aluno.split(',')
         matricula = partes[0].strip()
         nome = partes[1].strip()
-        aluno = Aluno(nome=nome, matricula=matricula, usuario=usuario)
+        aluno = Aluno(nome=nome, matricula=matricula)
         aluno.save()
+        aluno.usuario.add(usuario)
         alunos_criados.append(nome)
     return alunos_criados
 
