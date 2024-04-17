@@ -6,11 +6,18 @@
   &__menu {
     width: 130px;
 
-    &__itens{
+    &__itens {
       margin-bottom: 30px;
+
+      &__logout {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-top: 1px solid gray;
+      }
     }
 
-    &__links{
+    &__links {
       display: flex;
       flex-direction: column;
       text-decoration: none;
@@ -19,7 +26,7 @@
       gap: 4px;
     }
 
-    ul{
+    ul {
       list-style: none;
       padding: 10px;
       width: 100%;
@@ -30,7 +37,6 @@
   }
 }
 
-mat-drawer-content{
+mat-drawer-content {
   background-color: white;
 }
-

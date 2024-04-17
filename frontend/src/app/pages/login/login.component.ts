@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthenticationService } from '../../services/authentication/authentication.service';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { response } from 'express';
 
 @Component({
   selector: 'app-login',
@@ -11,18 +12,25 @@ import { RouterLink } from '@angular/router';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-rota = 'register'
-private _auth = inject(AuthenticationService);
+  rota = 'register';
+  private _auth = inject(AuthenticationService);
+  private _router = inject(Router);
 
   form = {
     email: '',
-    senha: ''
+    senha: '',
   };
 
-  onSubmit(){
-    console.log(this.form)
-    this._auth.post_login(this.form).subscribe(() => {
-      alert('Cadastrado com sucesso')
-    })
+  login(): void {
+    this._auth.login(this.form).subscribe({
+      next: (response) => {
+        if (response.token) {
+          this._router.navigate(['/admin']);
+        }
+      },
+      error: (error) => {
+        alert(error);
+      },
+    });
   }
 }

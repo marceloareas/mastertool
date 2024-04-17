@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { MatLabel } from '@angular/material/form-field';
+import { AuthenticationService } from '../../services/authentication/authentication.service';
 
 @Component({
   selector: 'app-user',
@@ -13,11 +15,15 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     MatIconModule,
     RouterLink,
     RouterOutlet,
+    MatLabel
   ],
   templateUrl: './user.component.html',
   styleUrl: './user.component.scss',
 })
 export class UserComponent {
+  private router = inject(Router);
+  private auth = inject(AuthenticationService);
+
   pages = [
     {
       title: 'Turmas',
@@ -35,4 +41,9 @@ export class UserComponent {
       route: 'student',
     },
   ];
+
+  logout(){
+    this.auth.logout();
+    this.router.navigate(['']);
+  }
 }
