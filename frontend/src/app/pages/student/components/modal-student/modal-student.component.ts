@@ -5,6 +5,7 @@ import { ClassService } from '../../../../services/class/class.service';
 import { DialogRef } from '@angular/cdk/dialog';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { EventEmitter } from 'stream';
+import { AuthenticationService } from '../../../../services/authentication/authentication.service';
 
 @Component({
   selector: 'app-modal-student',
@@ -24,6 +25,7 @@ import { EventEmitter } from 'stream';
 export class ModalStudentComponent {
   private classService = inject(ClassService);
   private dialogRef = inject(DialogRef);
+  private auth = inject(AuthenticationService);
   files!: any;
 
   onFileChange(event: any) {

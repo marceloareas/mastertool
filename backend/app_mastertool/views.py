@@ -1,14 +1,15 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import authenticate, login as login_django
-from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
 from .apis import *
 from .models import *
 import jwt
+from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 
 @api_view(['POST'])
 def cadastrar_usuario(request):
@@ -37,15 +38,15 @@ def login(request):
         if usuario is not None:
             login_django(request, usuario)
             
-            token = jwt.encode({'user_id': usuario.id}, settings.SECRET_KEY, algorithm='HS256')
+            token = get_tokens_for_user(usuario)
             return JsonResponse({'mensagem': 'Autenticado com sucesso', 'token': token}, status=200)
         else:
             return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
-
-@login_required()
+        
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def cadastrar_alunos(request):
-    if request.method == 'POST' and request.FILES.get('file'):
+    if request.method == 'POST':
         uploaded_file = request.FILES['file']
         usuario = request.user
         alunos_criados = cadastro_alunos_txt(uploaded_file, usuario)
@@ -54,9 +55,9 @@ def cadastrar_alunos(request):
             return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
-        
-@login_required()
+
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def cadastrar_turma(request):
     if request.method == 'POST' and request.FILES.get('file'):
         uploaded_file = request.FILES['file']
@@ -68,10 +69,11 @@ def cadastrar_turma(request):
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
 
-@login_required()
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_alunos(request):
     if request.method == 'GET':
-        alunos = Aluno.objects.all()
+        usuario = request.user
+        alunos = Aluno.objects.filter(usuario=usuario)
         alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome, 'atividade': aluno.atividade} for aluno in alunos]
         return JsonResponse(alunos_json, safe=False)

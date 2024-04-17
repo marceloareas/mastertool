@@ -22,6 +22,7 @@ export class AuthenticationService {
     return this.http.post<any>('http://127.0.0.1:8000/login/', dados).pipe(
       tap((response) => {
         if (response.token) {
+          localStorage.setItem('authToken', response.token.access);
           this.isLogged.set(true);
         } else {
           this.isLogged.set(false);
@@ -39,8 +40,7 @@ export class AuthenticationService {
   logout(): void {
     // Limpar credenciais de autenticação ou informações de sessão
     // Por exemplo, se você estiver usando JWT, pode limpar o token armazenado no localStorage
-    localStorage.removeItem('token');
-
+    localStorage.removeItem('authToken');
     // Atualizar o estado de autenticação para não autenticado
     this.isLogged.set(false);
   }
