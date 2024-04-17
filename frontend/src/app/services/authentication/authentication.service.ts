@@ -8,6 +8,7 @@ import { catchError, map, tap, throwError } from 'rxjs';
 export class AuthenticationService {
   private http = inject(HttpClient);
   isLogged = signal(false);
+  token!: any;
   constructor() {}
 
   post = (dados: any) => {
@@ -44,3 +45,4 @@ export class AuthenticationService {
     this.isLogged.set(false);
   }
 }
+
