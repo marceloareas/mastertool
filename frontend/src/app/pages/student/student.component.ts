@@ -9,6 +9,7 @@ import { MatLabel } from '@angular/material/form-field';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatInput } from '@angular/material/input';
 import { AuthenticationService } from '../../services/authentication/authentication.service';
+import { StudentService } from '../../services/student/student.service';
 
 @Component({
   selector: 'app-student',
@@ -28,13 +29,13 @@ import { AuthenticationService } from '../../services/authentication/authenticat
 export class StudentComponent {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   private dialog = inject(MatDialog);
-  private classService = inject(ClassService);
+  private student = inject(StudentService);
 
   displayedColumns: string[] = ['nome'];
   dataSource!: MatTableDataSource<MatPaginator>;
 
   constructor() {
-    this.classService.get().subscribe((data) => {
+    this.student.get().subscribe((data) => {
       this.dataSource = new MatTableDataSource(data);
       this.dataSource.paginator = this.paginator;
     });

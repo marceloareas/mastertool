@@ -4,14 +4,15 @@ import { Injectable, inject } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
-export class ClassService {
+export class StudentService {
   private http = inject(HttpClient)
+  constructor() { }
 
   get = () =>{
-    return this.http.get<any>('http://127.0.0.1:8000/cadastrar-turma/')
+    return this.http.get<any>('http://127.0.0.1:8000/cadastrar-alunos/')
   }
 
   post = (dados: any) => {
-    return this.http.post<any>('http://127.0.0.1:8000/turmas/', dados);
+    return this.http.post<any>('http://127.0.0.1:8000/alunos/', dados);
   }
 }

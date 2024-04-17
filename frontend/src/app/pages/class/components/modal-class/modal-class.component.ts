@@ -10,6 +10,7 @@ import {
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ClassService } from '../../../../services/class/class.service';
 
 @Component({
   selector: 'app-modal-class',
@@ -29,10 +30,12 @@ import { ReactiveFormsModule } from '@angular/forms';
 })
 export class ModalClassComponent {
   private dialogRef = inject(DialogRef);
+  private class = inject(ClassService);
   @ViewChild(FormClassComponent) formClassComponent! : FormClassComponent;
 
   save(event: Event){
-    console.log(event);
+    console.log('oi',event);
+    this.class.post(event).subscribe
   }
 
   closeModal(){

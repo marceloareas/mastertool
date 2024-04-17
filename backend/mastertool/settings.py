@@ -87,7 +87,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Mastertool_database',
         'USER': 'postgres',
-        'PASSWORD' : '123456',
+        'PASSWORD' : '11111112',
         'HOST' : 'localhost'
     }
 }

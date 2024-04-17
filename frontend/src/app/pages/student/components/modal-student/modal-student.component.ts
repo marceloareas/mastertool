@@ -25,7 +25,6 @@ import { AuthenticationService } from '../../../../services/authentication/authe
 export class ModalStudentComponent {
   private classService = inject(ClassService);
   private dialogRef = inject(DialogRef);
-  private auth = inject(AuthenticationService);
   files!: any;
 
   onFileChange(event: any) {

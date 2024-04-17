@@ -22,7 +22,9 @@ export class FormClassComponent {
   onFileChange(event: any) {
     const file: File = event.target.files[0];
     if (file) {
-      this.class.get('turma')?.setValue(file);
+      this.class.patchValue({
+        turma: file,
+      });
     }
   }
 
@@ -30,8 +32,18 @@ export class FormClassComponent {
     const formData = new FormData();
     formData.append('nome', this.class.value.nome);
     formData.append('periodo', this.class.value.periodo);
-    formData.append('arquivo', this.class.value.turma);
+    const turmaValue = this.class.get('turma')?.value; // Obtendo o valor do campo 'turma'
+    if (turmaValue instanceof File) {
+      formData.append('arquivo', turmaValue, turmaValue.name); // Adicionando o arquivo ao FormData
+    }
 
-    this.formClass.emit(this.class);
+    // Criar um novo objeto para emitir
+    const formDataToSend = {
+      nome: this.class.value.nome,
+      periodo: this.class.value.periodo,
+      turma: turmaValue, // Adicionando o objeto de arquivo
+    };
+
+    this.formClass.emit(formDataToSend);
   }
 }
