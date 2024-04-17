@@ -22,6 +22,9 @@ def cadastro_turma_txt(data, info_turma, usuario):
     conteudo_arquivo = data.read().decode('utf-8')
     alunos = conteudo_arquivo.splitlines()
 
+    info_turma.nome = 'pcs'
+    info_turma.periodo = 'oitavo'
+
     nova_turma = Turma(nome=info_turma.nome, periodo=info_turma.periodo, usuario=usuario)
     nova_turma.save()
 
@@ -33,7 +36,7 @@ def cadastro_turma_txt(data, info_turma, usuario):
             matriculas.append(matricula)
         else:
             alunos_nao_criados.append(matricula)
-    alunos_existentes = Aluno.objects.filter(matricula=matriculas)
+    alunos_existentes = Aluno.objects.filter(matricula__in=matriculas)
     nova_turma.aluno.add(*alunos_existentes)
 
-    return alunos_nao_criados
+    return alunos_existentes
