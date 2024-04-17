@@ -34,8 +34,7 @@ export class ModalClassComponent {
   @ViewChild(FormClassComponent) formClassComponent! : FormClassComponent;
 
   save(event: Event){
-    console.log('oi',event);
-    this.class.post(event).subscribe
+
   }
 
   closeModal(){
