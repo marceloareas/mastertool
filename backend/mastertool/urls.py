@@ -6,11 +6,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # url de alunos
-    path('alunos/', views.get_alunos, name='get_alunos'),
-    path('aluno/<str:matricula>/', views.get_aluno, name='get_aluno'),
     path('cadastrar-alunos/', views.cadastrar_alunos, name='cadastrar_alunos'),
+    path('alunos/', views.get_alunos, name='get_alunos'),
+    path('aluno-unico/<str:matricula>', views.get_aluno, name='get_aluno'),
     path('excluir-aluno/<str:matricula>', views.excluir_alunos, name='excluir_alunos'),
-    path('editar-aluno/<str:matricula>', views.excluir_alunos, name='excluir_alunos'),
+    path('editar-aluno/<str:matricula>', views.editar_alunos, name='editar_alunos'),
 
     # url de usuario
     path('cadastrar-usuario/', views.cadastrar_usuario, name='cadastrar_usuario'),

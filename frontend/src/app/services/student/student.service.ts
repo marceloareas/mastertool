@@ -15,14 +15,18 @@ export class StudentService {
     );
   };
 
-  put = (id: string, dados: any) => {
-    return this.http.post<any>(
-      'http://127.0.0.1:8000/cadastrar-alunos/' + id,
-      dados
-    );
+  get = (id: string = '') => {
+    if (id) {
+      console.log('entrei no aluno')
+      return this.http.get<any>('http://127.0.0.1:8000/aluno-unico/' + id);
+    } else {
+      console.log('entrei nos alunos')
+
+      return this.http.get<any>('http://127.0.0.1:8000/alunos/');
+    }
   };
 
-  get = () => {
+  put = () => {
     return this.http.get<any>('http://127.0.0.1:8000/alunos/');
   };
 
