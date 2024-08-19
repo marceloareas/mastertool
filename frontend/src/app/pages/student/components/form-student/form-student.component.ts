@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class FormStudentComponent {
   @Input() data: any;
-  @Output() formClass: EventEmitter<any> = new EventEmitter();
+  @Output() formStudent: EventEmitter<any> = new EventEmitter();
 
   constructor(private fb: FormBuilder) {}
 
@@ -27,7 +27,9 @@ export class FormStudentComponent {
     }
   }
 
-  save() {}
+  save() {
+    this.formStudent.emit(this.form)
+  }
 
   populateForm() {
     this.form.patchValue(this.data);

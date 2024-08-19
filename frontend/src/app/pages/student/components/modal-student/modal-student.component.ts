@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, Inject, inject, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -15,6 +15,7 @@ import { EventEmitter } from 'stream';
 import { AuthenticationService } from '../../../../services/authentication/authentication.service';
 import { StudentService } from '../../../../services/student/student.service';
 import { FormStudentComponent } from '../form-student/form-student.component';
+import { FormClassComponent } from '../../../class/components/form-class/form-class.component';
 
 @Component({
   selector: 'app-modal-student',
@@ -38,6 +39,8 @@ export class ModalStudentComponent {
   files!: any;
   student: any;
 
+  @ViewChild(FormStudentComponent) formStudentComponent!: FormStudentComponent;
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { id: string; mode: string }
   ) {}
@@ -46,6 +49,13 @@ export class ModalStudentComponent {
     if (this.data.id) {
       this.getData();
     }
+  }
+
+  save(event: Event) {
+    // this.studentService.put(event).subscribe(() => {
+    //   this.dialogRef.close(true);
+    //   alert('Cadastrado com sucesso');
+    // });
   }
 
   getData() {
