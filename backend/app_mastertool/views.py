@@ -54,6 +54,25 @@ def cadastrar_alunos(request):
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
         
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_alunos(request):
+    if request.method == 'GET':
+        usuario = request.user
+        alunos = Aluno.objects.filter(usuario=usuario)
+        alunos_json = [{'matricula': aluno.matricula, 
+                        'nome': aluno.nome, 
+                        'atividade': aluno.atividade} for aluno in alunos]
+        return JsonResponse(alunos_json, safe=False)
+    
+def get_aluno(request, matricula):
+    usuario = request.user
+    aluno = Aluno.objects.get(matricula=matricula, usuario=usuario)
+    alunos_json = [{'matricula': aluno.matricula, 
+                    'nome': aluno.nome, 
+                    'atividade': aluno.atividade}]
+    return JsonResponse(alunos_json, safe=False)
+        
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def excluir_alunos(request, matricula):
@@ -69,6 +88,20 @@ def excluir_alunos(request, matricula):
         return JsonResponse({'mensagem': 'Aluno excluído.'})
     else:
         return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def editar_alunos(request, data):
+    usuario = request.user
+    aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
+
+    if aluno:
+        aluno_editado = Aluno(matricula=data['matricula'], nome=data['nome'])
+        aluno_editado.save()
+        return JsonResponse({'mensagem': 'Dados do aluno foram editados.'})
+    else:
+        return JsonResponse({'erro': 'Não foi possível editar o aluno.'}, status=400)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -82,15 +115,6 @@ def cadastrar_turma(request):
             return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_alunos(request):
-    if request.method == 'GET':
-        usuario = request.user
-        alunos = Aluno.objects.filter(usuario=usuario)
-        alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome, 'atividade': aluno.atividade} for aluno in alunos]
-        return JsonResponse(alunos_json, safe=False)
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
