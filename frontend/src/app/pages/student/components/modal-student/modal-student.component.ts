@@ -36,10 +36,10 @@ import { FormClassComponent } from '../../../class/components/form-class/form-cl
 export class ModalStudentComponent {
   private studentService = inject(StudentService);
   private dialogRef = inject(DialogRef);
-  files!: any;
-  student: any;
 
   @ViewChild(FormStudentComponent) formStudentComponent!: FormStudentComponent;
+  files!: any;
+  student: any;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { id: string; mode: string }
@@ -51,15 +51,26 @@ export class ModalStudentComponent {
     }
   }
 
-  save(event: Event) {
-    // this.studentService.put(event).subscribe(() => {
-    //   this.dialogRef.close(true);
-    //   alert('Cadastrado com sucesso');
-    // });
+  save(event?: Event, mode = this.data.mode) {
+    if(mode == 'ADD'){
+      const data = new FormData();
+      data.append('file', this.files);
+
+      this.studentService.post(data).subscribe((response: any) => {
+        alert('Cadastrado com sucesso');
+        this.dialogRef.close(true);
+      });
+    }
+    else{
+      this.studentService.put(this.data.id,{...this.student, ...event}).subscribe(() => {
+        this.dialogRef.close(true);
+        alert('Cadastrado com sucesso');
+      });
+    }
   }
 
   getData() {
-    this.studentService.get(this.data.id).subscribe((student) => {
+    this.studentService.get2(this.data.id).subscribe((student) => {
       this.student = student;
       console.log(student)
     });
@@ -67,16 +78,6 @@ export class ModalStudentComponent {
 
   onFileChange(event: any) {
     this.files = event.target.files[0];
-  }
-
-  upload() {
-    const data = new FormData();
-    data.append('file', this.files);
-
-    this.studentService.post(data).subscribe((response: any) => {
-      alert('Cadastrado com sucesso');
-      this.dialogRef.close(true);
-    });
   }
 
   closeModal() {

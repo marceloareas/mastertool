@@ -1,11 +1,16 @@
 <section class="class">
-  <app-top-bar [title]="'Alunos'" class="bar" />
+  <mat-form-field appearance="outline">
+    <mat-label>Pesquisar</mat-label>
+    <input matInput (keyup)="filter($event)" />
+  </mat-form-field>
 
   <div class="class__content">
-    <mat-form-field appearance="outline">
-      <mat-label>Pesquisar</mat-label>
-      <input matInput (keyup)="filter($event)" />
-    </mat-form-field>
+    <div class="bottom__content">
+      <app-top-bar [title]="'Alunos'" class="bar" />
+      <button class="bottom__content__button" (click)="openModal()">
+        Cadastrar Alunos
+      </button>
+    </div>
 
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="matricula">
@@ -33,7 +38,10 @@
             <mat-icon fontIcon="more_vert" />
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="openModal(element.matricula,'Edit')">
+            <button
+              mat-menu-item
+              (click)="openModal(element.matricula, 'Edit')"
+            >
               <mat-icon fontIcon="edit" /> Editar
             </button>
             <button mat-menu-item (click)="delete(element)">
@@ -52,11 +60,5 @@
       showFirstLastButtons
       aria-label="Select page of periodic elements"
     ></mat-paginator>
-  </div>
-
-  <div class="bottom__content">
-    <button class="bottom__content__button" (click)="openModal()">
-      Cadastrar Alunos
-    </button>
   </div>
 </section>

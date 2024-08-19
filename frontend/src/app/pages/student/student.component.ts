@@ -31,9 +31,10 @@ import { MatMenuModule } from '@angular/material/menu';
   styleUrl: './student.component.scss',
 })
 export class StudentComponent {
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   private dialog = inject(MatDialog);
   private student = inject(StudentService);
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   displayedColumns: string[] = ['matricula', 'nome', 'editar'];
   dataSource!: MatTableDataSource<MatPaginator>;

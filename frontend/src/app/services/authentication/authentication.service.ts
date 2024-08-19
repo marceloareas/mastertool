@@ -1,18 +1,22 @@
+import { Inject, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
-import { catchError, map, tap, throwError } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
+import { catchError, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthenticationService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
   isLogged = signal(false);
 
   constructor() {
-    const authToken = this.getToken();
-    if (authToken) {
-      this.isLogged.set(true);
+    if (isPlatformBrowser(this.platformId)) {
+      const authToken = this.getToken();
+      if (authToken) {
+        this.isLogged.set(true);
+      }
     }
   }
 
@@ -27,7 +31,9 @@ export class AuthenticationService {
     return this.http.post<any>('http://127.0.0.1:8000/login/', dados).pipe(
       tap((response) => {
         if (response.token) {
-          localStorage.setItem('authToken', response.token.access);
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('authToken', response.token.access);
+          }
           this.isLogged.set(true);
         } else {
           this.isLogged.set(false);
@@ -41,12 +47,16 @@ export class AuthenticationService {
   };
 
   getToken(): string | null {
-    return localStorage.getItem('authToken')
+    if (isPlatformBrowser(this.platformId)) {
+      return localStorage.getItem('authToken');
+    }
+    return null;
   }
 
   logout(): void {
-    localStorage.removeItem('authToken');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('authToken');
+    }
     this.isLogged.set(false);
   }
 }
-

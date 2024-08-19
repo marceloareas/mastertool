@@ -2,24 +2,19 @@
   display: grid;
   grid-template-areas:
     "bar"
-    "class"
-    "bottom";
+    "class";
   grid-template-rows: 0fr 1fr 0fr;
   background: white;
   height: 100%;
 
   &__content {
-    padding: 20px;
   }
 
   .bottom__content {
-    grid-area: bottom;
     display: flex;
-    flex-direction: column;
-    margin: 0 20px 20px;
-    padding-top: 15px;
-    border-top: 1px solid gray;
+    justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid black;
 
     &__button {
       border: none;
