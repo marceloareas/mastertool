@@ -8,26 +8,28 @@ import { MatInputModule } from '@angular/material/input';
   standalone: true,
   imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
   templateUrl: './form-student.component.html',
-  styleUrl: './form-student.component.scss'
+  styleUrl: './form-student.component.scss',
 })
 export class FormStudentComponent {
-@Input() data: any;
-@Output() formClass: EventEmitter<any> = new EventEmitter();
+  @Input() data: any;
+  @Output() formClass: EventEmitter<any> = new EventEmitter();
 
-constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) {}
 
-form: FormGroup = this.fb.group({
-  matricula: [''],
-  nome: [''],
-});
+  form: FormGroup = this.fb.group({
+    matricula: [''],
+    nome: [''],
+  });
 
-ngOnInit(){
-  if(this.data){
-    this.populateForm();
+  ngOnInit() {
+    if (this.data) {
+      this.populateForm();
+    }
   }
-}
 
-populateForm(){
-  this.form.patchValue(this.data);
-}
+  save() {}
+
+  populateForm() {
+    this.form.patchValue(this.data);
+  }
 }

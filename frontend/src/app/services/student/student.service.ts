@@ -17,8 +17,11 @@ export class StudentService {
 
   get = (id: string = '') => {
     if (id) {
-      return this.http.get<any>('http://127.0.0.1:8000/alunos/' + id);
+      console.log('entrei no aluno')
+      return this.http.get<any>('http://127.0.0.1:8000/aluno/' + id);
     } else {
+      console.log('entrei nos alunos')
+
       return this.http.get<any>('http://127.0.0.1:8000/alunos/');
     }
   };

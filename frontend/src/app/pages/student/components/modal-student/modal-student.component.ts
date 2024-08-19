@@ -27,7 +27,7 @@ import { FormStudentComponent } from '../form-student/form-student.component';
     MatButtonModule,
     MatDialogModule,
     ReactiveFormsModule,
-    FormStudentComponent
+    FormStudentComponent,
   ],
   templateUrl: './modal-student.component.html',
   styleUrl: './modal-student.component.scss',
@@ -49,9 +49,10 @@ export class ModalStudentComponent {
   }
 
   getData() {
-    this.studentService
-      .get(this.data.id)
-      .subscribe((student) => (this.student = student));
+    this.studentService.get(this.data.id).subscribe((student) => {
+      this.student = student;
+      console.log(student)
+    });
   }
 
   onFileChange(event: any) {
