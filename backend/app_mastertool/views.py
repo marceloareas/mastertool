@@ -1,14 +1,12 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import authenticate, login as login_django
-from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
 from .apis import *
 from .models import *
-import jwt
 from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 
 @api_view(['POST'])
@@ -53,6 +51,23 @@ def cadastrar_alunos(request):
 
         if alunos_criados:
             return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})
+        else:
+            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+        
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def excluir_alunos(request, matricula):
+    if request.method == 'POST':
+        usuario = request.user
+        aluno = get_object_or_404(Aluno, matricula=matricula, usuario=usuario)
+
+        turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
+        for turma in turmas:
+            turma.aluno.remove(aluno)
+
+        if aluno:
+            aluno.delete()
+            return JsonResponse({'mensagem': 'Aluno excluído.'})
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
 

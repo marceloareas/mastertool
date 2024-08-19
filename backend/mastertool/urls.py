@@ -5,6 +5,7 @@ from app_mastertool import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('cadastrar-alunos/', views.cadastrar_alunos, name='cadastrar_alunos'),
+    path('excluir-aluno/<str:matricula>', views.excluir_alunos, name='excluir_alunos'),
     path('cadastrar-usuario/', views.cadastrar_usuario, name='cadastrar_usuario'),
     path('cadastrar-turma/', views.cadastrar_turma, name='cadastrar_turma'),
     path('turmas/', views.get_turmas, name='get_turmas'),
