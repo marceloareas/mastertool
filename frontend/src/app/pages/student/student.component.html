@@ -33,10 +33,10 @@
             <mat-icon fontIcon="more_vert" />
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="openModal(element)">
+            <button mat-menu-item (click)="openModal(element.matricula,'Edit')">
               <mat-icon fontIcon="edit" /> Editar
             </button>
-            <button mat-menu-item (click)="delete(element.matricula)">
+            <button mat-menu-item (click)="delete(element)">
               <mat-icon fontIcon="delete" /> Remover
             </button>
           </mat-menu>

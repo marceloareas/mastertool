@@ -53,16 +53,19 @@ export class StudentComponent {
     });
   }
 
-  delete(id: number) {
+  delete(id: string) {
     this.student.delete(id).subscribe(() => {
       alert('Aluno excluído');
       this.getStudent();
     });
   }
 
-  openModal(data?: any) {
+  openModal(data?: any, mode = 'ADD') {
     this.dialog
-      .open(ModalStudentComponent, { width: '600px' })
+      .open(ModalStudentComponent, {
+        width: '600px',
+        data: { id: data, mode },
+      })
       .afterClosed()
       .subscribe(() => {
         this.getStudent();
