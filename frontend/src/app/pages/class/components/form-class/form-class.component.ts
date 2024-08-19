@@ -1,4 +1,4 @@
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,42 +13,32 @@ import { ClassService } from '../../../../services/class/class.service';
 })
 export class FormClassComponent {
   private classService = inject(ClassService);
+  constructor(private fb: FormBuilder) {}
+
   @Output() formClass: EventEmitter<any> = new EventEmitter();
 
-  class: FormGroup = new FormGroup({
-    nome: new FormControl(),
-    periodo: new FormControl(),
-    turma: new FormControl(),
+
+  class: FormGroup = this.fb.group({
+    nome: [''],
+    periodo: [''],
+    turma: [null], // Campo para referência, mas não vincule diretamente ao input de arquivo
   });
-  file!: any;
 
   onFileChange(event: any) {
-    this.file = event.target.files[0];
-  }
-
-  save(){
-    const formData = new FormData();
-    formData.append('file', this.file);
-
-    this.formClass.emit(formData);
-  }
-
-  /*  save() {
-    const formData = new FormData();
-    formData.append('nome', this.class.value.nome);
-    formData.append('periodo', this.class.value.periodo);
-    const turmaValue = this.class.get('turma')?.value; // Obtendo o valor do campo 'turma'
-    if (turmaValue instanceof File) {
-      formData.append('arquivo', turmaValue, turmaValue.name); // Adicionando o arquivo ao FormData
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.class.patchValue({
+          turma: reader.result, // Armazena o conteúdo original do arquivo
+        });
+      };
+      reader.readAsText(file); // Lê o conteúdo do arquivo como texto
     }
+  }
 
-    // Criar um novo objeto para emitir
-    const formDataToSend = {
-      nome: this.class.value.nome,
-      periodo: this.class.value.periodo,
-      turma: turmaValue, // Adicionando o objeto de arquivo
-    };
-
-    this.formClass.emit(formDataToSend);
-  } */
+  save() {
+    console.log(this.class.value);
+    this.formClass.emit(this.class.value);
+  }
 }

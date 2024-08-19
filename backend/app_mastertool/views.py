@@ -75,7 +75,7 @@ def excluir_alunos(request, matricula):
 @permission_classes([IsAuthenticated])
 def cadastrar_turma(request):
     if request.method == 'POST':
-        uploaded_file = request.FILES['file']
+        uploaded_file = request.FILES['turma']
         usuario = request.user
         alunos_criados = cadastro_turma_txt(uploaded_file, request.data, usuario)
 

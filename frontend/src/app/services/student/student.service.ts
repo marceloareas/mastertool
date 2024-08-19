@@ -15,4 +15,8 @@ export class StudentService {
   get = () => {
     return this.http.get<any>('http://127.0.0.1:8000/alunos/');
   }
+
+  delete = (id: number) =>{
+    return this.http.delete<any>('http://127.0.0.1:8000/excluir-aluno/'+id);
+  }
 }

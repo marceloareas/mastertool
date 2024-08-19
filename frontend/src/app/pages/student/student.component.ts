@@ -49,10 +49,16 @@ export class StudentComponent {
   getStudent() {
     this.student.get().subscribe((data) => {
       this.dataSource = new MatTableDataSource(data);
-      this.dataSource.paginator = this.paginator;    });
+      this.dataSource.paginator = this.paginator;
+    });
   }
 
-  delete() {}
+  delete(id: number) {
+    this.student.delete(id).subscribe(() => {
+      alert('Aluno excluído');
+      this.getStudent();
+    });
+  }
 
   openModal(data?: any) {
     this.dialog
