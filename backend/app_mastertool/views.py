@@ -64,7 +64,9 @@ def get_alunos(request):
                         'nome': aluno.nome, 
                         'atividade': aluno.atividade} for aluno in alunos]
         return JsonResponse(alunos_json, safe=False)
-    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_aluno(request, matricula):
     usuario = request.user
     aluno = Aluno.objects.get(matricula=matricula, usuario=usuario)
@@ -96,7 +98,7 @@ def editar_alunos(request, data):
     aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
 
     if aluno:
-        aluno_editado = Aluno(matricula=data['matricula'], nome=data['nome'])
+        aluno_editado = Aluno(matricula=data.get('matricula', aluno.matricula), nome=data.get('nome', aluno.nome))
         aluno_editado.save()
         return JsonResponse({'mensagem': 'Dados do aluno foram editados.'})
     else:
