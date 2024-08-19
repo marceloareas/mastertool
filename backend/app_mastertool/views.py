@@ -59,7 +59,7 @@ def cadastrar_alunos(request):
 def excluir_alunos(request, matricula):
     if request.method == 'POST':
         usuario = request.user
-        aluno = get_object_or_404(Aluno, matricula=matricula, usuario=usuario)
+        aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
 
         turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
         for turma in turmas:
