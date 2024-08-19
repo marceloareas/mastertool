@@ -3,7 +3,7 @@ import { TopBarComponent } from '../../components/top-bar/top-bar.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalClassComponent } from './components/modal-class/modal-class.component';
-import {MatCardModule} from '@angular/material/card';
+import { MatCardModule } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SingleClassComponent } from './components/single-class/single-class.component';
@@ -22,7 +22,7 @@ import { CommonModule } from '@angular/common';
     MatIcon,
     MatButtonModule,
     SingleClassComponent,
-    CommonModule
+    CommonModule,
   ],
   templateUrl: './class.component.html',
   styleUrl: './class.component.scss',
@@ -30,23 +30,32 @@ import { CommonModule } from '@angular/common';
 export class ClassComponent {
   private classService = inject(ClassService);
   classes!: any;
-  isOpen= false
+  isOpen = false;
   dataClass!: any;
 
   constructor(public dialog: MatDialog) {
-    this.classService.get().subscribe(data =>{
-      this.classes = data
-    })
+    this.getClass();
   }
 
-  openModal() {
-    this.dialog.open(ModalClassComponent, {
-      width: '600px',
+  getClass() {
+    this.classService.get().subscribe((data) => {
+      this.classes = data;
     });
   }
 
-  openClass(turma = ''){
+  openModal() {
+    this.dialog
+      .open(ModalClassComponent, {
+        width: '600px',
+      })
+      .afterClosed()
+      .subscribe(() => {
+        this.getClass();
+      });
+  }
+
+  openClass(turma = '') {
     this.isOpen = !this.isOpen;
-    this.dataClass = turma
+    this.dataClass = turma;
   }
 }

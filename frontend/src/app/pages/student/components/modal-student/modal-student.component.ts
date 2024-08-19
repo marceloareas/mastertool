@@ -37,6 +37,7 @@ export class ModalStudentComponent {
       data.append('file', this.files);
 
       this.studentService.post(data).subscribe((response: any) => {
+        alert('Cadastrado com sucesso');
         this.dialogRef.close(true)
       });
     }

@@ -23,21 +23,25 @@ import { ClassService } from '../../../../services/class/class.service';
     MatButtonModule,
     ReactiveFormsModule,
     MatDialogModule,
-    FormClassComponent
+    FormClassComponent,
   ],
   templateUrl: './modal-class.component.html',
   styleUrl: './modal-class.component.scss',
 })
 export class ModalClassComponent {
   private dialogRef = inject(DialogRef);
-  private class = inject(ClassService);
-  @ViewChild(FormClassComponent) formClassComponent! : FormClassComponent;
+  private classService = inject(ClassService);
 
-  save(event: Event){
+  @ViewChild(FormClassComponent) formClassComponent!: FormClassComponent;
 
+  save(event: Event) {
+    this.classService.post(event).subscribe(() => {
+      this.dialogRef.close(true);
+      alert('Cadastrado com sucesso');
+    });
   }
 
-  closeModal(){
-    this.dialogRef.close()
+  closeModal() {
+    this.dialogRef.close();
   }
 }

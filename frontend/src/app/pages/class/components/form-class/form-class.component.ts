@@ -30,7 +30,7 @@ export class FormClassComponent {
     const formData = new FormData();
     formData.append('file', this.file);
 
-    this.classService.post(formData).subscribe();
+    this.formClass.emit(formData);
   }
 
   /*  save() {
