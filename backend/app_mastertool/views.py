@@ -68,12 +68,13 @@ def get_alunos(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
 def get_aluno(request, matricula):
-    usuario = request.user
-    aluno = Aluno.objects.get(matricula=matricula, usuario=usuario)
-    alunos_json = [{'matricula': aluno.matricula, 
-                    'nome': aluno.nome, 
-                    'atividade': aluno.atividade}]
-    return JsonResponse(alunos_json, safe=False)
+    if request.method == 'GET':
+        usuario = request.user
+        aluno = Aluno.objects.get(matricula=matricula, usuario=usuario)
+        alunos_json = [{'matricula': aluno.matricula, 
+                        'nome': aluno.nome, 
+                        'atividade': aluno.atividade}]
+        return JsonResponse(alunos_json, safe=False)
         
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
