@@ -54,22 +54,21 @@ def cadastrar_alunos(request):
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
         
-@api_view(['POST'])
+@api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def excluir_alunos(request, matricula):
-    if request.method == 'POST':
-        usuario = request.user
-        aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
+    usuario = request.user
+    aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
 
-        turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
-        for turma in turmas:
-            turma.aluno.remove(aluno)
+    turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
+    for turma in turmas:
+        turma.aluno.remove(aluno)
 
-        if aluno:
-            aluno.delete()
-            return JsonResponse({'mensagem': 'Aluno excluído.'})
-        else:
-            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+    if aluno:
+        aluno.delete()
+        return JsonResponse({'mensagem': 'Aluno excluído.'})
+    else:
+        return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
