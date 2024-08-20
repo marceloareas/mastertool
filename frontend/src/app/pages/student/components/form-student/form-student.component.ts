@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,13 +22,21 @@ export class FormStudentComponent {
   });
 
   ngOnInit() {
+    console.log(this.data)
     if (this.data) {
       this.populateForm();
     }
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    // Verifique se a propriedade 'data' foi alterada
+    if (changes['data'] && this.data) {
+      this.populateForm();
+    }
+  }
+
   save() {
-    this.formStudent.emit(this.form)
+    this.formStudent.emit(this.form.value)
   }
 
   populateForm() {

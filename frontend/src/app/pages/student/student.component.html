@@ -1,16 +1,15 @@
 <section class="class">
-  <mat-form-field appearance="outline">
-    <mat-label>Pesquisar</mat-label>
-    <input matInput (keyup)="filter($event)" />
-  </mat-form-field>
+  <div class="top__bar">
+    <app-top-bar [title]="'Alunos'"/>
+    <button mat-stroked-button (click)="openModal()"> Cadastrar Alunos</button>
+  </div>
 
   <div class="class__content">
-    <div class="bottom__content">
-      <app-top-bar [title]="'Alunos'" class="bar" />
-      <button class="bottom__content__button" (click)="openModal()">
-        Cadastrar Alunos
-      </button>
-    </div>
+    <mat-form-field appearance="outline">
+      <mat-label>Pesquisar</mat-label>
+      <input matInput (keyup)="filter($event)" />
+    </mat-form-field>
+
 
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="matricula">

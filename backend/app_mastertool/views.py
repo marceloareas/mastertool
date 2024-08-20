@@ -60,10 +60,10 @@ def get_aluno(request, matricula):
     if request.method == 'GET':
         usuario = request.user
         aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
-        alunos_json = [{'matricula': aluno.matricula, 
+        aluno_json = {'matricula': aluno.matricula, 
                         'nome': aluno.nome, 
-                        'atividade': aluno.atividade}]
-        return JsonResponse(alunos_json, safe=False)
+                        'atividade': aluno.atividade}
+        return JsonResponse(aluno_json, safe=False)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

@@ -1,4 +1,4 @@
-import { Component, Inject, inject, ViewChild } from '@angular/core';
+import { Component, Inject, inject, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -16,6 +16,7 @@ import { AuthenticationService } from '../../../../services/authentication/authe
 import { StudentService } from '../../../../services/student/student.service';
 import { FormStudentComponent } from '../form-student/form-student.component';
 import { FormClassComponent } from '../../../class/components/form-class/form-class.component';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-modal-student',
@@ -33,7 +34,7 @@ import { FormClassComponent } from '../../../class/components/form-class/form-cl
   templateUrl: './modal-student.component.html',
   styleUrl: './modal-student.component.scss',
 })
-export class ModalStudentComponent {
+export class ModalStudentComponent implements OnInit{
   private studentService = inject(StudentService);
   private dialogRef = inject(DialogRef);
 
@@ -62,17 +63,18 @@ export class ModalStudentComponent {
       });
     }
     else{
+      console.log({...this.student, ...event})
       this.studentService.put(this.data.id,{...this.student, ...event}).subscribe(() => {
+        alert('Registro atualizado');
         this.dialogRef.close(true);
-        alert('Cadastrado com sucesso');
       });
     }
   }
 
   getData() {
-    this.studentService.get2(this.data.id).subscribe((student) => {
+    this.studentService.get(this.data.id).subscribe((student) => {
       this.student = student;
-      console.log(student)
+      console.log(this.student)
     });
   }
 

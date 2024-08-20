@@ -1,41 +1,35 @@
+.a1 {
+  height: 60px;
+  background: #c4ade1;
+  width: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  border-radius: 6px;
+}
+
 .class {
-  display: grid;
-  grid-template-areas:
-    "bar"
-    "class"
-    "bottom";
-  grid-template-rows: 0fr 1fr 0fr;
   background: white;
-  height: 100%;
 
   &__content {
-    display: flex;
-    gap: 25px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(185px, auto));
+    gap: 60px;
     padding: 20px;
+    justify-content: center;
 
-    &.teste{
+    &.teste {
       display: initial;
     }
   }
 
-  .bottom__content {
-    grid-area: bottom;
+  .top__bar {
     display: flex;
-    flex-direction: column;
-    margin: 0 20px 20px;
-    padding-top: 15px;
-    border-top: 1px solid gray;
+    justify-content: space-between;
     align-items: center;
-
-    &__button {
-      border: none;
-      background: #7a7a7a;
-      border-radius: 12px;
-      width: 130px;
-      height: 55px;
-      font-size: 16px;
-      color: white;
-    }
+    padding: 0 20px;
+    border-bottom: 1px solid black;
   }
 }
 
@@ -46,11 +40,25 @@
 }
 
 .example-card {
-  width: 150px;
-  height: 100px;
+  width: 180px;
+  height: 150px;
   display: flex;
-  justify-content: center;
+  align-items: center;
   text-align: center;
   cursor: pointer;
 }
 
+span {
+  font-weight: 500;
+  font-size: 20px;
+}
+
+@media (min-width: 1440px) {
+  .class {
+    background: white;
+
+    &__content {
+      justify-content: start;
+    }
+  }
+}

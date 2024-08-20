@@ -58,4 +58,13 @@ export class ClassComponent {
     this.isOpen = !this.isOpen;
     this.dataClass = turma;
   }
+
+  teste(name: string) {
+    const arrayName = name.split(' ');
+     return arrayName.map((item) => {
+      const first = item.charAt(0);
+      const second = item.length > 1 ? item.charAt(1) : '';
+      return first.toUpperCase() + second.toUpperCase();
+    });
+  }
 }

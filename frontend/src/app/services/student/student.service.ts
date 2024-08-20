@@ -17,22 +17,17 @@ export class StudentService {
 
   get = (id: string = '') => {
     if (id) {
-      console.log('entrei no aluno')
       return this.http.get<any>('http://127.0.0.1:8000/aluno-unico/' + id);
     } else {
-      console.log('entrei nos alunos')
-
       return this.http.get<any>('http://127.0.0.1:8000/alunos/');
     }
   };
 
-  put = () => {
-    return this.http.get<any>('http://127.0.0.1:8000/alunos/');
+  put = (id: string, dados: any) => {
+    return this.http.put<any>('http://127.0.0.1:8000/editar-aluno/'+id, dados);
   };
 
-  get2(id: string = '') {
-    return this.http.get<any>('http://127.0.0.1:8000/aluno/' + id);
-  }
+
 
   delete = (id: string) => {
     return this.http.delete<any>('http://127.0.0.1:8000/excluir-aluno/' + id);

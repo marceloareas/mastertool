@@ -1,21 +1,26 @@
 <mat-drawer-container class="container">
   <mat-drawer mode="side" opened class="container__menu">
-    <ul>
-      @for (page of pages; track page.title ) {
-      <li class="container__menu__itens">
-        <a [routerLink]="page.route" class="container__menu__links">
-          <mat-icon>{{ page.icon }}</mat-icon>
-          {{ page.title }}
-        </a>
-      </li>
-      }
-      <li class="container__menu__itens__logout">
+    <div class="teste">
+      <div class="lista">
+      <ul>
+        @for (page of pages; track page.title ) {
+        <li class="container__menu__itens">
+          <a [routerLink]="page.route" class="container__menu__links">
+            <mat-icon>{{ page.icon }}</mat-icon>
+            {{ page.title }}
+          </a>
+        </li>
+        }
+      </ul>
+    </div>
+      <div class="button">
         <button mat-icon-button (click)="logout()">
           <mat-icon> logout </mat-icon>
         </button>
         <mat-label>Sair</mat-label>
-      </li>
-    </ul>
+      </div>
+
+    </div>
   </mat-drawer>
   <mat-drawer-content class="container__content">
     <router-outlet></router-outlet>
