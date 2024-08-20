@@ -9,6 +9,10 @@ from .apis import *
 from .models import *
 from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 
+# -----------------------------------------------------------------------------------------------
+# ----------------------------------------- VIEWS USUARIO ---------------------------------------
+# -----------------------------------------------------------------------------------------------
+
 @api_view(['POST'])
 def cadastrar_usuario(request):
     if request.method == 'POST':
@@ -40,7 +44,11 @@ def login(request):
             return JsonResponse({'mensagem': 'Autenticado com sucesso', 'token': token}, status=200)
         else:
             return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
-        
+
+# -----------------------------------------------------------------------------------------------
+# ----------------------------------------- VIEWS ALUNOS ----------------------------------------
+# -----------------------------------------------------------------------------------------------
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def cadastrar_alunos(request):
@@ -94,25 +102,29 @@ def excluir_alunos(request, matricula):
     
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def editar_alunos(request, data):
+def editar_alunos(request, matricula):
     usuario = request.user
-    aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
+    data = request.data
+    aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
 
     if aluno:
-        aluno_editado = Aluno(matricula=data.get('matricula', aluno.matricula), nome=data.get('nome', aluno.nome))
-        aluno_editado.save()
+        aluno.matricula = data['matricula']
+        aluno.nome = data['nome']
+        aluno.save()
         return JsonResponse({'mensagem': 'Dados do aluno foram editados.'})
     else:
         return JsonResponse({'erro': 'Não foi possível editar o aluno.'}, status=400)
 
+# -----------------------------------------------------------------------------------------------
+# ----------------------------------------- VIEWS TURMA -----------------------------------------
+# -----------------------------------------------------------------------------------------------
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def cadastrar_turma(request):
     if request.method == 'POST':
-        uploaded_file = request.FILES['turma']
         usuario = request.user
-        alunos_criados = cadastro_turma_txt(uploaded_file, request.data, usuario)
+        alunos_criados = cadastro_turma_txt(request.data, usuario)
 
         if alunos_criados:
             return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})
