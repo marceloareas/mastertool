@@ -94,17 +94,18 @@ def excluir_alunos(request, matricula):
     
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def editar_alunos(request, data):
+def editar_alunos(request, matricula):
     usuario = request.user
-    aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
+    data = request.data
+    aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
 
     if aluno:
-        aluno_editado = Aluno(matricula=data.get('matricula', aluno.matricula), nome=data.get('nome', aluno.nome))
-        aluno_editado.save()
+        aluno.matricula = data['matricula']
+        aluno.nome = data['nome']
+        aluno.save()
         return JsonResponse({'mensagem': 'Dados do aluno foram editados.'})
     else:
         return JsonResponse({'erro': 'Não foi possível editar o aluno.'}, status=400)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
