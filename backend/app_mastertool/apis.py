@@ -2,16 +2,21 @@ from .models import Aluno, Turma
 import re
 
 def cadastro_alunos_txt(data, usuario):
+    alunos = []
     alunos_criados = []
-    conteudo_arquivo = data.read().decode('utf-8-sig')
-    alunos = conteudo_arquivo.splitlines()
+    conteudo_arquivo = data['turma']
+    linhas = conteudo_arquivo.splitlines()
+
+    for linha in linhas:
+        matricula, nome = linha.split(', ')
+        if len(linha) < 2:
+            continue  # Pular linhas que não têm nome ou matricula
+        alunos.append({
+            'matricula': matricula,
+            'nome': nome
+        })
 
     for aluno in alunos:
-        partes = aluno.split(',')
-        if len(partes) < 2:
-            continue  # Pular linhas que não têm a quantidade correta de partes
-        matricula = partes[0].strip()
-        nome = partes[1].strip()
         if not Aluno.objects.filter(matricula=matricula).exists():
             novo_aluno = Aluno(matricula=matricula, nome=nome)
             novo_aluno.save()
@@ -25,25 +30,25 @@ def cadastro_alunos_txt(data, usuario):
         alunos_criados.append(nome)
     return alunos_criados
 
-def cadastro_turma_txt(data, info_turma, usuario):
+def cadastro_turma_txt(data, usuario):
     matriculas = []
     alunos_nao_criados = [] 
-    conteudo_arquivo = data.read().decode('utf-8-sig')
-    alunos = conteudo_arquivo.splitlines()
+    alunos = []
+    conteudo_arquivo = data['turma']
+    linhas = conteudo_arquivo.splitlines()
 
-    info_turma.nome = 'pcs'
-    info_turma.periodo = 'oitavo'
-
-    nova_turma = Turma(nome=info_turma.nome, periodo=info_turma.periodo, usuario=usuario)
+    nova_turma = Turma(nome=data['nome'], periodo=data['periodo'], usuario=usuario)
     nova_turma.save()
 
+    for linha in linhas:
+        matricula, nome = linha.split(', ')
+        alunos.append({
+            'matricula': matricula,
+            'nome': nome
+        })
+    
     for aluno in alunos:
-        partes = aluno.split(',')
-        if len(partes) < 2:
-            continue  # Pular linhas que não têm a quantidade correta de partes
-        matricula = partes[0].strip()
-        # nome = partes[1].strip()
-        if Aluno.objects.filter(matricula=matricula).first():
+        if Aluno.objects.filter(matricula=aluno['matricula']).first():
             matriculas.append(matricula)
         else:
             alunos_nao_criados.append(matricula)
