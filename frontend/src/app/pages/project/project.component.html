@@ -1,12 +1,10 @@
 <section class="class">
-  <app-top-bar [title]="'Projetos'" class="bar" />
+  <div class="top__bar">
+    <app-top-bar [title]="'Projetos'"/>
+    <button mat-stroked-button (click)="openModal()"> Cadastrar Alunos</button>
+  </div>
+
 
   <div class="class__content"></div>
-
-  <div class="bottom__content">
-    <button class="bottom__content__button" (click)="openModal()">
-      Cadastrar Projetos
-    </button>
-  </div>
 
 </section>

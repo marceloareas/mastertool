@@ -27,3 +27,17 @@ mat-form-field{
 table{
   margin-bottom: 20px;
 }
+
+@media(min-width:1440px){
+  .top__bar{
+    width: 100%;
+  }
+  .class{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .class__content{
+    width: 1200px;
+  }
+}
