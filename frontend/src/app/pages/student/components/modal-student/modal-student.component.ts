@@ -54,8 +54,8 @@ export class ModalStudentComponent implements OnInit{
 
   save(event?: Event, mode = this.data.mode) {
     if(mode == 'ADD'){
-      const data = new FormData();
-      data.append('file', this.files);
+      const data ={'turma': this.files}
+      console.log(data)
 
       this.studentService.post(data).subscribe((response: any) => {
         alert('Cadastrado com sucesso');
@@ -79,9 +79,15 @@ export class ModalStudentComponent implements OnInit{
   }
 
   onFileChange(event: any) {
-    this.files = event.target.files[0];
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.files = reader.result as string; // Converte o conteúdo para string e armazena
+      };
+      reader.readAsText(file); // Lê o arquivo como texto
+    }
   }
-
   closeModal() {
     this.dialogRef.close();
   }

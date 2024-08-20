@@ -29,13 +29,13 @@ export class FormStudentComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // Verifique se a propriedade 'data' foi alterada
     if (changes['data'] && this.data) {
       this.populateForm();
     }
   }
 
   save() {
+    console.log('entrei')
     this.formStudent.emit(this.form.value)
   }
 

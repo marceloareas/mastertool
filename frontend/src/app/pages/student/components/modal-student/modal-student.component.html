@@ -18,7 +18,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-raised-button (click)="closeModal()">Fechar</button>
-    <button mat-raised-button (click)="this.formStudentComponent.save()">
+    <button mat-raised-button (click)="data.mode === 'ADD' ? save(): this.formStudentComponent.save()">
       Salvar
     </button>
   </mat-dialog-actions>
