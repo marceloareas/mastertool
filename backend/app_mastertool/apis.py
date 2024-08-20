@@ -9,7 +9,7 @@ def cadastro_alunos_txt(data, usuario):
 
     for linha in linhas:
         matricula, nome = linha.split(', ')
-        if len(linha) < 2:
+        if not matricula and not nome:
             continue  # Pular linhas que não têm nome ou matricula
         alunos.append({
             'matricula': matricula,
@@ -17,17 +17,16 @@ def cadastro_alunos_txt(data, usuario):
         })
 
     for aluno in alunos:
-        if not Aluno.objects.filter(matricula=matricula).exists():
-            novo_aluno = Aluno(matricula=matricula, nome=nome)
+        if not Aluno.objects.filter(matricula=aluno['matricula'], usuario=usuario).exists():
+            novo_aluno = Aluno(matricula=aluno['matricula'], nome=aluno['nome'])
             novo_aluno.save()
             novo_aluno.usuario.add(usuario)
-            alunos_criados.append(nome)
+            alunos_criados.append(aluno['nome'])
         else:
             print(f'Aluno com matrícula {matricula} já existe.')
         aluno = Aluno(nome=nome, matricula=matricula)
         aluno.save()
         aluno.usuario.add(usuario)
-        alunos_criados.append(nome)
     return alunos_criados
 
 def cadastro_turma_txt(data, usuario):
@@ -49,7 +48,7 @@ def cadastro_turma_txt(data, usuario):
     
     for aluno in alunos:
         if Aluno.objects.filter(matricula=aluno['matricula']).first():
-            matriculas.append(matricula)
+            matriculas.append(aluno['matricula'])
         else:
             alunos_nao_criados.append(matricula)
     alunos_existentes = Aluno.objects.filter(matricula__in=matriculas, usuario=usuario)

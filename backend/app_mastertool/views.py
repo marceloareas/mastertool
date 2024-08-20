@@ -53,9 +53,8 @@ def login(request):
 @permission_classes([IsAuthenticated])
 def cadastrar_alunos(request):
     if request.method == 'POST':
-        uploaded_file = request.FILES['file']
         usuario = request.user
-        alunos_criados = cadastro_alunos_txt(uploaded_file, usuario)
+        alunos_criados = cadastro_alunos_txt(request.data, usuario)
 
         if alunos_criados:
             return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})
