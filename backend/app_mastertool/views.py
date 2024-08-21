@@ -161,6 +161,7 @@ def editar_turma(request, id):
     if turma:
         turma.nome = data['nome']
         turma.periodo = data['periodo']
+        turma.aluno = data['alunos']
         turma.save()
         return JsonResponse({'mensagem': 'Dados da turma foram editados.'})
     else:
