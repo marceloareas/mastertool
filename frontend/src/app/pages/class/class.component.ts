@@ -61,10 +61,10 @@ export class ClassComponent {
 
   teste(name: string) {
     const arrayName = name.split(' ');
-     return arrayName.map((item) => {
-      const first = item.charAt(0);
-      const second = item.length > 1 ? item.charAt(1) : '';
-      return first.toUpperCase() + second.toUpperCase();
-    });
+    if (arrayName.length === 1) {
+      return arrayName[0].charAt(0).toUpperCase() + arrayName[0].charAt(1).toUpperCase();
+    } else {
+      return arrayName[0].charAt(0).toUpperCase() + arrayName[1].charAt(0).toUpperCase();
+    }
   }
 }

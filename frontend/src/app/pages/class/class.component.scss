@@ -18,6 +18,11 @@
     gap: 60px;
     padding: 20px;
     justify-content: center;
+
+    &.teste{
+      display: initial;
+      justify-content: center;
+    }
   }
 
   .top__bar {
@@ -49,6 +54,19 @@ span {
   font-size: 20px;
 }
 
+h3{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 140px
+}
+
+mat-card-content{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 @media (min-width: 1440px) {
   .class {
     background: white;
@@ -57,6 +75,7 @@ span {
       justify-content: start;
 
       &.teste {
+        display: flex;
         justify-content: center;
       }
     }

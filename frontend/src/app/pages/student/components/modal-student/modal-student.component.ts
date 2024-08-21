@@ -34,7 +34,7 @@ import { finalize } from 'rxjs';
   templateUrl: './modal-student.component.html',
   styleUrl: './modal-student.component.scss',
 })
-export class ModalStudentComponent implements OnInit{
+export class ModalStudentComponent implements OnInit {
   private studentService = inject(StudentService);
   private dialogRef = inject(DialogRef);
 
@@ -52,29 +52,32 @@ export class ModalStudentComponent implements OnInit{
     }
   }
 
-  save(event?: Event, mode = this.data.mode) {
-    if(mode == 'ADD'){
-      const data ={'turma': this.files}
-      console.log(data)
+  save(event?: any, mode = this.data.mode) {
+    if (mode == 'ADD') {
+      const data = event.matricula
+        ? { turma: event.matricula + ', ' + event.nome }
+        : { turma: this.files };
+        console.log(event)
 
       this.studentService.post(data).subscribe((response: any) => {
         alert('Cadastrado com sucesso');
         this.dialogRef.close(true);
       });
-    }
-    else{
-      console.log({...this.student, ...event})
-      this.studentService.put(this.data.id,{...this.student, ...event}).subscribe(() => {
-        alert('Registro atualizado');
-        this.dialogRef.close(true);
-      });
+    } else {
+      console.log({ ...this.student, ...event });
+      this.studentService
+        .put(this.data.id, { ...this.student, ...event })
+        .subscribe(() => {
+          alert('Registro atualizado');
+          this.dialogRef.close(true);
+        });
     }
   }
 
   getData() {
     this.studentService.get(this.data.id).subscribe((student) => {
       this.student = student;
-      console.log(this.student)
+      console.log(this.student);
     });
   }
 

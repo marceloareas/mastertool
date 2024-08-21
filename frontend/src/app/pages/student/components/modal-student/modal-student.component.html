@@ -5,20 +5,24 @@
 
   @if(data.mode == 'ADD'){
   <mat-dialog-content class="mat-typography">
+    <p>Suba um arquivo txt com os dados dos alunos</p>
     <input (change)="onFileChange($event)" type="file" id="fileUpload" />
   </mat-dialog-content>
-  }@else{
+  }
   <mat-dialog-content class="mat-typography">
+    @if(data.mode == 'ADD'){
+    <p>Ou cadastre somente um aluno</p>
+    }
     <app-form-student
       (formStudent)="save($event)"
       [data]="student"
+      [mode]="data.mode"
     ></app-form-student>
   </mat-dialog-content>
-  }
 
   <mat-dialog-actions align="end">
     <button mat-raised-button (click)="closeModal()">Fechar</button>
-    <button mat-raised-button (click)="data.mode === 'ADD' ? save(): this.formStudentComponent.save()">
+    <button mat-raised-button (click)="this.formStudentComponent.save()">
       Salvar
     </button>
   </mat-dialog-actions>

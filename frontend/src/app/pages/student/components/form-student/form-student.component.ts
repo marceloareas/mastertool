@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class FormStudentComponent {
   @Input() data: any;
+  @Input() mode: any;
   @Output() formStudent: EventEmitter<any> = new EventEmitter();
 
   constructor(private fb: FormBuilder) {}
