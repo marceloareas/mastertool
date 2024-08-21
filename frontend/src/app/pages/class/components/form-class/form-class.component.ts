@@ -1,5 +1,10 @@
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClassService } from '../../../../services/class/class.service';
@@ -15,14 +20,21 @@ export class FormClassComponent {
   private classService = inject(ClassService);
   constructor(private fb: FormBuilder) {}
 
+  @Input() data: any;
+  @Input() mode: any;
   @Output() formClass: EventEmitter<any> = new EventEmitter();
-
 
   class: FormGroup = this.fb.group({
     nome: [''],
     periodo: [''],
     turma: [null], // Campo para referência, mas não vincule diretamente ao input de arquivo
   });
+
+  ngOnInit() {
+    if (this.data) {
+      this.populateForm();
+    }
+  }
 
   onFileChange(event: any) {
     const file = event.target.files[0];
@@ -40,5 +52,9 @@ export class FormClassComponent {
   save() {
     console.log(this.class.value);
     this.formClass.emit(this.class.value);
+  }
+
+  populateForm() {
+    this.class.patchValue(this.data);
   }
 }

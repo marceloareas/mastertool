@@ -45,7 +45,7 @@ export class ClassComponent {
     });
   }
 
-  openModal() {
+  openModal(data?: any, mode = 'ADD') {
     this.dialog
       .open(ModalClassComponent, {
         width: '600px',

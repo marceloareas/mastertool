@@ -10,6 +10,9 @@
     </mat-form-field>
   </div>
 
-  <label for="avatar">Subir arquivo:</label>
-  <input type="file" id="avatar" (change)="onFileChange($event)" />
+  @if(data.mode == "ADD"){
+    <label for="avatar">Subir arquivo:</label>
+    <input type="file" id="avatar" (change)="onFileChange($event)" />
+  }@else{}
+
 </form>
