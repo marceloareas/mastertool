@@ -142,12 +142,11 @@ def excluir_turma(request, id):
 def editar_turma(request, id):
     usuario = request.user
     data    = request.data
-    turma   = Aluno.objects.filter(id=id, usuario=usuario).first()
+    turma   = Turma.objects.filter(id=id, usuario=usuario).first()
 
     if turma:
         turma.nome      = data['nome']
         turma.periodo   = data['periodo']
-        turma.aluno     = data['alunos']
         turma.save()
         return JsonResponse({'mensagem': 'Dados da turma foram editados.'})
     else:
