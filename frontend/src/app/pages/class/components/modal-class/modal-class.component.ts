@@ -37,9 +37,7 @@ export class ModalClassComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { data: any; mode: string }
-  ) {
-    console.log(this.data);
-  }
+  ) {}
 
   save(event: any) {
     if (this.data.mode == 'ADD') {
@@ -48,9 +46,13 @@ export class ModalClassComponent {
         alert('Cadastrado com sucesso');
       });
     } else {
-      console.log({ ...this.data.data, ...event });
+      const teste = {
+        nome: this.data.data.id,
+        periodo: this.data.data.periodo,
+      };
+      console.log(this.data.data.id, { ...teste, ...event });
       this.classService
-        .put(this.data.data.id, { ...this.data, ...event })
+        .put(this.data.data.id, { ...teste, ...event })
         .subscribe(() => {
           alert('Registro atualizado');
           this.dialogRef.close(true);

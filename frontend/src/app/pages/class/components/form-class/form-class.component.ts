@@ -50,8 +50,16 @@ export class FormClassComponent {
   }
 
   save() {
-    console.log(this.class.value);
-    this.formClass.emit(this.class.value);
+    let data;
+    if (this.mode == 'ADD') {
+      data = this.class.value;
+    } else {
+      data = {
+        nome: this.class.value.nome,
+        periodo: this.class.value.periodo,
+      };
+    }
+    this.formClass.emit(data);
   }
 
   populateForm() {
