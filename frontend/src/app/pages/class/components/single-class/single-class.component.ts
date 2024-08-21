@@ -28,6 +28,7 @@ export class SingleClassComponent {
 
   ngOnInit() {
     this.getClass();
+    console.log(this.class)
   }
 
   getClass(){

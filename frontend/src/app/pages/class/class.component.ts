@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { SingleClassComponent } from './components/single-class/single-class.component';
 import { ClassService } from '../../services/class/class.service';
 import { CommonModule } from '@angular/common';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-class',
@@ -23,6 +24,7 @@ import { CommonModule } from '@angular/common';
     MatButtonModule,
     SingleClassComponent,
     CommonModule,
+    MatMenuModule,
   ],
   templateUrl: './class.component.html',
   styleUrl: './class.component.scss',
@@ -62,9 +64,15 @@ export class ClassComponent {
   teste(name: string) {
     const arrayName = name.split(' ');
     if (arrayName.length === 1) {
-      return arrayName[0].charAt(0).toUpperCase() + arrayName[0].charAt(1).toUpperCase();
+      return (
+        arrayName[0].charAt(0).toUpperCase() +
+        arrayName[0].charAt(1).toUpperCase()
+      );
     } else {
-      return arrayName[0].charAt(0).toUpperCase() + arrayName[1].charAt(0).toUpperCase();
+      return (
+        arrayName[0].charAt(0).toUpperCase() +
+        arrayName[1].charAt(0).toUpperCase()
+      );
     }
   }
 }

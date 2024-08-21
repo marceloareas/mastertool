@@ -8,22 +8,26 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [ReactiveFormsModule, FormsModule],
   templateUrl: './cadastro.component.html',
-  styleUrl: './cadastro.component.scss'
+  styleUrl: './cadastro.component.scss',
 })
 export class CadastroComponent {
   private _auth = inject(AuthenticationService);
-  private router = inject(Router)
+  private router = inject(Router);
 
   form = {
     email: '',
-    senha: ''
+    senha: '',
   };
 
-  onSubmit(){
-    console.log(this.form)
-    this._auth.post(this.form).subscribe(() => {
-      alert('Cadastrado com sucesso')
-      this.router.navigate([''])
-    })
+  onSubmit() {
+    this._auth.post(this.form).subscribe({
+      next: () => {
+        alert('Cadastrado com sucesso');
+        this.router.navigate(['']);
+        console.log('entrei');
+      },error:(res) =>{
+        alert('Usuário já cadastrado');
+      }
+    });
   }
 }
