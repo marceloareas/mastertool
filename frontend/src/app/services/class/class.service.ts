@@ -14,4 +14,8 @@ export class ClassService {
   get = () => {
     return this.http.get<any>('http://127.0.0.1:8000/turmas/');
   }
+
+  delete = (id: string) =>{
+    return this.http.delete<any>('http://127.0.0.1:8000/turmas/excluir/' + id);
+  }
 }
