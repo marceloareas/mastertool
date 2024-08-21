@@ -20,7 +20,7 @@ urlpatterns = [
     path('turmas/', views.get_turmas, name='get_turmas'),
     path('turmas/<str:id>', views.get_turmas, name='get_turma'),
     path('turmas/cadastrar/', views.cadastrar_turma, name='cadastrar_turma'),
-    path('turmas/excluir<str:id>', views.excluir_turma, name='excluir_turma'),
-    path('turmas/editar<str:id>', views.editar_turma, name='editar_alunos'),
+    path('turmas/excluir/<str:id>', views.excluir_turma, name='excluir_turma'),
+    path('turmas/editar/<str:id>', views.editar_turma, name='editar_alunos'),
 
 ]
