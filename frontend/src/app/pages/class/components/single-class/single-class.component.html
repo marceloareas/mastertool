@@ -1,7 +1,16 @@
 <section>
-  <button mat-icon-button (click)="closeClass()">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
+  <div class="teste">
+    <button mat-icon-button (click)="closeClass()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <div class="action">
+      <button mat-stroked-button (click)="delete(class.id)">
+        Excluir turma
+      </button>
+      <button mat-stroked-button>Editar turma</button>
+    </div>
+  </div>
 
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <ng-container matColumnDef="nome">

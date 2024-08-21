@@ -22,7 +22,6 @@ export class FormClassComponent {
     nome: [''],
     periodo: [''],
     turma: [null], // Campo para referência, mas não vincule diretamente ao input de arquivo
-    arquivoConteudo: [null], // Armazena o conteúdo do arquivo lido como texto
   });
 
   onFileChange(event: any) {

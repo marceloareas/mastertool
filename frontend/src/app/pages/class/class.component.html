@@ -1,7 +1,9 @@
 <section class="class">
   <div class="top__bar">
     <app-top-bar [title]="'Turmas'" />
-    <button mat-stroked-button (click)="openModal()">Cadastrar Turma</button>
+    @if(!isOpen){<button mat-stroked-button (click)="openModal()">
+      Cadastrar Turma</button
+    >}
   </div>
 
   <div class="class__content" [ngClass]="isOpen ? 'teste' : ''">

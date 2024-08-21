@@ -28,15 +28,22 @@ export class SingleClassComponent {
 
   ngOnInit() {
     this.getClass();
-    console.log(this.class)
+    console.log(this.class);
   }
 
-  getClass(){
+  getClass() {
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
   }
 
   closeClass() {
     this.closeClassEvent.emit();
+  }
+
+  delete(id: string) {
+    // this.student.delete(id).subscribe(() => {
+    //   alert('Aluno excluído');
+    //   this.getStudent();
+    // });
   }
 }
