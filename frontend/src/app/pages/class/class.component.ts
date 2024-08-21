@@ -75,4 +75,11 @@ export class ClassComponent {
       );
     }
   }
+
+  delete(id: string) {
+    this.classService.delete(id).subscribe(() => {
+      alert('Turma excluída');
+      this.getClass();
+    });
+  }
 }

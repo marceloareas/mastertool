@@ -8,6 +8,15 @@
 
   <div class="class__content" [ngClass]="isOpen ? 'teste' : ''">
     @if(!isOpen){ @for (class of classes; track class ) {
+      <div class="card">
+        <button class="button__menu" mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon fontIcon="more_vert" />
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="delete(class.id)">
+            <mat-icon fontIcon="delete" /> Remover
+          </button>
+        </mat-menu>
 
     <mat-card class="example-card" (click)="openClass(class)">
       <mat-card-content>
@@ -18,6 +27,7 @@
         <h3>{{ class.nome.toUpperCase() }}</h3>
       </mat-card-content>
     </mat-card>
+  </div>
 
     } } @if(isOpen){
     <app-single-class (closeClassEvent)="openClass()" [class]="dataClass" />

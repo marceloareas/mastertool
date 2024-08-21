@@ -19,7 +19,7 @@
     padding: 20px;
     justify-content: center;
 
-    &.teste{
+    &.teste {
       display: initial;
       justify-content: center;
     }
@@ -54,17 +54,28 @@ span {
   font-size: 20px;
 }
 
-h3{
+h3 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 140px
+  width: 140px;
 }
 
-mat-card-content{
+mat-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.card {
+  position: relative;
+}
+
+.button__menu {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 999;
 }
 
 @media (min-width: 1440px) {

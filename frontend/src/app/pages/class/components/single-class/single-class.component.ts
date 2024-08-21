@@ -43,10 +43,4 @@ export class SingleClassComponent {
   closeClass() {
     this.closeClassEvent.emit();
   }
-
-  delete(id: string) {
-    this.classService.delete(id).subscribe(() => {
-      alert('Turma excluída');
-    });
-  }
 }
