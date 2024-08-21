@@ -48,6 +48,7 @@ export class ClassComponent {
   openModal(data?: any, mode = 'ADD') {
     this.dialog
       .open(ModalClassComponent, {
+        data: { data: data, mode },
         width: '600px',
       })
       .afterClosed()
