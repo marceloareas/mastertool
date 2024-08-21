@@ -32,6 +32,19 @@ def cadastro_alunos_txt(data, usuario):
         aluno.usuario.add(usuario)
     return alunos_criados
 
+def encontrar_aluno(matricula, usuario):
+    if matricula:
+        aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
+        aluno_json = {  'matricula' : aluno.matricula, 
+                        'nome'      : aluno.nome, 
+                        'atividade' : aluno.atividade}
+        return aluno_json
+    
+    alunos = Aluno.objects.filter(usuario=usuario)
+    alunos_json = [{'matricula' : aluno.matricula, 
+                    'nome'      : aluno.nome, 
+                    'atividade' : aluno.atividade} for aluno in alunos]
+    return alunos_json
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS TURMA -----------------------------------------
 # -----------------------------------------------------------------------------------------------

@@ -63,31 +63,17 @@ def cadastrar_alunos(request):
         
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_aluno(request, matricula):
+def get_alunos(request, matricula=None):
     if request.method == 'GET':
         usuario = request.user
-        aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
-        aluno_json = {'matricula': aluno.matricula, 
-                        'nome': aluno.nome, 
-                        'atividade': aluno.atividade}
-        return JsonResponse(aluno_json, safe=False)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_alunos(request):
-    if request.method == 'GET':
-        usuario = request.user
-        alunos = Aluno.objects.filter(usuario=usuario)
-        alunos_json = [{'matricula': aluno.matricula, 
-                        'nome': aluno.nome, 
-                        'atividade': aluno.atividade} for aluno in alunos]
+        alunos_json = encontrar_aluno(matricula, usuario)
         return JsonResponse(alunos_json, safe=False)
        
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def excluir_aluno(request, matricula):
     usuario = request.user
-    aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
+    aluno   = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
 
     turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
     for turma in turmas:
@@ -103,12 +89,12 @@ def excluir_aluno(request, matricula):
 @permission_classes([IsAuthenticated])
 def editar_aluno(request, matricula):
     usuario = request.user
-    data = request.data
-    aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
+    data    = request.data
+    aluno   = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
 
     if aluno:
         aluno.matricula = data['matricula']
-        aluno.nome = data['nome']
+        aluno.nome      = data['nome']
         aluno.save()
         return JsonResponse({'mensagem': 'Dados do aluno foram editados.'})
     else:
@@ -122,7 +108,7 @@ def editar_aluno(request, matricula):
 @permission_classes([IsAuthenticated])
 def cadastrar_turma(request):
     if request.method == 'POST':
-        usuario = request.user
+        usuario        = request.user
         alunos_criados = cadastro_turma_txt(request.data, usuario)
 
         if alunos_criados:
@@ -155,13 +141,13 @@ def excluir_turma(request, id):
 @permission_classes([IsAuthenticated])
 def editar_turma(request, id):
     usuario = request.user
-    data = request.data
-    turma = Aluno.objects.filter(id=id, usuario=usuario).first()
+    data    = request.data
+    turma   = Aluno.objects.filter(id=id, usuario=usuario).first()
 
     if turma:
-        turma.nome = data['nome']
-        turma.periodo = data['periodo']
-        turma.aluno = data['alunos']
+        turma.nome      = data['nome']
+        turma.periodo   = data['periodo']
+        turma.aluno     = data['alunos']
         turma.save()
         return JsonResponse({'mensagem': 'Dados da turma foram editados.'})
     else:
