@@ -1,10 +1,10 @@
 <section class="modal">
-  <h2 mat-dialog-title>Cadastrar Turma</h2>
+  <h2 mat-dialog-title>{{data.mode === 'ADD' ? 'Cadastrar Turma' : 'Editar Turma'}}</h2>
 
   <mat-dialog-content class="mat-typography">
     <app-form-class
       (formClass)="save($event)"
-      [data]="data.data"
+      [data]="data.singleClass"
       [mode]="data.mode"
     />
   </mat-dialog-content>

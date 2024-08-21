@@ -1,6 +1,5 @@
 import { MatIconModule } from '@angular/material/icon';
 import { Component, ViewChild, inject } from '@angular/core';
-import { TopBarComponent } from '../../components/top-bar/top-bar.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalStudentComponent } from './components/modal-student/modal-student.component';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -16,7 +15,6 @@ import { MatMenuModule } from '@angular/material/menu';
   selector: 'app-student',
   standalone: true,
   imports: [
-    TopBarComponent,
     MatDialogModule,
     MatTableModule,
     MatLabel,
@@ -39,14 +37,17 @@ export class StudentComponent {
   displayedColumns: string[] = ['matricula', 'nome', 'editar'];
   dataSource!: MatTableDataSource<MatPaginator>;
 
-  constructor() {
-    this.getStudent();
-  }
-
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
 
+  ngOnInit() {
+    this.getStudent();
+  }
+
+  /**
+   * Obtém a lista de estudantes do serviço e popula a fonte de dados da tabela.
+   */
   getStudent() {
     this.student.get().subscribe((data) => {
       this.dataSource = new MatTableDataSource(data);
@@ -54,6 +55,10 @@ export class StudentComponent {
     });
   }
 
+  /**
+   * Exclui um estudante pelo ID fornecido.
+   * @param id ID do estudante a ser excluído.
+   */
   delete(id: string) {
     this.student.delete(id).subscribe(() => {
       alert('Aluno excluído');
@@ -61,11 +66,16 @@ export class StudentComponent {
     });
   }
 
-  openModal(data?: any, mode = 'ADD') {
+  /**
+   * Abre um modal para adicionar ou editar um estudante.
+   * @param data Dados do estudante para edição, se disponível.
+   * @param mode Modo do modal, padrão é 'ADD' para adicionar.
+   */
+  openModal(matricula?: any, mode = 'ADD') {
     this.dialog
       .open(ModalStudentComponent, {
         width: '600px',
-        data: { id: data, mode },
+        data: { matricula, mode },
       })
       .afterClosed()
       .subscribe(() => {
@@ -73,6 +83,10 @@ export class StudentComponent {
       });
   }
 
+  /**
+   * Filtra os dados da tabela com base no valor de entrada.
+   * @param event Evento de entrada que acionou o filtro.
+   */
   filter(event: Event) {
     this.dataSource.filter = (event.target as HTMLInputElement)?.value;
   }

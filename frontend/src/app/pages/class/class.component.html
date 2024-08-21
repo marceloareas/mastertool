@@ -1,15 +1,15 @@
 <section class="class">
-  <div class="top__bar">
-    <app-top-bar [title]="'Turmas'" />
-    @if(!isOpen){<button mat-stroked-button (click)="openModal()">
+  <div class="class__top">
+    <h1 class="title">Turmas</h1>
+    @if(!classIsOpen){<button mat-stroked-button (click)="openModal()">
       Cadastrar Turma</button
     >}
   </div>
 
-  <div class="class__content" [ngClass]="isOpen ? 'teste' : ''">
-    @if(!isOpen){ @for (class of classes; track class ) {
-      <div class="card">
-        <button class="button__menu" mat-icon-button [matMenuTriggerFor]="menu">
+  <div class="class__content" [ngClass]="classIsOpen ? 'single' : ''">
+    @if(!classIsOpen){ @for (class of classes; track class ) {
+      <div class="class__content__card">
+        <button class="class__content__menu" mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon fontIcon="more_vert" />
         </button>
         <mat-menu #menu="matMenu">
@@ -18,19 +18,18 @@
           </button>
         </mat-menu>
 
-    <mat-card class="example-card" (click)="openClass(class)">
+    <mat-card class="card" (click)="openClass(class)">
       <mat-card-content>
-        <div class="a1">
-          <span> {{ teste(class.nome) }}</span>
+        <div class="avatar">
+          <span> {{ generateInitials(class.nome) }}</span>
         </div>
-
-        <h3>{{ class.nome.toUpperCase() }}</h3>
+        <h3 class="title">{{ class.nome.toUpperCase() }}</h3>
       </mat-card-content>
     </mat-card>
   </div>
 
-    } } @if(isOpen){
-    <app-single-class (closeClassEvent)="openClass()" [class]="dataClass" />
+    } } @if(classIsOpen){
+    <app-single-class (closeClassEvent)="openClass()" (closeModalEvent)="getClass()" [class]="singleClass" />
     }
   </div>
 </section>

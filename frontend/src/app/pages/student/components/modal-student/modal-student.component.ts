@@ -39,34 +39,39 @@ export class ModalStudentComponent implements OnInit {
   private dialogRef = inject(DialogRef);
 
   @ViewChild(FormStudentComponent) formStudentComponent!: FormStudentComponent;
-  files!: any;
+  file!: any;
   student: any;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { id: string; mode: string }
+    @Inject(MAT_DIALOG_DATA) public data: { matricula: string; mode: string }
   ) {}
 
   ngOnInit() {
-    if (this.data.id) {
+    if (this.data.matricula) {
       this.getData();
     }
   }
 
-  save(event?: any, mode = this.data.mode) {
+  /**
+   * Salva os dados do estudante.
+   * Se o modo for 'ADD', cadastra estudante(é possivel cadastrar vários estudantes através de um arquivo txt,
+   * ou cadastrar somente um aluno pelo form); caso contrário, atualiza o registro existente.
+   * @param event Dados do evento do formulário.
+   * @param mode Modo de operação, pode ser 'ADD' ou outro para atualização.
+   */
+  save(student?: any, mode = this.data.mode) {
     if (mode == 'ADD') {
-      const data = event.matricula
-        ? { turma: event.matricula + ', ' + event.nome }
-        : { turma: this.files };
-        console.log(event)
+      const data = student.matricula
+        ? { turma: student.matricula + ', ' + student.nome }
+        : { turma: this.file };
 
-      this.studentService.post(data).subscribe((response: any) => {
+      this.studentService.post(data).subscribe(() => {
         alert('Cadastrado com sucesso');
         this.dialogRef.close(true);
       });
     } else {
-      console.log({ ...this.student, ...event });
       this.studentService
-        .put(this.data.id, { ...this.student, ...event })
+        .put(this.data.matricula, { ...this.student, ...student })
         .subscribe(() => {
           alert('Registro atualizado');
           this.dialogRef.close(true);
@@ -74,23 +79,33 @@ export class ModalStudentComponent implements OnInit {
     }
   }
 
+  /**
+   * Obtém os dados do estudante com base na matrícula fornecido.
+   */
   getData() {
-    this.studentService.get(this.data.id).subscribe((student) => {
-      this.student = student;
-      console.log(this.student);
+    this.studentService.get(this.data.matricula).subscribe((data) => {
+      this.student = data;
     });
   }
 
+  /**
+   * Manipula a mudança de arquivo, lê o arquivo e armazena seu conteúdo.
+   * @param event Evento que contém o arquivo selecionado.
+   */
   onFileChange(event: any) {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        this.files = reader.result as string; // Converte o conteúdo para string e armazena
+        this.file = reader.result as string;
       };
-      reader.readAsText(file); // Lê o arquivo como texto
+      reader.readAsText(file);
     }
   }
+
+  /**
+   * Fecha o modal de estudante.
+   */
   closeModal() {
     this.dialogRef.close();
   }

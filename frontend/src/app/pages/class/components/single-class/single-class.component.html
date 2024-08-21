@@ -1,11 +1,11 @@
-<section>
-  <div class="teste">
+<section class="single-class">
+  <div class="single-class__top">
     <button mat-icon-button (click)="closeClass()">
       <mat-icon>arrow_back</mat-icon>
     </button>
 
-    <div class="action">
-      <button mat-stroked-button (click)="openModal(class, 'Edit')">
+    <div class="action-button">
+      <button mat-stroked-button (click)="openModal(class, 'EDIT')">
         Editar turma
       </button>
     </div>
@@ -32,12 +32,8 @@
           <mat-icon fontIcon="more_vert" />
         </button>
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="openModal(element.matricula, 'Edit')">
-            <mat-icon fontIcon="edit" /> Editar
-          </button>
-          <button mat-menu-item (click)="delete(element.matricula)">
-            <mat-icon fontIcon="delete" /> Remover
-          </button>
+          <button mat-menu-item><mat-icon fontIcon="edit" /> Editar</button>
+          <button mat-menu-item><mat-icon fontIcon="delete" /> Remover</button>
         </mat-menu>
       </td>
     </ng-container>

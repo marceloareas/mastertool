@@ -1,36 +1,72 @@
-.a1 {
-  height: 60px;
-  background: #c4ade1;
-  width: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
-  border-radius: 6px;
-}
-
 .class {
-  background: white;
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid black;
+    height: 70px;
+
+    .title {
+      margin: 0;
+      color: black;
+      font-weight: 400;
+    }
+  }
 
   &__content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(185px, auto));
     gap: 60px;
     padding: 20px;
-    justify-content: center;
+    justify-content: flex-start;
 
-    &.teste {
+    &__card {
+      position: relative;
+    }
+
+    &__menu {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 999;
+    }
+
+    &.single {
       display: initial;
       justify-content: center;
     }
-  }
 
-  .top__bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    border-bottom: 1px solid black;
+    .card {
+      width: 180px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+
+      .avatar {
+        height: 60px;
+        background: #c4ade1;
+        width: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+        border-radius: 6px;
+
+        span {
+          font-weight: 500;
+          font-size: 20px;
+        }
+      }
+      .title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 140px;
+      }
+    }
   }
 }
 
@@ -40,52 +76,16 @@
   }
 }
 
-.example-card {
-  width: 180px;
-  height: 150px;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  cursor: pointer;
-}
-
-span {
-  font-weight: 500;
-  font-size: 20px;
-}
-
-h3 {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 140px;
-}
-
 mat-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.card {
-  position: relative;
-}
-
-.button__menu {
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 999;
-}
-
 @media (min-width: 1440px) {
   .class {
-    background: white;
-
     &__content {
-      justify-content: start;
-
-      &.teste {
+      &.single {
         display: flex;
         justify-content: center;
       }

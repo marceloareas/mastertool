@@ -25,12 +25,4 @@ export class ProjectModalComponent {
   private dialogRef = inject(DialogRef);
 
   @ViewChild(FormProjectComponent) formProjectComponent!: FormProjectComponent;
-
-  save(event: Event){
-    console.log(event)
-  }
-
-  closeModal(){
-    this.dialogRef.close();
-  }
 }

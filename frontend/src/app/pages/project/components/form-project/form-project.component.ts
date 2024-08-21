@@ -21,7 +21,4 @@ export class FormProjectComponent {
     alunos: new FormControl(),
   });
 
-  save(){
-    this.projectForm.emit(this.project);
-  }
 }

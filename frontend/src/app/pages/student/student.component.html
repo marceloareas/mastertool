@@ -1,15 +1,14 @@
-<section class="class">
-  <div class="top__bar">
-    <app-top-bar [title]="'Alunos'"/>
-    <button mat-stroked-button (click)="openModal()"> Cadastrar Alunos</button>
+<section class="student">
+  <div class="student__top">
+    <h1 class="title">Alunos</h1>
+    <button mat-stroked-button (click)="openModal()">Cadastrar Alunos</button>
   </div>
 
-  <div class="class__content">
+  <div class="student__content">
     <mat-form-field appearance="outline">
       <mat-label>Pesquisar</mat-label>
       <input matInput (keyup)="filter($event)" />
     </mat-form-field>
-
 
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="matricula">
@@ -19,7 +18,9 @@
 
       <ng-container matColumnDef="nome">
         <th mat-header-cell *matHeaderCellDef>Alunos</th>
-        <td mat-cell *matCellDef="let element">{{ element.nome }}</td>
+        <td mat-cell *matCellDef="let element">
+          {{ element.nome.toUpperCase() }}
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="editar">
@@ -39,7 +40,7 @@
           <mat-menu #menu="matMenu">
             <button
               mat-menu-item
-              (click)="openModal(element.matricula, 'Edit')"
+              (click)="openModal(element.matricula, 'EDIT')"
             >
               <mat-icon fontIcon="edit" /> Editar
             </button>
@@ -49,7 +50,6 @@
           </mat-menu>
         </td>
       </ng-container>
-
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>

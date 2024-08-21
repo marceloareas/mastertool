@@ -1,5 +1,4 @@
-<form [formGroup]="form">
-  <div class="form">
+<form class="form" [formGroup]="formStudent">
     @if(mode === 'ADD'){
     <mat-form-field appearance="outline">
       <mat-label>Matrícula</mat-label>
@@ -10,5 +9,4 @@
       <mat-label>Nome</mat-label>
       <input matInput formControlName="nome" />
     </mat-form-field>
-  </div>
 </form>

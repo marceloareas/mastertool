@@ -29,10 +29,9 @@ import { MatMenuModule } from '@angular/material/menu';
   styleUrl: './single-class.component.scss',
 })
 export class SingleClassComponent {
-  private classService = inject(ClassService);
-
   @Input() class!: any;
   @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
+  @Output() closeModalEvent: EventEmitter<any> = new EventEmitter();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -45,31 +44,42 @@ export class SingleClassComponent {
     this.getClass();
   }
 
+  /**
+   * Carrega os alunos da turma no `dataSource` da tabela e associa o paginador.
+   */
   getClass() {
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
   }
 
+  /**
+   * Emite o evento para fechar a visualização da turma.
+   */
   closeClass() {
     this.closeClassEvent.emit();
   }
 
-  openModal(data?: any, mode = 'ADD') {
+  /**
+   * Abre o modal para adicionar ou editar uma turma.
+   * @param data Dados da turma a serem editados (opcional).
+   * @param mode Modo de operação, pode ser 'ADD' ou 'EDIT'. O padrão é 'ADD'.
+   */
+  openModal(singleClass?: any, mode = 'ADD') {
     this.dialog
       .open(ModalClassComponent, {
-        data: { data: data, mode },
+        data: { singleClass, mode },
         width: '600px',
       })
       .afterClosed()
       .subscribe(() => {
-        this.getClass();
+        this.closeModal();
       });
   }
 
-  delete(id: string) {
-    // this.student.delete(id).subscribe(() => {
-    //   alert('Aluno excluído');
-    //   this.getStudent();
-    // });
+  /**
+   * Emite o evento para fechar o modal.
+   */
+  closeModal() {
+    this.closeModalEvent.emit();
   }
 }

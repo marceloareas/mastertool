@@ -24,7 +24,6 @@ export class CadastroComponent {
       next: () => {
         alert('Cadastrado com sucesso');
         this.router.navigate(['']);
-        console.log('entrei');
       },error:(res) =>{
         alert('Usuário já cadastrado');
       }

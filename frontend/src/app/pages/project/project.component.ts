@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { TopBarComponent } from '../../components/top-bar/top-bar.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ProjectModalComponent } from './components/project-modal/project-modal.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,7 +7,7 @@ import { MatIcon } from '@angular/material/icon';
 @Component({
   selector: 'app-project',
   standalone: true,
-  imports: [TopBarComponent, MatDialogModule, MatIcon, MatButtonModule],
+  imports: [ MatDialogModule, MatIcon, MatButtonModule],
   templateUrl: './project.component.html',
   styleUrl: './project.component.scss',
 })

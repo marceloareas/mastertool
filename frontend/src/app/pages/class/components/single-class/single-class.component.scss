@@ -1,25 +1,22 @@
-section {
+.single-class {
   padding: 0 20px;
-}
 
+  &__top {
+    display: flex;
+    justify-content: space-between;
 
-table{
-  margin-bottom: 20px;
-}
-
-.teste{
-  display: flex;
-  justify-content: space-between;
-}
-
-.action{
-  display: flex;
-  gap: 10px;
-}
-@media (min-width: 1440px) {
-  section{
-
-    width: 1200px;
+    .action-button {
+      display: flex;
+      gap: 10px;
+    }
   }
 
+  table {
+    margin-bottom: 20px;
+  }
+}
+@media (min-width: 1440px) {
+  .single-class {
+    width: 1200px;
+  }
 }

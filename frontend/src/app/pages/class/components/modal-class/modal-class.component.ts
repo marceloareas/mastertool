@@ -36,23 +36,29 @@ export class ModalClassComponent {
   @ViewChild(FormClassComponent) formClassComponent!: FormClassComponent;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { data: any; mode: string }
+    @Inject(MAT_DIALOG_DATA) public data: { singleClass: any; mode: string }
   ) {}
 
-  save(event: any) {
+  ngOnInit(){
+    console.log(this.data.singleClass)
+  }
+  /**
+   * Salva as informações da classe, criando uma nova classe ou atualizando uma existente.
+   * @param event Dados do formulário que devem ser salvos.
+   */
+  save(singleClass: any) {
     if (this.data.mode == 'ADD') {
-      this.classService.post(event).subscribe(() => {
-        this.dialogRef.close(true);
+      this.classService.post(singleClass).subscribe(() => {
         alert('Cadastrado com sucesso');
+        this.dialogRef.close(true);
       });
     } else {
-      const teste = {
-        nome: this.data.data.id,
-        periodo: this.data.data.periodo,
+      const dataClass = {
+        nome: this.data.singleClass.id,
+        periodo: this.data.singleClass.periodo,
       };
-      console.log(this.data.data.id, { ...teste, ...event });
       this.classService
-        .put(this.data.data.id, { ...teste, ...event })
+        .put(this.data.singleClass.id, { ...dataClass, ...singleClass })
         .subscribe(() => {
           alert('Registro atualizado');
           this.dialogRef.close(true);
@@ -60,6 +66,9 @@ export class ModalClassComponent {
     }
   }
 
+  /**
+   * Fecha o modal sem salvar as alterações.
+   */
   closeModal() {
     this.dialogRef.close();
   }

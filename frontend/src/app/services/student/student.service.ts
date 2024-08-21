@@ -16,18 +16,15 @@ export class StudentService {
   };
 
   get = (id: string = '') => {
-    if (id) {
-      return this.http.get<any>('http://127.0.0.1:8000/alunos/' + id);
-    } else {
-      return this.http.get<any>('http://127.0.0.1:8000/alunos/');
-    }
+    return this.http.get<any>('http://127.0.0.1:8000/alunos/' + id);
   };
 
   put = (id: string, dados: any) => {
-    return this.http.put<any>('http://127.0.0.1:8000/alunos/editar/'+id, dados);
+    return this.http.put<any>(
+      'http://127.0.0.1:8000/alunos/editar/' + id,
+      dados
+    );
   };
-
-
 
   delete = (id: string) => {
     return this.http.delete<any>('http://127.0.0.1:8000/alunos/excluir/' + id);

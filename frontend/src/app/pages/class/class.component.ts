@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { TopBarComponent } from '../../components/top-bar/top-bar.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalClassComponent } from './components/modal-class/modal-class.component';
@@ -15,7 +14,6 @@ import { MatMenuModule } from '@angular/material/menu';
   selector: 'app-class',
   standalone: true,
   imports: [
-    TopBarComponent,
     ModalClassComponent,
     ReactiveFormsModule,
     MatDialogModule,
@@ -31,24 +29,32 @@ import { MatMenuModule } from '@angular/material/menu';
 })
 export class ClassComponent {
   private classService = inject(ClassService);
+  classIsOpen = false;
   classes!: any;
-  isOpen = false;
-  dataClass!: any;
+  singleClass!: any;
 
   constructor(public dialog: MatDialog) {
     this.getClass();
   }
 
+  /**
+   * Obtém a lista de turmas do serviço `ClassService` e armazena em `classes`.
+   */
   getClass() {
     this.classService.get().subscribe((data) => {
       this.classes = data;
     });
   }
 
+  /**
+   * Abre o modal para adicionar ou editar uma turma.
+   * @param data Dados da turma a serem editados (opcional).
+   * @param mode Modo de operação, pode ser 'ADD' ou 'EDIT'. O padrão é 'ADD'.
+   */
   openModal(data?: any, mode = 'ADD') {
     this.dialog
       .open(ModalClassComponent, {
-        data: { data: data, mode },
+        data: { data, mode },
         width: '600px',
       })
       .afterClosed()
@@ -57,26 +63,35 @@ export class ClassComponent {
       });
   }
 
+  /**
+   * Alterna a visibilidade dos detalhes de uma turma específica.
+   * @param turma Nome ou identificador da turma (opcional).
+   */
   openClass(turma = '') {
-    this.isOpen = !this.isOpen;
-    this.dataClass = turma;
+    this.classIsOpen = !this.classIsOpen;
+    this.singleClass = turma;
   }
 
-  teste(name: string) {
+  /**
+   * Gera um acrônimo a partir do nome da turma.
+   * @param name Nome da turma.
+   * @returns Acrônimo gerado a partir do nome da turma.
+   */
+  generateInitials(name: string) {
     const arrayName = name.split(' ');
     if (arrayName.length === 1) {
-      return (
-        arrayName[0].charAt(0).toUpperCase() +
-        arrayName[0].charAt(1).toUpperCase()
-      );
-    } else {
-      return (
-        arrayName[0].charAt(0).toUpperCase() +
-        arrayName[1].charAt(0).toUpperCase()
-      );
+      return arrayName[0].slice(0, 2).toUpperCase(); // Retorna as duas primeiras letras do único nome
     }
+    return (
+      arrayName[0].charAt(0).toUpperCase() +
+      arrayName[1].charAt(0).toUpperCase()
+    );
   }
 
+  /**
+   * Exclui uma turma com base no ID fornecido.
+   * @param id Identificador da turma a ser excluída.
+   */
   delete(id: string) {
     this.classService.delete(id).subscribe(() => {
       alert('Turma excluída');
