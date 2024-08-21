@@ -1,0 +1,19 @@
+<section>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline">
+      <mat-label>Usuário</mat-label>
+      <input matInput formControlName="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Senha</mat-label>
+      <input matInput formControlName="senha" />
+    </mat-form-field>
+  </form>
+
+  <div class="login__buttons">
+    <button (click)="submit(mode)">
+      {{ mode === "LOGIN" ? "Entrar": "Cadastrar" }}
+    </button>
+  </div>
+</section>

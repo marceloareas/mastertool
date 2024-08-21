@@ -1,22 +1,20 @@
 <section class="login">
   <div class="login__content">
-    <div class="login__logo">
+    <div class="login__content__logo">
       <img src="../../../assets/M.png" class="logo1" id="img" />
       <img src="../../../assets/T.png" class="logo2" id="img" />
     </div>
 
-    <div class="login__form">
-      <form>
-        <label>Usuário</label>
-        <input type="email" [(ngModel)]="form.email" name="campo1"/>
+    <h2 class="title">Login</h2>
 
-        <label>Senha</label>
-        <input type="password" [(ngModel)]="form.senha" name="campo2"/>
-      </form>
-    </div>
-    <div class="login__buttons">
-      <button (click)="login()">Entrar</button>
-      <a [routerLink]="rota">Criar Conta</a>
+    <div class="login__content__form">
+      <app-form-login (loginEvent)="login($event)"></app-form-login>
+
+      <div class="login__content__footer">
+        <p>Ainda não tem conta?</p>
+        <a [routerLink]="rota">Cadastre-se</a>
+      </div>
+
     </div>
   </div>
 </section>

@@ -1,0 +1,38 @@
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  background-color: #092747;
+  color: white;
+  border-radius: 3px;
+  border: none;
+  height: 40px;
+  width: 324px;
+  cursor: pointer;
+  margin-bottom: 35px;
+}
+
+::ng-deep {
+  mat-form-field {
+    .mat-mdc-text-field-wrapper {
+      border: none;
+      height: 35px;
+      width: 100%;
+      border-radius: 8px;
+    }
+  }
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mdc-text-field__input {
+    padding-top: 8px;
+  }
+
+  .mat-mdc-form-field:not(.mat-form-field-disabled)
+    .mat-mdc-floating-label.mdc-floating-label {
+    padding-bottom: 20px;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 0 !important;
+  }
+}

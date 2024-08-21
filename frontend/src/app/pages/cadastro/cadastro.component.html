@@ -1,19 +1,16 @@
-<section class="login">
-  <div class="login__content">
+<section class="register">
+  <div class="register__content">
+    <button class="back-button" mat-icon-button (click)="voltar()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
 
-    <h1>Criar conta</h1>
-
-    <div class="login__form">
-      <form>
-        <label>Email</label>
-        <input type="email" [(ngModel)]="form.email" name="campo1"/>
-
-        <label>Senha</label>
-        <input type="password" [(ngModel)]="form.senha" name="campo2"/>
-      </form>
+    <div class="register__content__top">
+      <h1 class="title">Cadastro</h1>
+      <hr />
     </div>
-    <div class="login__buttons">
-      <button (click)="onSubmit()">Cadastrar</button>
+
+    <div class="register__content__form">
+     <app-form-login (registerEvent)="onSubmit($event)" [mode]="'REGISTER'"></app-form-login>
     </div>
   </div>
 </section>
