@@ -1,5 +1,8 @@
 from .models import Aluno, Turma
-import re
+
+# -----------------------------------------------------------------------------------------------
+# ----------------------------------------- APIS ALUNOS -----------------------------------------
+# -----------------------------------------------------------------------------------------------
 
 def cadastro_alunos_txt(data, usuario):
     alunos = []
@@ -29,6 +32,10 @@ def cadastro_alunos_txt(data, usuario):
         aluno.usuario.add(usuario)
     return alunos_criados
 
+# -----------------------------------------------------------------------------------------------
+# ----------------------------------------- APIS TURMA -----------------------------------------
+# -----------------------------------------------------------------------------------------------
+
 def cadastro_turma_txt(data, usuario):
     matriculas = []
     alunos_nao_criados = [] 
@@ -55,3 +62,42 @@ def cadastro_turma_txt(data, usuario):
     nova_turma.aluno.add(*alunos_existentes)
 
     return alunos_existentes
+
+def encontrar_turma(id, usuario):
+    if id: # get de apenas uma turma
+        turma = Turma.objects.get(id=id, usuario=usuario)
+        alunos_json = []
+        for aluno in turma.aluno.all():
+            alunos_json.append({
+                'matricula': aluno.matricula,
+                'nome': aluno.nome,
+                'atividade': aluno.atividade,
+            })
+        turma_dict = {
+            'id': turma.id,
+            'nome': turma.nome,
+            'periodo': turma.periodo,
+            'alunos': alunos_json,
+        }
+        return turma_dict
+    
+    # get de todas as turmas
+    turmas = Turma.objects.filter(usuario=usuario)
+    turmas_json = []
+
+    for turma in turmas:
+        alunos_json = []
+        for aluno in turma.aluno.all():
+            alunos_json.append({
+                'matricula': aluno.matricula,
+                'nome': aluno.nome,
+                'atividade': aluno.atividade,
+            })
+        turma_dict = {
+            'id': turma.id,
+            'nome': turma.nome,
+            'periodo': turma.periodo,
+            'alunos': alunos_json,
+        }
+        turmas_json.append(turma_dict)
+    return turmas_json
