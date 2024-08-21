@@ -85,7 +85,7 @@ def get_alunos(request):
        
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def excluir_alunos(request, matricula):
+def excluir_aluno(request, matricula):
     usuario = request.user
     aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
 
@@ -101,7 +101,7 @@ def excluir_alunos(request, matricula):
     
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def editar_alunos(request, matricula):
+def editar_aluno(request, matricula):
     usuario = request.user
     data = request.data
     aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
@@ -132,26 +132,36 @@ def cadastrar_turma(request):
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_turmas(request):
+def get_turmas(request, id=None):
     if request.method == 'GET':
         usuario = request.user
 
-        turmas = Turma.objects.filter(usuario=usuario)
-        turmas_json = []
-
-        for turma in turmas:
-            alunos_json = []
-            for aluno in turma.aluno.all():
-                alunos_json.append({
-                    'matricula': aluno.matricula,
-                    'nome': aluno.nome,
-                    'atividade': aluno.atividade,
-                })
-            turma_dict = {
-                'nome': turma.nome,
-                'periodo': turma.periodo,
-                'alunos': alunos_json,
-            }
-            turmas_json.append(turma_dict)
+        turmas_json = encontrar_turma(id, usuario)
 
         return JsonResponse(turmas_json, safe=False)
+    
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def excluir_turma(request, id):
+    usuario = request.user
+    if turma:
+        turma = Turma.objects.filter(id=id, usuario=usuario).first()
+        turma.delete()
+        return JsonResponse({'mensagem': 'Turma excluído.'})
+    else:
+        return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def editar_turma(request, id):
+    usuario = request.user
+    data = request.data
+    turma = Aluno.objects.filter(id=id, usuario=usuario).first()
+
+    if turma:
+        turma.nome = data['nome']
+        turma.periodo = data['periodo']
+        turma.save()
+        return JsonResponse({'mensagem': 'Dados da turma foram editados.'})
+    else:
+        return JsonResponse({'erro': 'Não foi possível editar a turma.'}, status=400)
