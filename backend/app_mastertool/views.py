@@ -130,8 +130,8 @@ def get_turmas(request, id=None):
 @permission_classes([IsAuthenticated])
 def excluir_turma(request, id):
     usuario = request.user
+    turma = Turma.objects.filter(id=id, usuario=usuario).first()
     if turma:
-        turma = Turma.objects.filter(id=id, usuario=usuario).first()
         turma.delete()
         return JsonResponse({'mensagem': 'Turma excluído.'})
     else:
