@@ -229,25 +229,12 @@ def editar_atividade(request, id):
     usuario = request.user
     try:
         atividade   = Atividade.objects.filter(id=id, usuario=usuario).first()
-        usuario_id  = usuario
         titulo      = data['titulo']
         turma_id    = data['turma_id']
         alunos_ids  = data['alunos_ids']
 
         if titulo:
             atividade.titulo = titulo
-        if turma_id:
-            try:
-                turma   = Turma.objects.filter(id=turma_id, usuario=usuario).first()
-                atividade.turma = turma
-            except ObjectDoesNotExist:
-                return HttpResponseNotFound("Turma não encontrada")
-        if usuario_id:
-            try:
-                usuario   = User.objects.filter(id=usuario_id).first()
-                atividade.usuario = usuario
-            except ObjectDoesNotExist:
-                return HttpResponseNotFound("Usuário não encontrado")
         if alunos_ids:
             atividade.alunos.set(Aluno.objects.filter(pk__in=alunos_ids))
         
@@ -255,3 +242,27 @@ def editar_atividade(request, id):
         return JsonResponse({"status": "Atividade editada com sucesso!"})
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Atividade não encontrada")
+    
+def lancar_nota(request, atividade_id, aluno_id):
+    data    = request.data
+    usuario = request.user
+    
+    if data['nota'] is None:
+        return JsonResponse({"error": "Nota não fornecida"}, status=400)
+
+    try:
+        aluno     = aluno.objects.filter(id=aluno_id, usuario=usuario).first()
+        atividade = Atividade.objects.filter(id=atividade_id, usuario=usuario).first()
+        
+        nota_atividade = NotaAtividade.objects.create(atividade=atividade, aluno=aluno, usuario=usuario)
+        nota_atividade.nota = data['nota']
+        nota_atividade.save()
+
+        return JsonResponse({
+            "status": "Nota lançada com sucesso!",
+            "atividade": atividade.titulo,
+            "aluno": aluno.nome,
+            "nota": nota_atividade.nota,
+        })
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Atividade ou Aluno não encontrado")

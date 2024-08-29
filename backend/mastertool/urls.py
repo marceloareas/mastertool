@@ -29,5 +29,7 @@ urlpatterns = [
     path('atividades/cadastrar/', views.cadastrar_atividade, name='cadastrar_atividades'),
     path('atividades/excluir/<str:id>', views.excluir_atividade, name='excluir_atividades'),
     path('atividades/editar/<str:id>', views.editar_atividade, name='editar_atividades'),
+    path('atividades/<str:atividade_id>/aluno/<str:aluno_id>/nota/', views.lancar_nota, name='lancar_nota'),
+
 
 ]
