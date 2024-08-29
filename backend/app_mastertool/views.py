@@ -1,5 +1,4 @@
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse, HttpResponseNotFound
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -8,6 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from .apis import *
 from .models import *
 from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
+from django.views.decorators.http import require_http_methods
+from django.core.exceptions import ObjectDoesNotExist
 
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS USUARIO ---------------------------------------
@@ -73,32 +74,34 @@ def get_alunos(request, matricula=None):
 @permission_classes([IsAuthenticated])
 def excluir_aluno(request, matricula):
     usuario = request.user
-    aluno   = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
+    try:
+        aluno   = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
+        try:
+            turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
+            for turma in turmas:
+                turma.aluno.remove(aluno)
 
-    turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
-    for turma in turmas:
-        turma.aluno.remove(aluno)
-
-    if aluno:
-        aluno.delete()
-        return JsonResponse({'mensagem': 'Aluno excluído.'})
-    else:
-        return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+                aluno.delete()
+                return JsonResponse({'mensagem': 'Aluno excluído.'})
+        except ObjectDoesNotExist:
+            return HttpResponseNotFound("Turma não encontrada")
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Aluno não encontrad")
     
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def editar_aluno(request, matricula):
     usuario = request.user
     data    = request.data
-    aluno   = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
-
-    if aluno:
+    
+    try:
+        aluno   = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
         aluno.matricula = data['matricula']
         aluno.nome      = data['nome']
         aluno.save()
         return JsonResponse({'mensagem': 'Dados do aluno foram editados.'})
-    else:
-        return JsonResponse({'erro': 'Não foi possível editar o aluno.'}, status=400)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Não foi possível editar o aluno.")
 
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS TURMA -----------------------------------------
@@ -130,24 +133,125 @@ def get_turmas(request, id=None):
 @permission_classes([IsAuthenticated])
 def excluir_turma(request, id):
     usuario = request.user
-    turma = Turma.objects.filter(id=id, usuario=usuario).first()
-    if turma:
+
+    try:
+        turma = Turma.objects.filter(id=id, usuario=usuario).first()
         turma.delete()
-        return JsonResponse({'mensagem': 'Turma excluído.'})
-    else:
-        return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+        return JsonResponse({'mensagem': 'Turma excluída.'})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Turma não encontrada")
     
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def editar_turma(request, id):
     usuario = request.user
     data    = request.data
-    turma   = Turma.objects.filter(id=id, usuario=usuario).first()
 
-    if turma:
+    try:
+        turma   = Turma.objects.filter(id=id, usuario=usuario).first()
         turma.nome      = data['nome']
         turma.periodo   = data['periodo']
         turma.save()
-        return JsonResponse({'mensagem': 'Dados da turma foram editados.'})
+        return JsonResponse({'mensagem': 'Turma editada.'})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Turma não encontrada")
+    
+# -----------------------------------------------------------------------------------------------
+# -------------------------------------- VIEWS ATIVIDADES ---------------------------------------
+# -----------------------------------------------------------------------------------------------
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cadastrar_atividade(request):
+    usuario = request.user
+    data    = request.data
+
+    titulo      = data['titulo']
+    turma_id    = data['turma_id']
+    alunos_ids  = data['alunos_ids']
+
+    try:
+        turma   = Turma.objects.filter(id=turma_id, usuario=usuario).first()
+        usuario = User.objects.get(pk=usuario)
+        atividade = Atividade.objects.create(titulo=titulo, turma=turma, usuario=usuario)
+        atividade.alunos.set(Aluno.objects.filter(pk__in=alunos_ids))
+        atividade.save()
+        return JsonResponse({"status": "Atividade cadastrada com sucesso!"})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Turma ou usuário não encontrado")
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_atividades(request, id=None):
+    usuario = request.user
+    if id:
+        try:
+            atividade = Atividade.objects.filter(id=id, usuario=usuario).first()
+            data = {
+                "id": atividade.id,
+                "titulo": atividade.titulo,
+                "turma": atividade.turma.nome,
+                "alunos": [aluno.nome for aluno in atividade.alunos.all()],
+                "usuario": atividade.usuario.username,
+            }
+            return JsonResponse(data)
+        except ObjectDoesNotExist:
+            return HttpResponseNotFound("Atividade não encontrada")
     else:
-        return JsonResponse({'erro': 'Não foi possível editar a turma.'}, status=400)
+        atividades = Atividade.objects.all()
+        data = [
+            {
+                "id": atividade.id,
+                "titulo": atividade.titulo,
+                "turma": atividade.turma.nome,
+                "alunos": [aluno.nome for aluno in atividade.alunos.all()],
+                "usuario": atividade.usuario.username,
+            }
+            for atividade in atividades
+        ]
+        return JsonResponse(data, safe=False)
+    
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def excluir_atividade(request, id):
+    usuario = request.user
+    try:
+        atividade = Atividade.objects.filter(id=id, usuario=usuario).first()
+        atividade.delete()
+        return JsonResponse({"status": "Atividade excluída com sucesso!"})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Atividade não encontrada")
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def editar_atividade(request, id):
+    data    = request.data
+    usuario = request.user
+    try:
+        atividade   = Atividade.objects.filter(id=id, usuario=usuario).first()
+        usuario_id  = usuario
+        titulo      = data['titulo']
+        turma_id    = data['turma_id']
+        alunos_ids  = data['alunos_ids']
+
+        if titulo:
+            atividade.titulo = titulo
+        if turma_id:
+            try:
+                turma   = Turma.objects.filter(id=turma_id, usuario=usuario).first()
+                atividade.turma = turma
+            except ObjectDoesNotExist:
+                return HttpResponseNotFound("Turma não encontrada")
+        if usuario_id:
+            try:
+                usuario   = User.objects.filter(id=usuario_id).first()
+                atividade.usuario = usuario
+            except ObjectDoesNotExist:
+                return HttpResponseNotFound("Usuário não encontrado")
+        if alunos_ids:
+            atividade.alunos.set(Aluno.objects.filter(pk__in=alunos_ids))
+        
+        atividade.save()
+        return JsonResponse({"status": "Atividade editada com sucesso!"})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Atividade não encontrada")
