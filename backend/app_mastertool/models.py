@@ -18,3 +18,24 @@ class Turma(models.Model):
 
     def __str__(self):
         return self.nome
+
+class Atividade(models.Model):
+    titulo = models.CharField(max_length=100)
+    turma = models.ForeignKey('Turma', on_delete=models.CASCADE, related_name='atividades')
+    alunos = models.ManyToManyField('Aluno', blank=True, related_name='atividades')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='atividades')
+
+    def __str__(self):
+        return self.titulo
+    
+class NotaAtividade(models.Model):
+    aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)
+    atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
+    nota = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='atividades')
+
+    class Meta:
+        unique_together = ('aluno', 'atividade')
+
+    def __str__(self):
+        return f'{self.aluno.nome} - {self.atividade.titulo}: {self.nota}'
