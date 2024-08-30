@@ -29,7 +29,6 @@ export class FormClassComponent {
 
   ngOnInit() {
     if (this.data) {
-      console.log(this.data)
       this.populateForm();
     }
   }

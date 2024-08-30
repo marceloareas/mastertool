@@ -9,6 +9,8 @@ import { SingleClassComponent } from './components/single-class/single-class.com
 import { ClassService } from '../../services/class/class.service';
 import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTableDataSource } from '@angular/material/table';
+import { StudentService } from '../../services/student/student.service';
 
 @Component({
   selector: 'app-class',
@@ -29,6 +31,7 @@ import { MatMenuModule } from '@angular/material/menu';
 })
 export class ClassComponent {
   private classService = inject(ClassService);
+
   classIsOpen = false;
   classes!: any;
   singleClass!: any;

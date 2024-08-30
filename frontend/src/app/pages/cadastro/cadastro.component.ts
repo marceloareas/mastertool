@@ -34,8 +34,6 @@ export class CadastroComponent {
   private router = inject(Router);
 
   onSubmit(data: any) {
-    console.log(data)
-
     this._auth.post(data).subscribe({
       next: () => {
         alert('Cadastrado com sucesso');

@@ -14,6 +14,7 @@ import { ClassService } from '../../../../services/class/class.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalClassComponent } from '../modal-class/modal-class.component';
 import { MatMenuModule } from '@angular/material/menu';
+import { StudentService } from '../../../../services/student/student.service';
 
 @Component({
   selector: 'app-single-class',
@@ -29,19 +30,24 @@ import { MatMenuModule } from '@angular/material/menu';
   styleUrl: './single-class.component.scss',
 })
 export class SingleClassComponent {
-  @Input() class!: any;
+  private student = inject(StudentService);
+
   @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
   @Output() closeModalEvent: EventEmitter<any> = new EventEmitter();
+  @Input() class!: any;
+
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   displayedColumns: string[] = ['nome', 'editar'];
   dataSource!: MatTableDataSource<MatPaginator>;
+  students!: any;
 
   constructor(public dialog: MatDialog) {}
 
   ngOnInit() {
     this.getClass();
+    this.getStudent();
   }
 
   /**
@@ -52,12 +58,19 @@ export class SingleClassComponent {
     this.dataSource.paginator = this.paginator;
   }
 
+  getStudent(){
+    this.student.get().subscribe((data) => {
+      this.students = data;
+    });
+  }
+
   /**
    * Emite o evento para fechar a visualização da turma.
    */
   closeClass() {
     this.closeClassEvent.emit();
   }
+
 
   /**
    * Abre o modal para adicionar ou editar uma turma.
@@ -75,7 +88,6 @@ export class SingleClassComponent {
         this.closeModal();
       });
   }
-
   /**
    * Emite o evento para fechar o modal.
    */
