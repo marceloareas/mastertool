@@ -77,7 +77,7 @@ def cadastro_turma_txt(data, usuario):
     return alunos_existentes
 
 def encontrar_turma(id, usuario):
-    if id: # get de apenas uma turma
+    if id:
         turma = Turma.objects.get(id=id, usuario=usuario)
         alunos_json = []
         for aluno in turma.aluno.all():
@@ -94,7 +94,6 @@ def encontrar_turma(id, usuario):
         }
         return turma_dict
     
-    # get de todas as turmas
     turmas = Turma.objects.filter(usuario=usuario)
     turmas_json = []
 
