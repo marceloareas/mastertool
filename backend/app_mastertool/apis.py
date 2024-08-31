@@ -89,7 +89,7 @@ def encontrar_turma(id, usuario):
                 'matricula': aluno.matricula,
                 'nome': aluno.nome,
                 'atividade': aluno.atividade,
-                'nota' : nota
+                'nota' : ['7', '8', '10']
             })
 
 
