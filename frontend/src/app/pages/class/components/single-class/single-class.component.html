@@ -44,8 +44,8 @@
     <ng-container [matColumnDef]="notaCol">
       <th mat-header-cell *matHeaderCellDef width="50px">
         {{ notaCol }}
-        <button mat-icon-button (click)="removeColumn(notaColIndex(notaCol))">
-          <mat-icon fontIcon="more_vert"></mat-icon>
+        <button mat-icon-button class="button__delete" (click)="removeColumn(notaColIndex(notaCol))">
+          <mat-icon class="icon__delete" fontIcon="delete"></mat-icon>
         </button>
       </th>
       <td mat-cell *matCellDef="let element">

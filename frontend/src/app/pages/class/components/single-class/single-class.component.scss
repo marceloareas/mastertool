@@ -1,15 +1,29 @@
+.icon__delete {
+  font-size: 16px;
+}
+
+.button__delete {
+  width: 17px;
+  height: 17px;
+
+  mat-icon{
+    width: 17px;
+    height: 17px;
+  }
+}
+
 .bar__top {
   display: flex;
   justify-content: space-between;
   margin-bottom: 30px;
 
-  &__content{
+  &__content {
     display: flex;
     gap: 15px;
     align-items: center;
   }
 
-  &__button{
+  &__button {
     display: flex;
     gap: 20px;
   }

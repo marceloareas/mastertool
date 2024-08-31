@@ -64,6 +64,7 @@ export class SingleClassComponent implements OnInit {
   getClass() {
     this.classService.get(this.class.id).subscribe((data) => {
       this.class = data;
+      console.log(this.class)
       this.refreshTable();
     });
   }
@@ -97,21 +98,32 @@ export class SingleClassComponent implements OnInit {
   }
 
   removeColumn(index: number) {
+    console.log('Removendo coluna de índice:', index);
+
+    // Remove a coluna da lista de colunas exibidas
     this.notaColumns.splice(index, 1);
-    this.displayedColumns = this.displayedColumns.filter(
-      col => !col.startsWith('nota') || parseInt(col.split(' ')[1], 10) !== (index + 1)
-    );
-    this.dataSource.data.forEach(element => {
-      element.notas.splice(index, 1);
+    console.log('Nota Columns após remoção:', this.notaColumns);
+
+    this.displayedColumns = this.displayedColumns.filter(col => !col.startsWith('nota') || this.notaColumns.includes(col));
+    console.log('Displayed Columns após remoção:', this.displayedColumns);
+
+    // Remove a nota correspondente de cada aluno
+    this.dataSource.data.forEach((element: any) => {
+      if (element.notas && index < element.notas.length) {
+        element.notas.splice(index, 1);
+      }
     });
-    this.refreshTable();
-    this.classService
-      .postNota(this.class.id, this.dataSource.data)
-      .subscribe(() => {
-        alert('Coluna removida');
-        this.closeModal();
-        this.getClass();
-      });
+    console.log('DataSource após remoção:', this.dataSource.data);
+
+    // Atualiza a tabela com os dados modificados
+    this.dataSource._updateChangeSubscription();
+
+    // Envia os dados atualizados para o serviço
+    this.classService.postNota(this.class.id, this.dataSource.data).subscribe(() => {
+      alert('Coluna removida com sucesso!');
+      this.closeModal();
+      this.getClass(); // Atualiza a classe com os dados mais recentes
+    });
   }
 
   getNota(element: any, index: number): number {
