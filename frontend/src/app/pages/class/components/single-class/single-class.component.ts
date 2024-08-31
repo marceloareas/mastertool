@@ -1,4 +1,3 @@
-import { ModalStudentComponent } from './../../../student/components/modal-student/modal-student.component';
 import {
   Component,
   Output,
@@ -7,6 +6,7 @@ import {
   ViewChild,
   inject,
   OnInit,
+  SimpleChanges,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -15,7 +15,6 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalClassComponent } from '../modal-class/modal-class.component';
 import { MatMenuModule } from '@angular/material/menu';
-import { StudentService } from '../../../../services/student/student.service';
 import { StudentClassModalComponent } from '../student-class-modal/student-class-modal.component';
 import { ClassService } from '../../../../services/class/class.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -41,7 +40,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './single-class.component.html',
   styleUrl: './single-class.component.scss',
 })
-export class SingleClassComponent implements OnInit {
+export class SingleClassComponent {
   private classService = inject(ClassService);
 
   @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
@@ -50,16 +49,29 @@ export class SingleClassComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  displayedColumns: string[] = ['nome', 'editar']; // Inicialmente apenas 'nome' e 'editar'
+  displayedColumns: string[] = ['nome', 'editar'];
+  notaColumns: string[] = [];
   dataSource!: MatTableDataSource<any>;
+
   mode: string = 'VIEW';
-  notaColumns: string[] = []; // Colunas dinâmicas para notas
 
   constructor(public dialog: MatDialog) {}
 
   ngOnInit() {
-    this.refreshTable();
     this.initializeColumns();
+    this.refreshTable();
+  }
+
+  getClass() {
+    this.classService.get(this.class.id).subscribe((data) => {
+      this.class = data;
+      this.refreshTable();
+    });
+  }
+
+  refreshTable() {
+    this.dataSource = new MatTableDataSource(this.class.alunos);
+    this.dataSource.paginator = this.paginator;
   }
 
   initializeColumns() {
@@ -76,10 +88,8 @@ export class SingleClassComponent implements OnInit {
   addNewColumn() {
     const newColumn = `nota ${this.notaColumns.length + 1}`;
     this.notaColumns.push(newColumn);
-
-    // Encontrar o índice da coluna 'media'
     const mediaIndex = this.displayedColumns.indexOf('media');
-    this.displayedColumns.splice(mediaIndex, 0, newColumn); // Adiciona antes da coluna 'editar'
+    this.displayedColumns.splice(mediaIndex, 0, newColumn);
     this.class.alunos.forEach((aluno: { notas: number[] }) =>
       aluno.notas.push(0)
     );
@@ -89,20 +99,18 @@ export class SingleClassComponent implements OnInit {
 
   removeColumn(i: any) {
     this.notaColumns.splice(i, 1);
-    // Atualizar o array displayedColumns removendo o identificador correspondente
     this.displayedColumns = this.displayedColumns.filter(
       (col) => col !== `nota${i + 1}`
     );
-    // Remover a nota correspondente de cada item no dataSource
     this.dataSource.data.forEach((element: any) => {
       element.notas.splice(i, 1);
     });
-    // Atualizar a tabela para refletir as mudanças
     this.dataSource._updateChangeSubscription();
     this.classService
       .postNota(this.class.id, this.dataSource.data)
       .subscribe(() => {
         alert('Coluna removida');
+        this.closeModal();
         this.getClass();
       });
   }
@@ -112,23 +120,12 @@ export class SingleClassComponent implements OnInit {
     return index;
   }
 
-  refreshTable() {
-    this.dataSource = new MatTableDataSource(this.class.alunos);
-    this.dataSource.paginator = this.paginator;
-  }
-
   delete(matricula: any) {
     const data = { removerMatricula: matricula };
     this.classService.put(this.class.id, data).subscribe(() => {
       alert('Registro deletado');
       this.getClass();
-      this.refreshTable();
-    });
-  }
-
-  getClass() {
-    this.classService.get().subscribe((data) => {
-      this.class = data;
+      this.closeModal();
     });
   }
 
@@ -144,8 +141,8 @@ export class SingleClassComponent implements OnInit {
       })
       .afterClosed()
       .subscribe(() => {
-        this.closeModal();
         this.getClass();
+        this.closeModal();
       });
   }
 
@@ -156,8 +153,8 @@ export class SingleClassComponent implements OnInit {
       })
       .afterClosed()
       .subscribe((result) => {
-        this.closeModal();
         this.getClass();
+        this.closeModal();
       });
   }
 
@@ -192,4 +189,3 @@ export class SingleClassComponent implements OnInit {
     return media.toFixed(1);
   }
 }
-

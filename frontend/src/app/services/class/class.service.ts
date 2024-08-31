@@ -15,8 +15,8 @@ export class ClassService {
     );
   };
 
-  get = () => {
-    return this.http.get<any>('http://127.0.0.1:8000/turmas/');
+  get = (id: string = '') => {
+    return this.http.get<any>('http://127.0.0.1:8000/turmas/'+ id);
   };
 
   delete = (id: string) => {
