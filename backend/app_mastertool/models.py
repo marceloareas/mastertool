@@ -22,6 +22,7 @@ class Nota(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='notas')
     turma = models.ForeignKey(Turma, on_delete=models.CASCADE, related_name='notas')
     valor = models.DecimalField(max_digits=5, decimal_places=2)
+    # usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notas', default=1)
 
     def __str__(self):
         return f'{self.aluno.nome} - {self.turma.nome}: {self.valor}'
