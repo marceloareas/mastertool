@@ -112,10 +112,18 @@ def editar_aluno(request, matricula):
 def cadastrar_turma(request):
     if request.method == 'POST':
         usuario        = request.user
-        alunos_criados = cadastro_turma_txt(request.data, usuario)
+        resultado  = cadastro_turma_txt(request.data, usuario)
+
+        alunos_criados = resultado.get('alunos_criados', [])
+        alunos_nao_criados = resultado.get('alunos_nao_criados', [])
 
         if alunos_criados:
-            return JsonResponse({'mensagem': 'Arquivo processado com sucesso.'})
+            response_data = {
+                'mensagem': 'Arquivo processado com sucesso.',
+                'alunos_criados': [aluno.nome for aluno in alunos_criados],
+                'alunos_nao_criados': alunos_nao_criados
+            }
+            return JsonResponse(response_data)
         else:
             return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
     
@@ -148,10 +156,19 @@ def editar_turma(request, id):
     data    = request.data
 
     try:
-        turma   = Turma.objects.filter(id=id, usuario=usuario).first()
-        turma.nome      = data['nome']
-        turma.periodo   = data['periodo']
+        turma = Turma.objects.filter(id=id, usuario=usuario).first()
+
+        if 'matricula' in data:
+            try:
+                aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
+                turma.aluno.add(aluno) 
+            except ObjectDoesNotExist:
+                return HttpResponseNotFound("Aluno não encontrado")
+        else:
+            turma.nome    = data['nome']
+            turma.periodo = data['periodo']
         turma.save()
+
         return JsonResponse({'mensagem': 'Turma editada.'})
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Turma não encontrada")
