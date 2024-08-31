@@ -147,9 +147,9 @@ export class SingleClassComponent implements OnInit {
   save() {
     console.log(this.dataSource.data);
     this.mode = 'VIEW';
-    // this.classService.postNota(this.class.id, this.dataSource.data).subscribe(() => {
-    //   alert('Notas atualizadas com sucesso!');
-    //  });
+    this.classService.postNota(this.class.id, this.dataSource.data).subscribe(() => {
+      alert('Notas atualizadas com sucesso!');
+    });
   }
 
   teste() {
