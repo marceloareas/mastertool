@@ -151,22 +151,22 @@ def excluir_turma(request, id):
     
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def editar_turma(request, id, matricula=None):
+def editar_turma(request, id):
     usuario = request.user
     data    = request.data
 
     try:
         turma = Turma.objects.filter(id=id, usuario=usuario).first()
 
-        if matricula:
+        if 'matricula' in data:
             try:
-                aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
+                aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
                 turma.aluno.add(aluno) 
             except ObjectDoesNotExist:
                 return HttpResponseNotFound("Aluno não encontrado")
         else:
-            turma.nome      = data['nome']
-            turma.periodo   = data['periodo']
+            turma.nome    = data['nome']
+            turma.periodo = data['periodo']
         turma.save()
 
         return JsonResponse({'mensagem': 'Turma editada.'})
