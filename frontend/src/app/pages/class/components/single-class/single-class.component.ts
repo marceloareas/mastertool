@@ -133,8 +133,8 @@ export class SingleClassComponent implements OnInit {
   }
 
   save() {
-    // this.classService.updateNotas(this.class.id, this.class.alunos).subscribe(() => {
-    //   alert('Notas atualizadas com sucesso!');
-    // });
+    this.classService.postNota(this.class.id, this.dataSource.data).subscribe(() => {
+      alert('Notas atualizadas com sucesso!');
+     });
   }
 }
