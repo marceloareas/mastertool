@@ -6,20 +6,44 @@
 
     <div class="action-button">
       <button mat-stroked-button (click)="openModalStudent()">
-        Adicinar Aluno
+        Adicionar Aluno
       </button>
       <button mat-stroked-button (click)="openModal(class, 'EDIT')">
         Editar turma
+      </button>
+      <!-- Botão para adicionar nova coluna de nota -->
+      <button mat-stroked-button color="primary" (click)="addNewColumn()">
+        Adicionar Nota
+      </button>
+      <!-- Botão para salvar notas -->
+      <button mat-stroked-button color="accent" (click)="save()">
+        Salvar Notas
       </button>
     </div>
   </div>
 
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <!-- Nome Column -->
     <ng-container matColumnDef="nome">
       <th mat-header-cell *matHeaderCellDef>Alunos</th>
       <td mat-cell *matCellDef="let element">{{ element.nome }}</td>
     </ng-container>
 
+    <!-- Dynamic Nota Columns -->
+    @for(notaCol of notaColumns; track notaCol ){
+    <ng-container [matColumnDef]="notaCol">
+      <th mat-header-cell *matHeaderCellDef>{{ notaCol }}</th>
+      <td mat-cell *matCellDef="let element">
+        <input
+          matInput
+          type="number"
+          [(ngModel)]="element.notas[notaColIndex(notaCol)]"
+        />
+      </td>
+    </ng-container>
+    }
+
+    <!-- Ações Column -->
     <ng-container matColumnDef="editar">
       <th
         mat-header-cell
@@ -32,14 +56,20 @@
       </th>
       <td mat-cell *matCellDef="let element" class="action-cell">
         <button mat-icon-button [matMenuTriggerFor]="menu">
-          <mat-icon fontIcon="more_vert" />
+          <mat-icon fontIcon="more_vert"></mat-icon>
         </button>
         <mat-menu #menu="matMenu">
-          <button mat-menu-item><mat-icon fontIcon="edit" /> Editar</button>
-          <button mat-menu-item (click)="delete(element.matricula)"><mat-icon fontIcon="delete"/> Remover</button>
+          <button mat-menu-item>
+            <mat-icon fontIcon="edit"></mat-icon> Editar
+          </button>
+          <button mat-menu-item (click)="delete(element.matricula)">
+            <mat-icon fontIcon="delete"></mat-icon> Remover
+          </button>
         </mat-menu>
       </td>
     </ng-container>
+
+    <!-- Header and Row Definitions -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>

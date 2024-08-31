@@ -6,6 +6,7 @@ import {
   Input,
   ViewChild,
   inject,
+  OnInit,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -17,6 +18,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { StudentService } from '../../../../services/student/student.service';
 import { StudentClassModalComponent } from '../student-class-modal/student-class-modal.component';
 import { ClassService } from '../../../../services/class/class.service';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-single-class',
@@ -27,11 +31,15 @@ import { ClassService } from '../../../../services/class/class.service';
     MatTableModule,
     MatPaginatorModule,
     MatMenuModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule
   ],
   templateUrl: './single-class.component.html',
   styleUrl: './single-class.component.scss',
 })
-export class SingleClassComponent {
+export class SingleClassComponent implements OnInit {
   private student = inject(StudentService);
   private classService = inject(ClassService);
 
@@ -39,44 +47,64 @@ export class SingleClassComponent {
   @Output() closeModalEvent: EventEmitter<any> = new EventEmitter();
   @Input() class!: any;
 
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  displayedColumns: string[] = ['nome', 'editar'];
-  dataSource!: MatTableDataSource<MatPaginator>;
+  displayedColumns: string[] = ['nome', 'editar'];  // Inicialmente apenas 'nome' e 'editar'
+  dataSource!: MatTableDataSource<any>;
+
+  notaColumns: string[] = [];  // Colunas dinâmicas para notas
 
   constructor(public dialog: MatDialog) {}
 
   ngOnInit() {
     this.getClass();
+    console.log(this.dataSource.data)
+    this.initializeColumns();
+
   }
 
-  delete(matricula: any){
-    const data = {removerMatricula: matricula};
-    this.classService.put(this.class.id,data).subscribe(() => {
-      alert('Registro deletado');
-    });
+  initializeColumns() {
+    if (this.class && this.class.alunos && this.class.alunos?.length > 0) {
+      const numNotas = this.class.alunos[0]?.notas?.length;
+      this.notaColumns = Array.from({ length: numNotas }, (_, i) => `nota${i + 1}`);
+      this.displayedColumns = ['nome', ...this.notaColumns, 'editar'];
+    }
   }
 
-  /**
-   * Carrega os alunos da turma no `dataSource` da tabela e associa o paginador.
-   */
-  getClass() {
+  addNewColumn() {
+    const newColumn = `nota${this.notaColumns.length + 1}`;
+    this.notaColumns.push(newColumn);
+    this.displayedColumns.splice(this.displayedColumns.length - 1, 0, newColumn); // Adiciona antes da coluna 'editar'
+    this.class.alunos.forEach((aluno: { notas: number[]; }) => aluno.notas.push(0)); // Inicializa a nova nota como 0 para todos os alunos
+    this.refreshTable();
+  }
+
+  notaColIndex(notaCol: string): number {
+    const index = parseInt(notaCol.replace('nota', ''), 10) - 1;
+    return index;
+  }
+
+  refreshTable() {
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
   }
-  /**
-   * Emite o evento para fechar a visualização da turma.
-   */
+
+  delete(matricula: any) {
+    const data = { removerMatricula: matricula };
+    this.classService.put(this.class.id, data).subscribe(() => {
+      alert('Registro deletado');
+      this.getClass();
+    });
+  }
+
+  getClass() {
+    this.refreshTable();
+  }
+
   closeClass() {
     this.closeClassEvent.emit();
   }
 
-  /**
-   * Abre o modal para adicionar ou editar uma turma.
-   * @param data Dados da turma a serem editados (opcional).
-   * @param mode Modo de operação, pode ser 'ADD' ou 'EDIT'. O padrão é 'ADD'.
-   */
   openModal(singleClass?: any, mode = 'ADD') {
     this.dialog
       .open(ModalClassComponent, {
@@ -86,26 +114,27 @@ export class SingleClassComponent {
       .afterClosed()
       .subscribe(() => {
         this.closeModal();
+        this.getClass();
       });
   }
 
-  /**
-   * Abre o modal para adicionar ou editar uma turma.
-   * @param data Dados da turma a serem editados (opcional).
-   * @param mode Modo de operação, pode ser 'ADD' ou 'EDIT'. O padrão é 'ADD'.
-   */
   openModalStudent() {
     this.dialog
       .open(StudentClassModalComponent, {
         data: { class: this.class.id },
       }).afterClosed().subscribe(result => {
         this.closeModal();
+        this.getClass();
       });
   }
-  /**
-   * Emite o evento para fechar o modal.
-   */
+
   closeModal() {
     this.closeModalEvent.emit();
+  }
+
+  save() {
+    // this.classService.updateNotas(this.class.id, this.class.alunos).subscribe(() => {
+    //   alert('Notas atualizadas com sucesso!');
+    // });
   }
 }
