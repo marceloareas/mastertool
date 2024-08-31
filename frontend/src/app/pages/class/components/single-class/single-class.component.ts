@@ -21,6 +21,7 @@ import { ClassService } from '../../../../services/class/class.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-single-class',
@@ -34,7 +35,8 @@ import { MatInputModule } from '@angular/material/input';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    FormsModule
+    FormsModule,
+    CommonModule,
   ],
   templateUrl: './single-class.component.html',
   styleUrl: './single-class.component.scss',
@@ -49,33 +51,41 @@ export class SingleClassComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  displayedColumns: string[] = ['nome', 'editar'];  // Inicialmente apenas 'nome' e 'editar'
+  displayedColumns: string[] = ['nome', 'editar']; // Inicialmente apenas 'nome' e 'editar'
   dataSource!: MatTableDataSource<any>;
-
-  notaColumns: string[] = [];  // Colunas dinâmicas para notas
+  mode: string = 'VIEW';
+  notaColumns: string[] = []; // Colunas dinâmicas para notas
 
   constructor(public dialog: MatDialog) {}
 
   ngOnInit() {
     this.getClass();
-    console.log(this.dataSource.data)
+    console.log(this.dataSource.data);
     this.initializeColumns();
-
   }
 
   initializeColumns() {
     if (this.class && this.class.alunos && this.class.alunos?.length > 0) {
       const numNotas = this.class.alunos[0]?.notas?.length;
-      this.notaColumns = Array.from({ length: numNotas }, (_, i) => `nota${i + 1}`);
-      this.displayedColumns = ['nome', ...this.notaColumns, 'editar'];
+      this.notaColumns = Array.from(
+        { length: numNotas },
+        (_, i) => `nota${i + 1}`
+      );
+      this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
     }
   }
 
   addNewColumn() {
     const newColumn = `nota${this.notaColumns.length + 1}`;
     this.notaColumns.push(newColumn);
-    this.displayedColumns.splice(this.displayedColumns.length - 1, 0, newColumn); // Adiciona antes da coluna 'editar'
-    this.class.alunos.forEach((aluno: { notas: number[]; }) => aluno.notas.push(0)); // Inicializa a nova nota como 0 para todos os alunos
+    this.displayedColumns.splice(
+      this.displayedColumns.length - 1,
+      0,
+      newColumn
+    ); // Adiciona antes da coluna 'editar'
+    this.class.alunos.forEach((aluno: { notas: number[] }) =>
+      aluno.notas.push(0)
+    ); // Inicializa a nova nota como 0 para todos os alunos
     this.refreshTable();
   }
 
@@ -122,7 +132,9 @@ export class SingleClassComponent implements OnInit {
     this.dialog
       .open(StudentClassModalComponent, {
         data: { class: this.class.id },
-      }).afterClosed().subscribe(result => {
+      })
+      .afterClosed()
+      .subscribe((result) => {
         this.closeModal();
         this.getClass();
       });
@@ -133,8 +145,25 @@ export class SingleClassComponent implements OnInit {
   }
 
   save() {
-    this.classService.postNota(this.class.id, this.dataSource.data).subscribe(() => {
-      alert('Notas atualizadas com sucesso!');
-     });
+    console.log(this.dataSource.data);
+    this.mode = 'VIEW';
+    // this.classService.postNota(this.class.id, this.dataSource.data).subscribe(() => {
+    //   alert('Notas atualizadas com sucesso!');
+    //  });
+  }
+
+  teste() {
+    this.mode = 'EDIT';
+  }
+
+  media(element: any) {
+    const arraySemNulls = element.notas.filter((elemento: null) => elemento !== null);
+    const soma = arraySemNulls.reduce(
+      (acumulador: any, elemento: any) => acumulador + elemento,
+      0
+    );
+    const media = soma / arraySemNulls.length;
+
+    return media.toFixed(1);
   }
 }
