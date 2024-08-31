@@ -205,6 +205,14 @@ def adicionar_nota(request, id):
                 aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
                 notas_existentes = Nota.objects.filter(aluno=aluno_editar['matricula'], turma=id)
 
+                if not notas_existentes.exists():
+                    for i, nota in enumerate(aluno_editar['notas']):
+                        Nota.objects.create(
+                            aluno=aluno,
+                            turma=turma,
+                            valor=aluno_editar['notas'][i]
+                        )
+                    continue
                 for i, nota in enumerate(notas_existentes):
                     if i < len(aluno_editar['notas']):
                         nota.valor = aluno_editar['notas'][i]
