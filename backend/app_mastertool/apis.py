@@ -82,9 +82,15 @@ def encontrar_turma(id, usuario):
         turma = Turma.objects.get(id=id, usuario=usuario)
         alunos_json = []
         for aluno in turma.aluno.all():
+            try:
+                notas = list(Nota.objects.filter(aluno=aluno, turma=turma).values_list('valor', flat=True))
+                notas = [int(nota) for nota in notas]            
+            except Nota.DoesNotExist:
+                notas = None
             alunos_json.append({
                 'matricula': aluno.matricula,
                 'nome': aluno.nome,
+                'notas' : notas
             })
 
 
