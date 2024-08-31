@@ -87,7 +87,6 @@ def encontrar_turma(id, usuario):
             alunos_json.append({
                 'matricula': aluno.matricula,
                 'nome': aluno.nome,
-                'atividade': aluno.atividade,
             })
 
 
@@ -112,7 +111,6 @@ def encontrar_turma(id, usuario):
             alunos_json.append({
                 'matricula': aluno.matricula,
                 'nome': aluno.nome,
-                'atividade': aluno.atividade,
                 'notas' : notas
 
             })
