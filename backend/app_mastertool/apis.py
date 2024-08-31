@@ -105,13 +105,14 @@ def encontrar_turma(id, usuario):
     for turma in turmas:
         alunos_json = []
         for aluno in turma.aluno.all():
-            # nota = NotaAtividade.objects.get(id=id, aluno=aluno.matricula, usuario=usuario)
-            nota = [7, 8, 10]
+
+            # notas = NotaAtividade.objects.get(turma=turma.id, aluno=aluno.matricula, usuario=usuario)
+            notas = [7, 8, 10]
             alunos_json.append({
                 'matricula': aluno.matricula,
                 'nome': aluno.nome,
                 'atividade': aluno.atividade,
-                'nota' : nota
+                'notas' : notas
 
             })
         turma_dict = {
