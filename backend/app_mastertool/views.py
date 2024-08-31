@@ -289,3 +289,13 @@ def lancar_nota(request, atividade_id, aluno_id):
         })
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Atividade ou Aluno não encontrado")
+    
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def get_nota(request, id_turma=None):
+#     if request.method == 'GET':
+#         usuario = request.user
+
+#         notas_json = encontrar_notas(id_turma, usuario)
+
+#         return JsonResponse(notas_json, safe=False)

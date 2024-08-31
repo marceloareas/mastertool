@@ -1,4 +1,4 @@
-from .models import Aluno, Turma
+from .models import *
 
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS ALUNOS -----------------------------------------
@@ -46,7 +46,7 @@ def encontrar_aluno(matricula, usuario):
                     'atividade' : aluno.atividade} for aluno in alunos]
     return alunos_json
 # -----------------------------------------------------------------------------------------------
-# ----------------------------------------- APIS TURMA -----------------------------------------
+# ----------------------------------------- APIS TURMA ------------------------------------------
 # -----------------------------------------------------------------------------------------------
 
 def cadastro_turma_txt(data, usuario):
@@ -84,11 +84,15 @@ def encontrar_turma(id, usuario):
         turma = Turma.objects.get(id=id, usuario=usuario)
         alunos_json = []
         for aluno in turma.aluno.all():
+            nota = NotaAtividade.objects.get(id=id, aluno = aluno.matricula, usuario=usuario)
             alunos_json.append({
                 'matricula': aluno.matricula,
                 'nome': aluno.nome,
                 'atividade': aluno.atividade,
+                'nota' : nota
             })
+
+
         turma_dict = {
             'id': turma.id,
             'nome': turma.nome,
@@ -116,3 +120,10 @@ def encontrar_turma(id, usuario):
         }
         turmas_json.append(turma_dict)
     return turmas_json
+
+# -----------------------------------------------------------------------------------------------
+# ----------------------------------------- APIS TURMA ------------------------------------------
+# -----------------------------------------------------------------------------------------------
+
+# def encontrar_notas(id_turma, usuario):
+#     return id_turma
