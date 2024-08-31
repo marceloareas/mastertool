@@ -1,3 +1,4 @@
+import { ModalStudentComponent } from './../../../student/components/modal-student/modal-student.component';
 import {
   Component,
   Output,
@@ -10,11 +11,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { ClassService } from '../../../../services/class/class.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalClassComponent } from '../modal-class/modal-class.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { StudentService } from '../../../../services/student/student.service';
+import { StudentClassModalComponent } from '../student-class-modal/student-class-modal.component';
 
 @Component({
   selector: 'app-single-class',
@@ -41,13 +42,11 @@ export class SingleClassComponent {
 
   displayedColumns: string[] = ['nome', 'editar'];
   dataSource!: MatTableDataSource<MatPaginator>;
-  students!: any;
 
   constructor(public dialog: MatDialog) {}
 
   ngOnInit() {
     this.getClass();
-    this.getStudent();
   }
 
   /**
@@ -57,20 +56,12 @@ export class SingleClassComponent {
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
   }
-
-  getStudent(){
-    this.student.get().subscribe((data) => {
-      this.students = data;
-    });
-  }
-
   /**
    * Emite o evento para fechar a visualização da turma.
    */
   closeClass() {
     this.closeClassEvent.emit();
   }
-
 
   /**
    * Abre o modal para adicionar ou editar uma turma.
@@ -85,6 +76,20 @@ export class SingleClassComponent {
       })
       .afterClosed()
       .subscribe(() => {
+        this.closeModal();
+      });
+  }
+
+  /**
+   * Abre o modal para adicionar ou editar uma turma.
+   * @param data Dados da turma a serem editados (opcional).
+   * @param mode Modo de operação, pode ser 'ADD' ou 'EDIT'. O padrão é 'ADD'.
+   */
+  openModalStudent() {
+    this.dialog
+      .open(StudentClassModalComponent, {
+        data: { class: this.class.id },
+      }).afterClosed().subscribe(result => {
         this.closeModal();
       });
   }

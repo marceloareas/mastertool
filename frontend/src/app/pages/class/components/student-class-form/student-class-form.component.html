@@ -1,0 +1,14 @@
+<form class="class" [formGroup]="form">
+  <div class="class__content">
+    <mat-form-field>
+      <mat-label>Aluno</mat-label>
+      <mat-select formControlName="matricula">
+        @for (student of students; track student) {
+        <mat-option [value]="student.matricula">{{
+          student.matricula +" - "+ student.nome
+        }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+</form>
