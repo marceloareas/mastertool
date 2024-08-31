@@ -164,6 +164,12 @@ def editar_turma(request, id):
                 turma.aluno.add(aluno) 
             except ObjectDoesNotExist:
                 return HttpResponseNotFound("Aluno não encontrado")
+        elif 'removerMatricula' in data:
+            try:
+                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+                turma.aluno.remove(aluno) 
+            except ObjectDoesNotExist:
+                return HttpResponseNotFound("Aluno não encontrado")
         else:
             turma.nome    = data['nome']
             turma.periodo = data['periodo']
