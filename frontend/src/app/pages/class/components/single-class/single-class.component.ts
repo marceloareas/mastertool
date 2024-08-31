@@ -42,7 +42,6 @@ import { CommonModule } from '@angular/common';
   styleUrl: './single-class.component.scss',
 })
 export class SingleClassComponent implements OnInit {
-  private student = inject(StudentService);
   private classService = inject(ClassService);
 
   @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
@@ -59,8 +58,7 @@ export class SingleClassComponent implements OnInit {
   constructor(public dialog: MatDialog) {}
 
   ngOnInit() {
-    this.getClass();
-    console.log(this.dataSource.data);
+    this.refreshTable();
     this.initializeColumns();
   }
 
@@ -69,24 +67,44 @@ export class SingleClassComponent implements OnInit {
       const numNotas = this.class.alunos[0]?.notas?.length;
       this.notaColumns = Array.from(
         { length: numNotas },
-        (_, i) => `nota${i + 1}`
+        (_, i) => `nota ${i + 1}`
       );
       this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
     }
   }
 
   addNewColumn() {
-    const newColumn = `nota${this.notaColumns.length + 1}`;
+    const newColumn = `nota ${this.notaColumns.length + 1}`;
     this.notaColumns.push(newColumn);
-    this.displayedColumns.splice(
-      this.displayedColumns.length - 1,
-      0,
-      newColumn
-    ); // Adiciona antes da coluna 'editar'
+
+    // Encontrar o índice da coluna 'media'
+    const mediaIndex = this.displayedColumns.indexOf('media');
+    this.displayedColumns.splice(mediaIndex, 0, newColumn); // Adiciona antes da coluna 'editar'
     this.class.alunos.forEach((aluno: { notas: number[] }) =>
       aluno.notas.push(0)
-    ); // Inicializa a nova nota como 0 para todos os alunos
+    );
+
     this.refreshTable();
+  }
+
+  removeColumn(i: any) {
+    this.notaColumns.splice(i, 1);
+    // Atualizar o array displayedColumns removendo o identificador correspondente
+    this.displayedColumns = this.displayedColumns.filter(
+      (col) => col !== `nota${i + 1}`
+    );
+    // Remover a nota correspondente de cada item no dataSource
+    this.dataSource.data.forEach((element: any) => {
+      element.notas.splice(i, 1);
+    });
+    // Atualizar a tabela para refletir as mudanças
+    this.dataSource._updateChangeSubscription();
+    this.classService
+      .postNota(this.class.id, this.dataSource.data)
+      .subscribe(() => {
+        alert('Coluna removida');
+        this.getClass();
+      });
   }
 
   notaColIndex(notaCol: string): number {
@@ -104,11 +122,14 @@ export class SingleClassComponent implements OnInit {
     this.classService.put(this.class.id, data).subscribe(() => {
       alert('Registro deletado');
       this.getClass();
+      this.refreshTable();
     });
   }
 
   getClass() {
-    this.refreshTable();
+    this.classService.get().subscribe((data) => {
+      this.class = data;
+    });
   }
 
   closeClass() {
@@ -147,9 +168,11 @@ export class SingleClassComponent implements OnInit {
   save() {
     console.log(this.dataSource.data);
     this.mode = 'VIEW';
-    this.classService.postNota(this.class.id, this.dataSource.data).subscribe(() => {
-      alert('Notas atualizadas com sucesso!');
-    });
+    this.classService
+      .postNota(this.class.id, this.dataSource.data)
+      .subscribe(() => {
+        alert('Notas atualizadas com sucesso!');
+      });
   }
 
   teste() {
@@ -157,7 +180,9 @@ export class SingleClassComponent implements OnInit {
   }
 
   media(element: any) {
-    const arraySemNulls = element.notas.filter((elemento: null) => elemento !== null);
+    const arraySemNulls = element.notas.filter(
+      (elemento: null) => elemento !== null
+    );
     const soma = arraySemNulls.reduce(
       (acumulador: any, elemento: any) => acumulador + elemento,
       0
@@ -167,3 +192,4 @@ export class SingleClassComponent implements OnInit {
     return media.toFixed(1);
   }
 }
+

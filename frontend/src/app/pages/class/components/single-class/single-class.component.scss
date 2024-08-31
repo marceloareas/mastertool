@@ -1,7 +1,7 @@
 .bar__top {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 
   &__content{
     display: flex;
@@ -26,6 +26,7 @@
   &__top {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 15px;
 
     .action-button {
       display: flex;

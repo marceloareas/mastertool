@@ -17,6 +17,20 @@
     </div>
   </div>
 
+  <div class="single-class__top">
+    <div class="action-button">
+      @if(mode === 'VIEW'){
+      <button mat-flat-button color="primary" (click)="teste()">
+        Editar Notas
+      </button>
+      } @else{
+      <button mat-stroked-button (click)="addNewColumn()">
+        Adicionar Nota
+      </button>
+      <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+      }
+    </div>
+  </div>
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <!-- Nome Column -->
     <ng-container matColumnDef="nome">
@@ -27,7 +41,12 @@
     <!-- Dynamic Nota Columns -->
     @for(notaCol of notaColumns; track notaCol ){
     <ng-container [matColumnDef]="notaCol">
-      <th mat-header-cell *matHeaderCellDef width="50px">{{ notaCol }}</th>
+      <th mat-header-cell *matHeaderCellDef width="50px">
+        {{ notaCol }}
+        <button mat-icon-button (click)="removeColumn([notaColIndex(notaCol)])">
+          <mat-icon fontIcon="more_vert"></mat-icon>
+        </button>
+      </th>
       <td mat-cell *matCellDef="let element">
         <input
           [ngClass]="mode === 'EDIT' ? 'teste' : ''"
@@ -75,24 +94,9 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
-
-  <div class="single-class__top">
-    <div class="action-button">
-      @if(mode === 'VIEW'){
-      <button mat-flat-button color="primary" (click)="teste()">
-        Editar Notas
-      </button>
-      } @else{
-      <button mat-stroked-button  (click)="addNewColumn()">
-        Adicionar Nota
-      </button>
-      <button mat-flat-button color="primary" (click)="save()">Salvar</button>
-      }
-    </div>
-    <mat-paginator
-      [pageSizeOptions]="[5, 10, 15]"
-      showFirstLastButtons
-      aria-label="Select page of periodic elements"
-    ></mat-paginator>
-  </div>
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 15]"
+    showFirstLastButtons
+    aria-label="Select page of periodic elements"
+  ></mat-paginator>
 </section>
