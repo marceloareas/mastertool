@@ -191,17 +191,20 @@ def adicionar_nota(request, id):
         usuario = request.user
 
         try:
+            turma = Turma.objects.get(id=id)
             for aluno_editar in data:
-                valores = aluno_editar['notas']
-                aluno = Aluno.objects.filter(matricula=aluno_editar['matricula'].lstrip('\ufeff'), usuario=usuario).first()
-                turma = Turma.objects.filter(id=id, usuario=usuario).first()
+                aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
+                aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
+                notas_existentes = Nota.objects.filter(aluno=aluno_editar['matricula'], turma=id)
 
-                for valor in valores:
-                    Nota.objects.update_or_create(
-                        aluno=aluno,
-                        turma=turma,
-                        valor=valor
-                    )
+                for i, nota in enumerate(notas_existentes):
+                    if i < len(aluno_editar['notas']):
+                        nota.valor = aluno_editar['notas'][i]
+                        nota.save()
+                    else:
+                        nota.delete() 
+            for i in range(len(notas_existentes), len(aluno_editar['notas'])):
+                Nota.objects.create(aluno=aluno, turma=turma, valor=aluno_editar['notas'][i])
 
             return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
         except Aluno.DoesNotExist:
