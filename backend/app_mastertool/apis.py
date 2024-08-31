@@ -36,14 +36,12 @@ def encontrar_aluno(matricula, usuario):
     if matricula:
         aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
         aluno_json = {  'matricula' : aluno.matricula, 
-                        'nome'      : aluno.nome, 
-                        'atividade' : aluno.atividade}
+                        'nome'      : aluno.nome}
         return aluno_json
     
     alunos = Aluno.objects.filter(usuario=usuario)
     alunos_json = [{'matricula' : aluno.matricula, 
-                    'nome'      : aluno.nome, 
-                    'atividade' : aluno.atividade} for aluno in alunos]
+                    'nome'      : aluno.nome} for aluno in alunos]
     return alunos_json
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS TURMA ------------------------------------------
