@@ -52,7 +52,7 @@
           [ngClass]="mode === 'EDIT' ? 'teste' : ''"
           matInput
           type="number"
-          [(ngModel)]="element.notas[notaColIndex(notaCol)]"
+          [(ngModel)]="element?.notas[notaColIndex(notaCol)]"
           [disabled]="mode === 'VIEW'"
         />
       </td>

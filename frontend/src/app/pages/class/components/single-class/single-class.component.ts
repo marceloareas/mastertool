@@ -91,7 +91,7 @@ export class SingleClassComponent {
     const mediaIndex = this.displayedColumns.indexOf('media');
     this.displayedColumns.splice(mediaIndex, 0, newColumn);
     this.class.alunos.forEach((aluno: { notas: number[] }) =>
-      aluno.notas.push(0)
+      aluno.notas?.push(0)
     );
 
     this.refreshTable();
@@ -177,14 +177,14 @@ export class SingleClassComponent {
   }
 
   media(element: any) {
-    const arraySemNulls = element.notas.filter(
+    const arraySemNulls = element.notas?.filter(
       (elemento: null) => elemento !== null
     );
-    const soma = arraySemNulls.reduce(
+    const soma = arraySemNulls?.reduce(
       (acumulador: any, elemento: any) => acumulador + elemento,
       0
     );
-    const media = soma / arraySemNulls.length;
+    const media = soma / arraySemNulls?.length;
 
     return media.toFixed(1);
   }
