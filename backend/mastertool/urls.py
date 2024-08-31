@@ -31,5 +31,10 @@ urlpatterns = [
     path('atividades/editar/<str:id>', views.editar_atividade, name='editar_atividades'),
     path('atividades/<str:atividade_id>/aluno/<str:aluno_id>/nota/', views.lancar_nota, name='lancar_nota'),
 
+    # # url de notas
+    # path('notas/', views.get_notas, name='get_notas'),
+
+
+
 
 ]
