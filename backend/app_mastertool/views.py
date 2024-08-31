@@ -185,22 +185,28 @@ def editar_turma(request, id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def adicionar_nota(request, id_turma):
-    data    = request.data
-    usuario = request.user
+def adicionar_nota(request, id):
+    if request.method == 'POST':
+        data    = request.data
+        usuario = request.user
 
-    try:
-        for aluno in data['alunos']:
-            valor = aluno.notas
-            aluno = Aluno.objects.filter(matricula=aluno.matricula, usuario=usuario).first()
-            turma = Turma.objects.filter(id=id_turma, usuario=usuario).first()
+        try:
+            for aluno_editar in data:
+                valores = aluno_editar['notas']
+                aluno = Aluno.objects.filter(matricula=aluno_editar['matricula'].lstrip('\ufeff'), usuario=usuario).first()
+                turma = Turma.objects.filter(id=id, usuario=usuario).first()
 
-            Nota.objects.update_or_create(aluno=aluno, turma=turma, valor=valor)
+                for valor in valores:
+                    Nota.objects.update_or_create(
+                        aluno=aluno,
+                        turma=turma,
+                        valor=valor
+                    )
 
-        return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
-    except Aluno.DoesNotExist:
-        return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
-    except Turma.DoesNotExist:
-        return JsonResponse({'error': 'Turma não encontrada'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
+        except Aluno.DoesNotExist:
+            return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
+        except Turma.DoesNotExist:
+            return JsonResponse({'error': 'Turma não encontrada'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
