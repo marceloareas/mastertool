@@ -16,6 +16,7 @@ import { ModalClassComponent } from '../modal-class/modal-class.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { StudentService } from '../../../../services/student/student.service';
 import { StudentClassModalComponent } from '../student-class-modal/student-class-modal.component';
+import { ClassService } from '../../../../services/class/class.service';
 
 @Component({
   selector: 'app-single-class',
@@ -32,6 +33,7 @@ import { StudentClassModalComponent } from '../student-class-modal/student-class
 })
 export class SingleClassComponent {
   private student = inject(StudentService);
+  private classService = inject(ClassService);
 
   @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
   @Output() closeModalEvent: EventEmitter<any> = new EventEmitter();
@@ -47,6 +49,13 @@ export class SingleClassComponent {
 
   ngOnInit() {
     this.getClass();
+  }
+
+  delete(matricula: any){
+    const data = {removerMatricula: matricula};
+    this.classService.put(this.class.id,data).subscribe(() => {
+      alert('Registro deletado');
+    });
   }
 
   /**

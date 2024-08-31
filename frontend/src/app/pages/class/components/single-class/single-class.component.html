@@ -36,7 +36,7 @@
         </button>
         <mat-menu #menu="matMenu">
           <button mat-menu-item><mat-icon fontIcon="edit" /> Editar</button>
-          <button mat-menu-item><mat-icon fontIcon="delete" /> Remover</button>
+          <button mat-menu-item (click)="delete(element.matricula)"><mat-icon fontIcon="delete"/> Remover</button>
         </mat-menu>
       </td>
     </ng-container>
