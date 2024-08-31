@@ -162,11 +162,20 @@ def editar_turma(request, id):
             try:
                 aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
                 turma.aluno.add(aluno) 
+
+                numero_notas = Nota.objects.filter(turma=turma).filter(aluno__isnull=False).count()
+                for _ in range(numero_notas):
+                    Nota.objects.create(
+                        aluno=aluno,
+                        turma=turma,
+                        valor=0
+                    )
             except ObjectDoesNotExist:
                 return HttpResponseNotFound("Aluno não encontrado")
         elif 'removerMatricula' in data:
             try:
                 aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+                Nota.objects.filter(aluno=aluno, turma=turma).delete()
                 turma.aluno.remove(aluno) 
             except ObjectDoesNotExist:
                 return HttpResponseNotFound("Aluno não encontrado")
@@ -193,7 +202,6 @@ def adicionar_nota(request, id):
         try:
             turma = Turma.objects.get(id=id)
             for aluno_editar in data:
-                aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
                 aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
                 notas_existentes = Nota.objects.filter(aluno=aluno_editar['matricula'], turma=id)
 
