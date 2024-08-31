@@ -180,122 +180,27 @@ def editar_turma(request, id):
         return HttpResponseNotFound("Turma não encontrada")
     
 # -----------------------------------------------------------------------------------------------
-# -------------------------------------- VIEWS ATIVIDADES ---------------------------------------
+# ---------------------------------------- VIEWS NOTAS ------------------------------------------
 # -----------------------------------------------------------------------------------------------
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def cadastrar_atividade(request):
-    usuario = request.user
-    data    = request.data
-
-    titulo      = data['titulo']
-    turma_id    = data['turma_id']
-    alunos_ids  = data['alunos_ids']
-
-    try:
-        turma   = Turma.objects.filter(id=turma_id, usuario=usuario).first()
-        usuario = User.objects.get(pk=usuario)
-        atividade = Atividade.objects.create(titulo=titulo, turma=turma, usuario=usuario)
-        atividade.alunos.set(Aluno.objects.filter(pk__in=alunos_ids))
-        atividade.save()
-        return JsonResponse({"status": "Atividade cadastrada com sucesso!"})
-    except ObjectDoesNotExist:
-        return HttpResponseNotFound("Turma ou usuário não encontrado")
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_atividades(request, id=None):
-    usuario = request.user
-    if id:
-        try:
-            atividade = Atividade.objects.filter(id=id, usuario=usuario).first()
-            data = {
-                "id": atividade.id,
-                "titulo": atividade.titulo,
-                "turma": atividade.turma.nome,
-                "alunos": [aluno.nome for aluno in atividade.alunos.all()],
-                "usuario": atividade.usuario.username,
-            }
-            return JsonResponse(data)
-        except ObjectDoesNotExist:
-            return HttpResponseNotFound("Atividade não encontrada")
-    else:
-        atividades = Atividade.objects.all()
-        data = [
-            {
-                "id": atividade.id,
-                "titulo": atividade.titulo,
-                "turma": atividade.turma.nome,
-                "alunos": [aluno.nome for aluno in atividade.alunos.all()],
-                "usuario": atividade.usuario.username,
-            }
-            for atividade in atividades
-        ]
-        return JsonResponse(data, safe=False)
-    
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def excluir_atividade(request, id):
-    usuario = request.user
-    try:
-        atividade = Atividade.objects.filter(id=id, usuario=usuario).first()
-        atividade.delete()
-        return JsonResponse({"status": "Atividade excluída com sucesso!"})
-    except ObjectDoesNotExist:
-        return HttpResponseNotFound("Atividade não encontrada")
-    
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated])
-def editar_atividade(request, id):
+def adicionar_nota(request, id_turma):
     data    = request.data
     usuario = request.user
-    try:
-        atividade   = Atividade.objects.filter(id=id, usuario=usuario).first()
-        titulo      = data['titulo']
-        turma_id    = data['turma_id']
-        alunos_ids  = data['alunos_ids']
-
-        if titulo:
-            atividade.titulo = titulo
-        if alunos_ids:
-            atividade.alunos.set(Aluno.objects.filter(pk__in=alunos_ids))
-        
-        atividade.save()
-        return JsonResponse({"status": "Atividade editada com sucesso!"})
-    except ObjectDoesNotExist:
-        return HttpResponseNotFound("Atividade não encontrada")
-    
-def lancar_nota(request, atividade_id, aluno_id):
-    data    = request.data
-    usuario = request.user
-    
-    if data['nota'] is None:
-        return JsonResponse({"error": "Nota não fornecida"}, status=400)
 
     try:
-        aluno     = aluno.objects.filter(id=aluno_id, usuario=usuario).first()
-        atividade = Atividade.objects.filter(id=atividade_id, usuario=usuario).first()
-        
-        nota_atividade = NotaAtividade.objects.create(atividade=atividade, aluno=aluno, usuario=usuario)
-        nota_atividade.nota = data['nota']
-        nota_atividade.save()
+        for aluno in data['alunos']:
+            valor = aluno.notas
+            aluno = Aluno.objects.filter(matricula=aluno.matricula, usuario=usuario).first()
+            turma = Turma.objects.filter(id=id_turma, usuario=usuario).first()
 
-        return JsonResponse({
-            "status": "Nota lançada com sucesso!",
-            "atividade": atividade.titulo,
-            "aluno": aluno.nome,
-            "nota": nota_atividade.nota,
-        })
-    except ObjectDoesNotExist:
-        return HttpResponseNotFound("Atividade ou Aluno não encontrado")
-    
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def get_nota(request, id_turma=None):
-#     if request.method == 'GET':
-#         usuario = request.user
+            Nota.objects.update_or_create(aluno=aluno, turma=turma, valor=valor)
 
-#         notas_json = encontrar_notas(id_turma, usuario)
-
-#         return JsonResponse(notas_json, safe=False)
+        return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
+    except Aluno.DoesNotExist:
+        return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
+    except Turma.DoesNotExist:
+        return JsonResponse({'error': 'Turma não encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
