@@ -6,7 +6,6 @@ import {
   ViewChild,
   inject,
   OnInit,
-  SimpleChanges,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -38,9 +37,9 @@ import { CommonModule } from '@angular/common';
     CommonModule,
   ],
   templateUrl: './single-class.component.html',
-  styleUrl: './single-class.component.scss',
+  styleUrls: ['./single-class.component.scss'],
 })
-export class SingleClassComponent {
+export class SingleClassComponent implements OnInit {
   private classService = inject(ClassService);
 
   @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
@@ -70,13 +69,16 @@ export class SingleClassComponent {
   }
 
   refreshTable() {
+    this.class.alunos.forEach((aluno: { notas: never[]; }) => {
+      aluno.notas = aluno.notas || [];
+    });
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
   }
 
   initializeColumns() {
-    if (this.class && this.class.alunos && this.class.alunos?.length > 0) {
-      const numNotas = this.class.alunos[0]?.notas?.length;
+    if (this.class && this.class.alunos && this.class.alunos.length > 0) {
+      const numNotas = this.class.alunos[0]?.notas?.length || 0;
       this.notaColumns = Array.from(
         { length: numNotas },
         (_, i) => `nota ${i + 1}`
@@ -90,22 +92,19 @@ export class SingleClassComponent {
     this.notaColumns.push(newColumn);
     const mediaIndex = this.displayedColumns.indexOf('media');
     this.displayedColumns.splice(mediaIndex, 0, newColumn);
-    this.class.alunos.forEach((aluno: { notas: number[] }) =>
-      aluno.notas?.push(0)
-    );
-
+    this.class.alunos.forEach((aluno: { notas: number[]; }) => aluno.notas.push(0));
     this.refreshTable();
   }
 
-  removeColumn(i: any) {
-    this.notaColumns.splice(i, 1);
+  removeColumn(index: number) {
+    this.notaColumns.splice(index, 1);
     this.displayedColumns = this.displayedColumns.filter(
-      (col) => col !== `nota${i + 1}`
+      col => !col.startsWith('nota') || parseInt(col.split(' ')[1], 10) !== (index + 1)
     );
-    this.dataSource.data.forEach((element: any) => {
-      element.notas.splice(i, 1);
+    this.dataSource.data.forEach(element => {
+      element.notas.splice(index, 1);
     });
-    this.dataSource._updateChangeSubscription();
+    this.refreshTable();
     this.classService
       .postNota(this.class.id, this.dataSource.data)
       .subscribe(() => {
@@ -115,9 +114,28 @@ export class SingleClassComponent {
       });
   }
 
+  getNota(element: any, index: number): number {
+    return (element.notas && element.notas[index] !== undefined) ? element.notas[index] : 0;
+  }
+
+  setNota(element: any, index: number, value: string) {
+    if (!element.notas) {
+      element.notas = [];
+    }
+    element.notas[index] = +value;
+  }
+
   notaColIndex(notaCol: string): number {
-    const index = parseInt(notaCol.replace('nota', ''), 10) - 1;
+    const index = parseInt(notaCol.replace('nota ', ''), 10) - 1;
     return index;
+  }
+
+  handleNotaChange(event: Event, element: any, index: number) {
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement) {
+      const value = Number(inputElement.value); // Converta o valor para número se necessário
+      element.notas[index] = value;
+    }
   }
 
   delete(matricula: any) {
@@ -152,7 +170,7 @@ export class SingleClassComponent {
         data: { class: this.class.id },
       })
       .afterClosed()
-      .subscribe((result) => {
+      .subscribe(() => {
         this.getClass();
         this.closeModal();
       });
@@ -177,14 +195,9 @@ export class SingleClassComponent {
   }
 
   media(element: any) {
-    const arraySemNulls = element.notas?.filter(
-      (elemento: null) => elemento !== null
-    );
-    const soma = arraySemNulls?.reduce(
-      (acumulador: any, elemento: any) => acumulador + elemento,
-      0
-    );
-    const media = soma / arraySemNulls?.length;
+    const arraySemNulls = element.notas?.filter((elemento: null) => elemento !== null);
+    const soma = arraySemNulls?.reduce((acumulador: any, elemento: any) => acumulador + elemento, 0) || 0;
+    const media = arraySemNulls?.length ? soma / arraySemNulls.length : 0;
 
     return media.toFixed(1);
   }

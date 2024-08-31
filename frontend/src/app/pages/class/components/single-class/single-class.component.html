@@ -39,11 +39,12 @@
     </ng-container>
 
     <!-- Dynamic Nota Columns -->
+
     @for(notaCol of notaColumns; track notaCol ){
     <ng-container [matColumnDef]="notaCol">
       <th mat-header-cell *matHeaderCellDef width="50px">
         {{ notaCol }}
-        <button mat-icon-button (click)="removeColumn([notaColIndex(notaCol)])">
+        <button mat-icon-button (click)="removeColumn(notaColIndex(notaCol))">
           <mat-icon fontIcon="more_vert"></mat-icon>
         </button>
       </th>
@@ -52,7 +53,9 @@
           [ngClass]="mode === 'EDIT' ? 'teste' : ''"
           matInput
           type="number"
-          [(ngModel)]="element?.notas[notaColIndex(notaCol)]"
+
+          [value]="getNota(element, notaColIndex(notaCol))"
+          (input)="handleNotaChange($event, element, notaColIndex(notaCol))"
           [disabled]="mode === 'VIEW'"
         />
       </td>
