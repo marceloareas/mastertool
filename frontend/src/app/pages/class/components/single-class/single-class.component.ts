@@ -121,7 +121,9 @@ export class SingleClassComponent implements OnInit {
    * @param name Nome da coluna a ser removida.
    */
   removeColumn(name: string) {
-    this.classService.postNota(this.class.id, name).subscribe(() => {
+    const data = {titulo: name}
+    console.log(data)
+    this.classService.postNota(this.class.id, data).subscribe(() => {
       alert('Coluna removida com sucesso!');
       this.closeModal();
       this.getClass();
