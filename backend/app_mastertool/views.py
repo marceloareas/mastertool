@@ -214,14 +214,14 @@ def adicionar_nota(request, id):
 
                     # Adicionar ou Atualizar notas
                     for nota in aluno_editar['notas']:
-                        nota_existente = Nota.objects.filter(
-                            aluno=aluno,
-                            turma=turma,
-                            id=nota['id']
-                        ).first()
 
                         # Atualiza o valor da nota existente
-                        if nota_existente:
+                        if 'id' in nota:
+                            nota_existente = Nota.objects.filter(
+                                aluno=aluno,
+                                turma=turma,
+                                id=nota['id']
+                            ).first()
                             nota_existente.titulo = nota['titulo']
                             nota_existente.valor = nota['valor']
                             nota_existente.save()
