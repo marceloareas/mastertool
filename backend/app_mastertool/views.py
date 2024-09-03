@@ -168,7 +168,7 @@ def editar_turma(request, id):
                     Nota.objects.create(
                         aluno=aluno,
                         turma=turma,
-                        valor=0
+                        valor=None
                     )
             except ObjectDoesNotExist:
                 return HttpResponseNotFound("Aluno não encontrado")
@@ -201,31 +201,25 @@ def adicionar_nota(request, id):
 
         try:
             turma = Turma.objects.get(id=id)
+            
+            # Excluir notas
+            if data['titulo']:
+                Nota.objects.filter(
+                    titulo=data['titulo'],
+                    turma=turma
+                ).first().delete()
+            
             for aluno_editar in data:
                 aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
-                notas_existentes = Nota.objects.filter(aluno=aluno_editar['matricula'], turma=id)
 
-                # Caso seja a primeira nota a ser adiconada
-                if not notas_existentes.exists():
-                    for i, nota in enumerate(aluno_editar['notas']):
-                        Nota.objects.create(
-                            aluno=aluno,
-                            turma=turma,
-                            valor=aluno_editar['notas'][i]
-                        )
-                    continue
-
-                # Já tendo notas adicionadas e queira atualizar
-                for i, nota in enumerate(notas_existentes):
-                    if i < len(aluno_editar['notas']):
-                        nota.valor = aluno_editar['notas'][i]
-                        nota.save()
-                    else:
-                        nota.delete() 
-
-                # Já tendo notas adicionadas e quer adiconar mais
-                for i in range(len(notas_existentes), len(aluno_editar['notas'])):
-                    Nota.objects.create(aluno=aluno, turma=turma, valor=aluno_editar['notas'][i])
+                # Adicionar ou Atualizar notas
+                for nota in enumerate(aluno_editar['notas']):
+                    Nota.objects.update_or_create(
+                        aluno=aluno,
+                        turma=turma,
+                        nome=nota['titulo'],
+                        valor=nota['valor']
+                    )
 
             return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
         except Aluno.DoesNotExist:
