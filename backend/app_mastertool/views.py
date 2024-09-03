@@ -202,17 +202,19 @@ def adicionar_nota(request, id):
         try:
             turma = Turma.objects.get(id=id)
             
-
-            for aluno_editar in data:
-                aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
-                # Excluir notas
-                if 'titulo' in data:
+            # Excluir notas
+            if 'titulo' in data:
+                alunos = Aluno.objects.filter(turma=turma)
+                for aluno in alunos:
                     Nota.objects.filter(
                         titulo=data['titulo'],
-                        aluno=aluno,
-                        turma=turma
+                        turma=turma, 
+                        aluno=aluno
                     ).first().delete()
-                else:
+            else:
+                for aluno_editar in data:
+                    aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
+
                     # Adicionar ou Atualizar notas
                     for nota in aluno_editar['notas']:
 
