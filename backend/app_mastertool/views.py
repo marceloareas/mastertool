@@ -208,31 +208,31 @@ def adicionar_nota(request, id):
                     titulo=data['titulo'],
                     turma=turma
                 ).first().delete()
-            
-            for aluno_editar in data:
-                aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
+            else:
+                for aluno_editar in data:
+                    aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
 
-                # Adicionar ou Atualizar notas
-                for nota in aluno_editar['notas']:
-                    nota_existente = Nota.objects.filter(
-                        aluno=aluno,
-                        turma=turma,
-                        id=nota['id']
-                    ).first()
-
-                    # Atualiza o valor da nota existente
-                    if nota_existente:
-                        nota_existente.titulo = nota['titulo']
-                        nota_existente.valor = nota['valor']
-                        nota_existente.save()
-                    else:
-                    # Cria uma nova nota
-                        Nota.objects.create(
+                    # Adicionar ou Atualizar notas
+                    for nota in aluno_editar['notas']:
+                        nota_existente = Nota.objects.filter(
                             aluno=aluno,
                             turma=turma,
-                            titulo=nota['titulo'],
-                            valor=nota['valor']
-                        )
+                            id=nota['id']
+                        ).first()
+
+                        # Atualiza o valor da nota existente
+                        if nota_existente:
+                            nota_existente.titulo = nota['titulo']
+                            nota_existente.valor = nota['valor']
+                            nota_existente.save()
+                        else:
+                        # Cria uma nova nota
+                            Nota.objects.create(
+                                aluno=aluno,
+                                turma=turma,
+                                titulo=nota['titulo'],
+                                valor=nota['valor']
+                            )
 
 
             return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
