@@ -84,7 +84,7 @@ export class SingleClassComponent implements OnInit {
   refreshTable() {
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
-    console.log('data',this.dataSource.data)
+    console.log('data', this.dataSource.data);
   }
 
   /**
@@ -121,7 +121,7 @@ export class SingleClassComponent implements OnInit {
    * @param name Nome da coluna a ser removida.
    */
   removeColumn(name: string) {
-    const data = {titulo: name}
+    const data = { titulo: name };
     this.classService.postNota(this.class.id, data).subscribe(() => {
       alert('Coluna removida com sucesso!');
       this.closeModal();
@@ -153,31 +153,34 @@ export class SingleClassComponent implements OnInit {
         });
       });
 
-    // Atualiza a tabela para refletir as mudanças
-    this.refreshTable();
-  }
-  }
-
-/**
- * Atualiza o valor da nota para um aluno em uma posição específica com base na entrada do usuário.
- * @param event Evento de alteração do input.
- * @param element Objeto do aluno.
- * @param columnName Nome da coluna da nota a ser atualizada.
- */
-updateNota(event: Event, element: any, columnName: string) {
-  const inputElement = event.target as HTMLInputElement;
-  if (inputElement) {
-    const value = Number(inputElement.value);
-
-    const notaIndex = element.notas.findIndex((nota: any) => nota.titulo === columnName);
-    if (notaIndex !== -1) {
-      element.notas[notaIndex].valor = value;
-    } else {
-      console.error(`Nota com título "${columnName}" não encontrada para o aluno.`);
+      // Atualiza a tabela para refletir as mudanças
+      this.refreshTable();
     }
   }
-}
 
+  /**
+   * Atualiza o valor da nota para um aluno em uma posição específica com base na entrada do usuário.
+   * @param event Evento de alteração do input.
+   * @param element Objeto do aluno.
+   * @param columnName Nome da coluna da nota a ser atualizada.
+   */
+  updateNota(event: Event, element: any, columnName: string) {
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement) {
+      const value = inputElement.value;
+
+      const notaIndex = element.notas.findIndex(
+        (nota: any) => nota.titulo === columnName
+      );
+      if (notaIndex !== -1) {
+        element.notas[notaIndex].valor = value;
+      } else {
+        console.error(
+          `Nota com título "${columnName}" não encontrada para o aluno.`
+        );
+      }
+    }
+  }
 
   /**
    * Altera o modo do componente (por exemplo, `VIEW` ou `EDIT`).
@@ -256,7 +259,7 @@ updateNota(event: Event, element: any, columnName: string) {
       .postNota(this.class.id, this.dataSource.data)
       .subscribe(() => {
         alert('Notas atualizadas com sucesso!');
-        this.getClass()
+        this.getClass();
       });
   }
 
@@ -267,11 +270,15 @@ updateNota(event: Event, element: any, columnName: string) {
    */
   media(element: any) {
     const arraySemNulls = element.notas
-      ?.filter((elemento: any) => elemento.valor !== null && !isNaN(elemento.valor))
-      .map((item: { valor: any }) => parseFloat(item.valor).toFixed(2)); // Converte para número e arredonda para 2 casas decimais
+      ?.filter((elemento: any) => {
+        // Verifica se o valor é válido e não é NaN
+        const valor = parseFloat(elemento.valor);
+        return valor !== null && valor !== undefined && !isNaN(valor);
+      })
+      .map((item: { valor: any }) => parseFloat(item.valor)) // Converte diretamente para número
 
-    // Converte os valores arredondados de volta para número
-    const valoresNumericos = arraySemNulls.map((valor: string) => parseFloat(valor));
+    // Filtra valores inválidos novamente após a conversão
+    const valoresNumericos = arraySemNulls.filter((valor: number) => !isNaN(valor));
 
     const soma = valoresNumericos.reduce(
       (acumulador: number, valor: number) => acumulador + valor,
