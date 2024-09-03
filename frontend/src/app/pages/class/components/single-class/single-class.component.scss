@@ -1,18 +1,3 @@
-.icon__delete {
-  font-size: 16px;
-  color: red;
-}
-
-.button__delete {
-  width: 17px;
-  height: 17px;
-  padding: 0;
-
-  mat-icon{
-    width: 17px;
-    height: 17px;
-  }
-}
 
 .bar__top {
   display: flex;
@@ -53,20 +38,36 @@
 
   table {
     margin-bottom: 20px;
+
+    input {
+      width: 60px;
+      height: 25px;
+      border: none;
+      background: transparent;
+      text-align: center;
+
+      &.edit {
+        border: #cfcfcf 1px solid;
+        border-radius: 3px;
+      }
+    }
+
+    .button__delete {
+      width: 17px;
+      height: 17px;
+      padding: 0;
+
+      mat-icon {
+        width: 17px;
+        height: 17px;
+
+        &.icon__delete {
+          font-size: 16px;
+          color: red;
+        }
+      }
+    }
   }
-}
-
-input {
-  width: 50px;
-  height: 25px;
-  border: none;
-  background: transparent;
-  text-align: center;
-}
-
-.teste {
-  border: #cfcfcf 1px solid;
-  border-radius: 3px;
 }
 @media (min-width: 1440px) {
   .single-class {

@@ -54,36 +54,42 @@ export class SingleClassComponent implements OnInit {
 
   mode: string = 'VIEW';
 
-  data = [
-    {
-      matricula: '1234567BCC',
-      nome: 'JOTTAp',
-      notas: [
-        { titulo: 'P1', valor: 9 },
-        { titulo: 'EXTRA1', valor: 7 },
-        { titulo: 'P2', valor: 10 },
-        { titulo: 'EXTRA2', valor: 9 },
-      ],
-    },
-    {
-      matricula: '2345673BCC',
-      nome: 'LARISSA ',
-      notas: [
-        { titulo: 'P1', valor: 9 },
-        { titulo: 'EXTRA1', valor: null },
-        { titulo: 'P2', valor: 10 },
-        { titulo: 'EXTRA2', valor: 9 },
-      ],
-    },
-  ];
-
   constructor(public dialog: MatDialog) {}
 
+  /**
+   * Método do ciclo de vida do Angular que é chamado após a construção do componente.
+   * Inicializa as colunas da tabela e atualiza os dados.
+   */
   ngOnInit() {
     this.initializeColumns();
     this.refreshTable();
+    console.log(this.class)
   }
 
+  /**
+   * Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
+   * Configura `notaColumns` e `displayedColumns`.
+   */
+  initializeColumns() {
+    if (this.class && this.class.alunos && this.class.alunos.length > 0) {
+      this.notaColumns = this.class.alunos[0].notas.map(
+        (nota: any) => nota.titulo
+      );
+      this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
+    }
+  }
+
+  /**
+   * Atualiza a fonte de dados da tabela e configura o paginador.
+   */
+  refreshTable() {
+    this.dataSource = new MatTableDataSource(this.class.alunos);
+    this.dataSource.paginator = this.paginator;
+  }
+
+  /**
+   * Obtém os dados da classe do serviço `classService` e atualiza a tabela.
+   */
   getClass() {
     this.classService.get(this.class.id).subscribe((data) => {
       this.class = data;
@@ -91,90 +97,88 @@ export class SingleClassComponent implements OnInit {
     });
   }
 
-  refreshTable() {
-    this.dataSource = new MatTableDataSource(this.data);
-    this.dataSource.paginator = this.paginator;
+  /**
+   * Adiciona uma nova coluna de notas à tabela e atualiza os dados dos alunos para incluir um objeto de nota vazio.
+   */
+  addNewColumn() {
+    const newColumn = `novaNota ${this.notaColumns.length + 1}`;
+    this.notaColumns.push(newColumn);
+    this.displayedColumns.splice(
+      this.displayedColumns.length - 2,
+      0,
+      newColumn
+    );
+
+    this.dataSource.data.forEach((aluno: any) => {
+      aluno.notas.push({ titulo: newColumn, valor: null });
+    });
+
+    this.refreshTable();
   }
 
-  initializeColumns() {
-    // Verifica se a classe e seus alunos estão disponíveis
-    if (this.class && this.class.alunos && this.class.alunos.length > 0) {
-      // Mapeia as colunas de 'notas' a partir do primeiro aluno, assumindo que todos têm as mesmas notas
-      this.notaColumns = this.data[0].notas.map((nota: any) => nota.titulo);
-
-      // Combina 'nome', as colunas de notas, e as colunas adicionais ('media' e 'editar')
-      this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
-    }
+  /**
+   * Remove uma coluna de notas com base no nome e notifica o serviço `classService` para atualizar os dados no backend.
+   * @param name Nome da coluna a ser removida.
+   */
+  removeColumn(name: string) {
+    this.classService.postNota(this.class.id, name).subscribe(() => {
+      alert('Coluna removida com sucesso!');
+      this.closeModal();
+      this.getClass();
+    });
   }
 
+  /**
+   * Atualiza o nome da coluna com base na entrada do usuário.
+   * @param event Evento de alteração do input.
+   * @param columnIndex Índice da coluna a ser atualizada.
+   */
   updateColumnName(event: any, columnIndex: any) {
     const newName = event.target.value.trim();
     if (newName) {
       this.notaColumns[columnIndex] = newName;
-      this.displayedColumns[this.displayedColumns.indexOf(`novaNota${columnIndex + 1}`)] = newName;
+      this.displayedColumns[
+        this.displayedColumns.indexOf(`novaNota${columnIndex + 1}`)
+      ] = newName;
+      this.refreshTable();
     }
   }
 
-    addNewColumn() {
-      const newColumn = `novaNota${this.notaColumns.length + 1}`; // Nome temporário da coluna
-      this.notaColumns.push(newColumn); // Adiciona o nome temporário à lista de colunas
-      this.displayedColumns.splice(this.displayedColumns.length - 2, 0, newColumn); // Adiciona a nova coluna antes da coluna 'media'
+/**
+ * Atualiza o valor da nota para um aluno em uma posição específica com base na entrada do usuário.
+ * @param event Evento de alteração do input.
+ * @param element Objeto do aluno.
+ * @param columnName Nome da coluna da nota a ser atualizada.
+ */
+updateNota(event: Event, element: any, columnName: string) {
+  const inputElement = event.target as HTMLInputElement;
+  if (inputElement) {
+    const value = Number(inputElement.value);
 
-  // Atualiza os dados para adicionar a nova nota como null para todos os alunos
-  this.dataSource.data.forEach((aluno: any) => {
-    aluno.notas.push({ titulo: newColumn, valor: null });
-  });
+    const notaIndex = element.notas.findIndex((nota: any) => nota.titulo === columnName);
 
-  // Atualiza a tabela com os novos dados
-  this.dataSource._updateChangeSubscription();
-    }
-
-
-  removeColumn(name: string) {
-    this.classService
-      .postNota(this.class.id, name)
-      .subscribe(() => {
-        alert('Coluna removida com sucesso!');
-        this.closeModal();
-        this.getClass(); // Atualiza os dados
-      });
-  }
-
-  getNota(element: any, index: number): number {
-    return element.notas && element.notas[index].valor !== undefined
-      ? element.notas[index].valor
-      : 0;
-  }
-
-  setNota(element: any, index: number, value: string) {
-    if (!element.notas) {
-      element.notas = [];
-    }
-    element.notas[index] = +value;
-  }
-
-  notaColIndex(notaCol: string): number {
-      const index = this.notaColumns.indexOf(notaCol);
-      return index;
-  }
-
-  handleNotaChange(event: Event, element: any, index: number) {
-    const inputElement = event.target as HTMLInputElement;
-    if (inputElement) {
-      const value = Number(inputElement.value);
-      element.notas[index].valie = value;
+    if (notaIndex !== -1) {
+      element.notas[notaIndex].valor = value;
+    } else {
+      console.error(`Nota com título "${columnName}" não encontrada para o aluno.`);
     }
   }
+}
 
-  teste3(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    // if (inputElement) {
-    //   const value = Number(inputElement.value); // Converta o valor para número se necessário
-    //   element.notas[index].nome = value;
-    // }
+
+  /**
+   * Altera o modo do componente (por exemplo, `VIEW` ou `EDIT`).
+   * @param mode Novo modo para o componente.
+   */
+  changeMode(mode: string) {
+    this.mode = mode;
   }
 
-  delete(matricula: any) {
+  /**
+   * Deleta um aluno com base na matrícula fornecida e atualiza a visualização.
+   * @param matricula Matrícula do aluno a ser removido.
+   */
+  deleteStudent(matricula: any) {
     const data = { removerMatricula: matricula };
     this.classService.put(this.class.id, data).subscribe(() => {
       alert('Registro deletado');
@@ -183,11 +187,12 @@ export class SingleClassComponent implements OnInit {
     });
   }
 
-  closeClass() {
-    this.closeClassEvent.emit();
-  }
-
-  openModal(singleClass?: any, mode = 'ADD') {
+  /**
+   * Abre um modal para adicionar ou editar uma turma. Após o fechamento do modal, atualiza os dados da classe.
+   * @param singleClass Objeto da turma.
+   * @param mode Modo de operação do modal ('ADD' ou 'EDIT').
+   */
+  openModalClass(singleClass?: any, mode = 'ADD') {
     this.dialog
       .open(ModalClassComponent, {
         data: { singleClass, mode },
@@ -200,6 +205,9 @@ export class SingleClassComponent implements OnInit {
       });
   }
 
+  /**
+   * Abre um modal para adicionar um novo aluno à classe. Após o fechamento do modal, atualiza os dados da classe.
+   */
   openModalStudent() {
     this.dialog
       .open(StudentClassModalComponent, {
@@ -212,17 +220,26 @@ export class SingleClassComponent implements OnInit {
       });
   }
 
+  /**
+   * Emite um evento para fechar a visualização da classe.
+   */
+  closeClass() {
+    this.closeClassEvent.emit();
+  }
+
+  /**
+   * Emite um evento para fechar o modal aberto.
+   */
   closeModal() {
     this.closeModalEvent.emit();
   }
 
+  /**
+   * Salva as notas atualizadas no backend e muda o modo para `VIEW`.
+   */
   save() {
-    const a = this.dataSource.data.map((item) => ({
-      ...item,
-      notas: item.notas?.filter((elemento: null) => elemento !== null),
-    }));
-
     this.mode = 'VIEW';
+
     this.classService
       .postNota(this.class.id, this.dataSource.data)
       .subscribe(() => {
@@ -230,25 +247,27 @@ export class SingleClassComponent implements OnInit {
       });
   }
 
-  teste() {
-    this.mode = 'EDIT';
-  }
-  teste2() {
-    this.mode = 'VIEW';
-  }
-
+  /**
+   * Calcula a média das notas de um aluno, ignorando valores nulos e retornando a média formatada com uma casa decimal.
+   * @param element Objeto do aluno.
+   * @returns Média das notas formatada com uma casa decimal.
+   */
   media(element: any) {
-    const arraySemNulls = element.notas?.filter(
-      (elemento: any) => elemento.valor !== null
-    );
-    const teste = arraySemNulls.map((item: { valor: any; }) => item.valor)
-    const soma =
-    teste?.reduce(
-        (acumulador: number, elemento: number) => acumulador + elemento,
-        0
-      ) || 0;
-    const media = teste?.length ? soma / teste.length : 0;
+    const arraySemNulls = element.notas
+      ?.filter((elemento: any) => elemento.valor !== null && !isNaN(elemento.valor))
+      .map((item: { valor: any }) => parseFloat(item.valor).toFixed(2)); // Converte para número e arredonda para 2 casas decimais
 
+    // Converte os valores arredondados de volta para número
+    const valoresNumericos = arraySemNulls.map((valor: string) => parseFloat(valor));
+
+    const soma = valoresNumericos.reduce(
+      (acumulador: number, valor: number) => acumulador + valor,
+      0
+    );
+    const media = valoresNumericos.length ? soma / valoresNumericos.length : 0;
+
+    // Retorna a média arredondada para 1 casa decimal
     return media.toFixed(1);
   }
+
 }

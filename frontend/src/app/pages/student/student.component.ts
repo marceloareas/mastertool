@@ -71,7 +71,7 @@ export class StudentComponent {
    * @param data Dados do estudante para edição, se disponível.
    * @param mode Modo do modal, padrão é 'ADD' para adicionar.
    */
-  openModal(matricula?: any, mode = 'ADD') {
+  openModal(matricula?: string, mode = 'ADD') {
     this.dialog
       .open(ModalStudentComponent, {
         width: '600px',
