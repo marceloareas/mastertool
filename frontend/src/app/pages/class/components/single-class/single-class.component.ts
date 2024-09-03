@@ -63,7 +63,6 @@ export class SingleClassComponent implements OnInit {
   ngOnInit() {
     this.initializeColumns();
     this.refreshTable();
-    console.log(this.class)
   }
 
   /**
@@ -85,6 +84,7 @@ export class SingleClassComponent implements OnInit {
   refreshTable() {
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
+    console.log('data',this.dataSource.data)
   }
 
   /**
@@ -122,7 +122,6 @@ export class SingleClassComponent implements OnInit {
    */
   removeColumn(name: string) {
     const data = {titulo: name}
-    console.log(data)
     this.classService.postNota(this.class.id, data).subscribe(() => {
       alert('Coluna removida com sucesso!');
       this.closeModal();
@@ -138,12 +137,25 @@ export class SingleClassComponent implements OnInit {
   updateColumnName(event: any, columnIndex: any) {
     const newName = event.target.value.trim();
     if (newName) {
+      const oldName = this.notaColumns[columnIndex];
       this.notaColumns[columnIndex] = newName;
-      this.displayedColumns[
-        this.displayedColumns.indexOf(`novaNota${columnIndex + 1}`)
-      ] = newName;
-      this.refreshTable();
-    }
+      const oldTitleIndex = this.displayedColumns.indexOf(oldName);
+      if (oldTitleIndex !== -1) {
+        this.displayedColumns[oldTitleIndex] = newName;
+      }
+
+      // Atualiza o título da nota para todos os alunos
+      this.class.alunos.forEach((item: any) => {
+        item.notas.forEach((nota: any) => {
+          if (nota.titulo === oldName) {
+            nota.titulo = newName;
+          }
+        });
+      });
+
+    // Atualiza a tabela para refletir as mudanças
+    this.refreshTable();
+  }
   }
 
 /**
@@ -158,7 +170,6 @@ updateNota(event: Event, element: any, columnName: string) {
     const value = Number(inputElement.value);
 
     const notaIndex = element.notas.findIndex((nota: any) => nota.titulo === columnName);
-
     if (notaIndex !== -1) {
       element.notas[notaIndex].valor = value;
     } else {
@@ -241,11 +252,11 @@ updateNota(event: Event, element: any, columnName: string) {
    */
   save() {
     this.mode = 'VIEW';
-
     this.classService
       .postNota(this.class.id, this.dataSource.data)
       .subscribe(() => {
         alert('Notas atualizadas com sucesso!');
+        this.getClass()
       });
   }
 

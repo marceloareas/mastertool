@@ -72,7 +72,7 @@
           [ngClass]="mode === 'EDIT' ? 'edit' : ''"
           matInput
           type="number"
-          [value]="element.notas[$index].valor"
+          [value]="element.notas[$index]?.valor"
           (input)="updateNota($event, element, notaCol)"
           [disabled]="mode === 'VIEW'"
         />
