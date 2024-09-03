@@ -202,16 +202,17 @@ def adicionar_nota(request, id):
         try:
             turma = Turma.objects.get(id=id)
             
-            # Excluir notas
-            if 'titulo' in data:
-                Nota.objects.filter(
-                    titulo=data['titulo'],
-                    turma=turma
-                ).first().delete()
-            else:
-                for aluno_editar in data:
-                    aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
 
+            for aluno_editar in data:
+                aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
+                # Excluir notas
+                if 'titulo' in data:
+                    Nota.objects.filter(
+                        titulo=data['titulo'],
+                        aluno=aluno,
+                        turma=turma
+                    ).first().delete()
+                else:
                     # Adicionar ou Atualizar notas
                     for nota in aluno_editar['notas']:
 
@@ -233,7 +234,6 @@ def adicionar_nota(request, id):
                                 titulo=nota['titulo'],
                                 valor=nota['valor']
                             )
-
 
             return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
         except Aluno.DoesNotExist:
