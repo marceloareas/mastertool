@@ -81,9 +81,9 @@ def encontrar_turma(id, usuario):
     if id:
         turma = Turma.objects.get(id=id, usuario=usuario)
         alunos_json = []
-        notas_json = []
         for aluno in turma.aluno.all():
             try:
+                notas_json = []
                 notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
                 for nota in notas:
                     notas_json.append({
@@ -111,9 +111,9 @@ def encontrar_turma(id, usuario):
 
     for turma in turmas:
         alunos_json = []
-        notas_json = []
         for aluno in turma.aluno.all():
             try:
+                notas_json = []
                 notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
                 for nota in notas:
                     notas_json.append({
