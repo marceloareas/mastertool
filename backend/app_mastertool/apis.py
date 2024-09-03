@@ -81,18 +81,22 @@ def encontrar_turma(id, usuario):
     if id:
         turma = Turma.objects.get(id=id, usuario=usuario)
         alunos_json = []
+        notas_json = []
         for aluno in turma.aluno.all():
             try:
-                notas = list(Nota.objects.filter(aluno=aluno, turma=turma).values_list('valor', flat=True))
-                notas = [int(nota) for nota in notas]            
+                notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
+                for nota in notas:
+                    notas_json.append({
+                        'titulo': nota.titulo,
+                        'valor' : nota.valor,
+                    })
             except Nota.DoesNotExist:
                 notas = None
             alunos_json.append({
-                'matricula': aluno.matricula,
-                'nome': aluno.nome,
-                'notas' : notas
+                'matricula' : aluno.matricula,
+                'nome'      : aluno.nome,
+                'notas'     : notas_json
             })
-
 
         turma_dict = {
             'id': turma.id,
@@ -107,16 +111,21 @@ def encontrar_turma(id, usuario):
 
     for turma in turmas:
         alunos_json = []
+        notas_json = []
         for aluno in turma.aluno.all():
             try:
-                notas = list(Nota.objects.filter(aluno=aluno, turma=turma).values_list('valor', flat=True))
-                notas = [int(nota) for nota in notas]            
+                notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
+                for nota in notas:
+                    notas_json.append({
+                        'titulo': nota.titulo,
+                        'valor' : nota.valor,
+                    })
             except Nota.DoesNotExist:
                 notas = None
             alunos_json.append({
-                'matricula': aluno.matricula,
-                'nome': aluno.nome,
-                'notas' : notas
+                'matricula' : aluno.matricula,
+                'nome'      : aluno.nome,
+                'notas'     : notas_json
 
             })
         turma_dict = {
