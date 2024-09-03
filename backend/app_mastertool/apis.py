@@ -87,6 +87,7 @@ def encontrar_turma(id, usuario):
                 notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
                 for nota in notas:
                     notas_json.append({
+                        'id'    : nota.id,
                         'titulo': nota.titulo,
                         'valor' : nota.valor,
                     })
@@ -117,6 +118,7 @@ def encontrar_turma(id, usuario):
                 notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
                 for nota in notas:
                     notas_json.append({
+                        'id'    : nota.id,
                         'titulo': nota.titulo,
                         'valor' : nota.valor,
                     })

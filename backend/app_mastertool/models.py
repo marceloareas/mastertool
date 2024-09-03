@@ -25,13 +25,5 @@ class Nota(models.Model):
     titulo =  models.CharField(max_length=100, default="PROVA")
     # usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notas', default=1)
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            super().save(*args, **kwargs) 
-            self.titulo = f'P{self.id}'
-            self.save(update_fields=['titulo']) 
-        else:
-            super().save(*args, **kwargs)
-
     def __str__(self):
         return f'{self.aluno.nome} - {self.turma.nome}: {self.valor}'
