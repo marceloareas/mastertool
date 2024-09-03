@@ -1,10 +1,12 @@
 .icon__delete {
   font-size: 16px;
+  color: red;
 }
 
 .button__delete {
   width: 17px;
   height: 17px;
+  padding: 0;
 
   mat-icon{
     width: 17px;
@@ -25,7 +27,7 @@
 
   &__button {
     display: flex;
-    gap: 20px;
+    gap: 10px;
   }
 
   h2,
@@ -44,7 +46,8 @@
 
     .action-button {
       display: flex;
-      gap: 10px;
+      width: 100%;
+      justify-content: space-between;
     }
   }
 

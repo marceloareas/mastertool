@@ -24,18 +24,24 @@
         Editar Notas
       </button>
       } @else{
-      <button mat-stroked-button (click)="addNewColumn()">
+      <button mat-stroked-button color="primary" (click)="addNewColumn()">
         Adicionar Nota
       </button>
-      <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+      <div class="bar__top__button">
+        <button mat-stroked-button (click)="teste2()">Cancelar</button>
+        <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+      </div>
       }
     </div>
   </div>
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+  <table mat-table [dataSource]="data" class="mat-elevation-z8">
     <!-- Nome Column -->
     <ng-container matColumnDef="nome">
       <th mat-header-cell *matHeaderCellDef width="200px">Alunos</th>
-      <td mat-cell *matCellDef="let element">{{ element.matricula }} - {{ element.nome }}</td>
+      <td mat-cell *matCellDef="let element">
+        {{ element.matricula }} - {{ element.nome }}
+      </td>
     </ng-container>
 
     <!-- Dynamic Nota Columns -->
@@ -43,17 +49,29 @@
     @for(notaCol of notaColumns; track notaCol ){
     <ng-container [matColumnDef]="notaCol">
       <th mat-header-cell *matHeaderCellDef width="50px">
-        {{ notaCol }}
-        <button mat-icon-button class="button__delete" (click)="removeColumn(notaColIndex(notaCol))">
+        <input
+        [ngClass]="mode === 'EDIT' ? 'teste' : ''"
+        matInput
+        type="text"
+        [value]="notaCol"
+        (blur)="updateColumnName($event, $index)"
+        placeholder="Digite o nome"
+      />
+        @if(mode !== 'VIEW'){
+        <button
+          mat-icon-button
+          class="button__delete"
+          (click)="removeColumn(notaCol)"
+        >
           <mat-icon class="icon__delete" fontIcon="delete"></mat-icon>
         </button>
+        }
       </th>
       <td mat-cell *matCellDef="let element">
         <input
           [ngClass]="mode === 'EDIT' ? 'teste' : ''"
           matInput
           type="number"
-
           [value]="getNota(element, notaColIndex(notaCol))"
           (input)="handleNotaChange($event, element, notaColIndex(notaCol))"
           [disabled]="mode === 'VIEW'"
