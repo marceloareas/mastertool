@@ -76,15 +76,14 @@ def excluir_aluno(request, matricula):
     usuario = request.user
     try:
         aluno   = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
-        try:
-            turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
+        
+        turmas = Turma.objects.filter(aluno=aluno, usuario=usuario)
+        if turmas: 
             for turma in turmas:
                 turma.aluno.remove(aluno)
 
-                aluno.delete()
-                return JsonResponse({'mensagem': 'Aluno excluído.'})
-        except ObjectDoesNotExist:
-            return HttpResponseNotFound("Turma não encontrada")
+        aluno.delete()
+        return JsonResponse({'mensagem': 'Aluno excluído.'})
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Aluno não encontrad")
     
