@@ -81,7 +81,7 @@ def excluir_aluno(request, matricula):
         if turmas: 
             for turma in turmas:
                 turma.aluno.remove(aluno)
-
+                Nota.objects.filter(aluno=aluno, turma=turma).delete()
         aluno.delete()
         return JsonResponse({'mensagem': 'Aluno excluído.'})
     except ObjectDoesNotExist:
