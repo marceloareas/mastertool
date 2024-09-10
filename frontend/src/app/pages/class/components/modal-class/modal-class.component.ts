@@ -57,10 +57,10 @@ export class ModalClassComponent {
           const result = confirm('Existem alunos que não foram cadastrados. Deseja cadastrar?');
 
           if (result) {
-           const data = response.alunos_nao_criados.map((aluno: { matricula: string; nome: string; }) => {
+           let data = response.alunos_nao_criados.map((aluno: { matricula: string; nome: string; }) => {
             return aluno.matricula + ', ' + aluno.nome
            })
-           console.log(data.join('\r\n'))
+           data = data.join(' ')
 
             this.studentService.post(data).subscribe(() => {
               alert('Cadastrado com sucesso');
