@@ -156,42 +156,9 @@ def editar_turma(request, id):
     usuario = request.user
     data    = request.data
 
-    try:
-        turma = Turma.objects.filter(id=id, usuario=usuario).first()
+    turma_editada = atualizar_turma(id, data, usuario)
+    return JsonResponse(turma_editada, safe=False)
 
-        if 'matricula' in data:
-            try:
-                aluno_existente = Aluno.objects.filter(turma=turma, usuario=usuario).first()
-                aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
-
-                turma.aluno.add(aluno) 
-                if aluno_existente:
-                    numero_notas = Nota.objects.filter(turma=turma, aluno=aluno_existente)
-                    for nota in numero_notas:
-                        Nota.objects.create(
-                            aluno=aluno,
-                            turma=turma,
-                            titulo=nota.titulo,
-                            valor=None
-                        )
-            except ObjectDoesNotExist:
-                return HttpResponseNotFound("Aluno não encontrado")
-        elif 'removerMatricula' in data:
-            try:
-                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
-                Nota.objects.filter(aluno=aluno, turma=turma).delete()
-                turma.aluno.remove(aluno) 
-            except ObjectDoesNotExist:
-                return HttpResponseNotFound("Aluno não encontrado")
-        else:
-            turma.nome    = data['nome']
-            turma.periodo = data['periodo']
-        turma.save()
-
-        return JsonResponse({'mensagem': 'Turma editada.'})
-    except ObjectDoesNotExist:
-        return HttpResponseNotFound("Turma não encontrada")
-    
 # -----------------------------------------------------------------------------------------------
 # ---------------------------------------- VIEWS NOTAS ------------------------------------------
 # -----------------------------------------------------------------------------------------------

@@ -1,14 +1,17 @@
 from .models import *
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse, HttpResponseNotFound
 
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS ALUNOS -----------------------------------------
 # -----------------------------------------------------------------------------------------------
 
 def cadastro_alunos_txt(data, usuario):
-    alunos = []
-    alunos_criados = []
-    conteudo_arquivo = data['turma']
-    linhas = conteudo_arquivo.splitlines()
+    alunos              = []
+    alunos_criados      = []
+    id_turma            = data.get('id', None)
+    conteudo_arquivo    = data['turma']
+    linhas              = conteudo_arquivo.splitlines()
 
     for linha in linhas:
         matricula, nome = linha.split(', ')
@@ -30,6 +33,9 @@ def cadastro_alunos_txt(data, usuario):
         aluno = Aluno(nome=nome, matricula=matricula)
         aluno.save()
         aluno.usuario.add(usuario)
+    if id_turma:
+        adicionar_aluno(id_turma, alunos, usuario)
+    
     return alunos_criados
 
 def encontrar_aluno(matricula, usuario):
@@ -138,3 +144,50 @@ def encontrar_turma(id, usuario):
         }
         turmas_json.append(turma_dict)
     return turmas_json
+
+def atualizar_turma(id, data, usuario):
+    try:
+        turma = Turma.objects.filter(id=id, usuario=usuario).first()
+
+        if 'matricula' in data:
+            try:
+                aluno_existente = Aluno.objects.filter(turma=turma, usuario=usuario).first()
+                aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
+
+                turma.aluno.add(aluno) 
+                if aluno_existente:
+                    numero_notas = Nota.objects.filter(turma=turma, aluno=aluno_existente)
+                    for nota in numero_notas:
+                        Nota.objects.create(
+                            aluno=aluno,
+                            turma=turma,
+                            titulo=nota.titulo,
+                            valor=None
+                        )
+            except ObjectDoesNotExist:
+                return HttpResponseNotFound("Aluno não encontrado")
+        elif 'removerMatricula' in data:
+            try:
+                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+                Nota.objects.filter(aluno=aluno, turma=turma).delete()
+                turma.aluno.remove(aluno) 
+            except ObjectDoesNotExist:
+                return HttpResponseNotFound("Aluno não encontrado")
+        else:
+            turma.nome    = data['nome']
+            turma.periodo = data['periodo']
+        turma.save()
+        return ({'mensagem': 'Turma editada.'})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Turma não encontrada")
+    
+def adicionar_aluno(id, alunos, usuario):
+    try:
+        turma = Turma.objects.filter(id=id, usuario=usuario).first()
+
+        for aluno in alunos:
+            aluno = Aluno.objects.filter(matricula=aluno['matricula'], usuario=usuario).first()
+
+            turma.aluno.add(aluno) 
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Aluno não encontrado")
