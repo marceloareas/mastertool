@@ -68,7 +68,7 @@ def cadastro_turma_txt(data, usuario):
         if Aluno.objects.filter(matricula=aluno['matricula']).first():
             matriculas.append(aluno['matricula'])
         else:
-            alunos_nao_criados.append(matricula)
+            alunos_nao_criados.append(aluno)
     alunos_existentes = Aluno.objects.filter(matricula__in=matriculas, usuario=usuario)
     nova_turma.aluno.add(*alunos_existentes)
 
