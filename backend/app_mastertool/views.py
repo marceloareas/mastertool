@@ -115,10 +115,12 @@ def cadastrar_turma(request):
 
         alunos_criados = resultado.get('alunos_criados', [])
         alunos_nao_criados = resultado.get('alunos_nao_criados', [])
+        id_turma = resultado.get('id_turma', [])
 
         if alunos_criados:
             response_data = {
                 'mensagem': 'Arquivo processado com sucesso.',
+                'id_turma': id_turma,
                 'alunos_criados': [aluno.nome for aluno in alunos_criados],
                 'alunos_nao_criados': alunos_nao_criados
             }

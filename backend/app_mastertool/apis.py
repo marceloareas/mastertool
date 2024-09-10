@@ -73,9 +73,9 @@ def cadastro_turma_txt(data, usuario):
     nova_turma.aluno.add(*alunos_existentes)
 
     if alunos_nao_criados:
-        return {'alunos_criados': alunos_existentes, 'alunos_nao_criados': alunos_nao_criados}
+        return {'id_turma': nova_turma.id, 'alunos_criados': alunos_existentes, 'alunos_nao_criados': alunos_nao_criados}
     else:
-        return {'alunos_criados': alunos_existentes}
+        return {'id_turma': nova_turma.id, 'alunos_criados': alunos_existentes}
 
 def encontrar_turma(id, usuario):
     if id:
