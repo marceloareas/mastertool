@@ -53,27 +53,29 @@ export class ModalClassComponent {
     if (this.data.mode == 'ADD') {
       this.classService.post(singleClass).subscribe((response) => {
         if (response.alunos_nao_criados.length > 0) {
-
-          const result = confirm('Existem alunos que não foram cadastrados. Deseja cadastrar?');
+          const result = confirm(
+            'Existem alunos que não foram cadastrados. Deseja cadastrar?'
+          );
 
           if (result) {
-           let data = response.alunos_nao_criados.map((aluno: { matricula: string; nome: string; }) => {
-            return aluno.matricula + ', ' + aluno.nome
-           })
-           data = data.join(' ')
+            let data = response.alunos_nao_criados.map(
+              (aluno: { matricula: string; nome: string }) => {
+                return aluno.matricula + ', ' + aluno.nome;
+              }
+            );
+
+            data = { turma: data.join('\r\n'), id: response.id_turma };
 
             this.studentService.post(data).subscribe(() => {
               alert('Cadastrado com sucesso');
               this.dialogRef.close(true);
             });
-
           }
         } else {
           alert('Cadastrado com sucesso');
         }
 
         this.dialogRef.close(true);
-
       });
     } else {
       const dataClass = {
