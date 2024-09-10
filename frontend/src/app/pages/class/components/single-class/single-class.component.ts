@@ -122,6 +122,18 @@ export class SingleClassComponent implements OnInit {
    */
   removeColumn(name: string) {
     const data = { titulo: name };
+    // Remove a coluna da lista de notas
+    const index = this.notaColumns.indexOf(name);
+    if (index !== -1) {
+      this.notaColumns.splice(index, 1);
+    }
+
+    // Remove a coluna da lista de colunas exibidas
+    const colIndex = this.displayedColumns.indexOf(name);
+    if (colIndex !== -1) {
+      this.displayedColumns.splice(colIndex, 1);
+    }
+
     this.classService.postNota(this.class.id, data).subscribe(() => {
       alert('Coluna removida com sucesso!');
       this.closeModal();
@@ -172,8 +184,10 @@ export class SingleClassComponent implements OnInit {
       const notaIndex = element.notas.findIndex(
         (nota: any) => nota.titulo === columnName
       );
+
       if (notaIndex !== -1) {
-        element.notas[notaIndex].valor = value;
+        element.notas[notaIndex].valor = value === '' ? null : value;
+        console.log('nota', value);
       } else {
         console.error(
           `Nota com título "${columnName}" não encontrada para o aluno.`
@@ -227,7 +241,7 @@ export class SingleClassComponent implements OnInit {
   openModalStudent() {
     this.dialog
       .open(StudentClassModalComponent, {
-        data: { class: this.class.id },
+        data: { class: this.class },
       })
       .afterClosed()
       .subscribe(() => {
@@ -255,6 +269,7 @@ export class SingleClassComponent implements OnInit {
    */
   save() {
     this.mode = 'VIEW';
+    console.log('salvar', this.dataSource.data);
     this.classService
       .postNota(this.class.id, this.dataSource.data)
       .subscribe(() => {
@@ -275,10 +290,12 @@ export class SingleClassComponent implements OnInit {
         const valor = parseFloat(elemento.valor);
         return valor !== null && valor !== undefined && !isNaN(valor);
       })
-      .map((item: { valor: any }) => parseFloat(item.valor)) // Converte diretamente para número
+      .map((item: { valor: any }) => parseFloat(item.valor)); // Converte diretamente para número
 
     // Filtra valores inválidos novamente após a conversão
-    const valoresNumericos = arraySemNulls.filter((valor: number) => !isNaN(valor));
+    const valoresNumericos = arraySemNulls.filter(
+      (valor: number) => !isNaN(valor)
+    );
 
     const soma = valoresNumericos.reduce(
       (acumulador: number, valor: number) => acumulador + valor,
@@ -289,5 +306,4 @@ export class SingleClassComponent implements OnInit {
     // Retorna a média arredondada para 1 casa decimal
     return media.toFixed(1);
   }
-
 }

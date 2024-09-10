@@ -1,3 +1,4 @@
+import { response } from 'express';
 import { FormClassComponent } from './../form-class/form-class.component';
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject, ViewChild, inject } from '@angular/core';
@@ -12,6 +13,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ClassService } from '../../../../services/class/class.service';
+import { StudentService } from '../../../../services/student/student.service';
 
 @Component({
   selector: 'app-modal-class',
@@ -31,6 +33,7 @@ import { ClassService } from '../../../../services/class/class.service';
 })
 export class ModalClassComponent {
   private dialogRef = inject(DialogRef);
+  private studentService = inject(StudentService);
   private classService = inject(ClassService);
 
   @ViewChild(FormClassComponent) formClassComponent!: FormClassComponent;
@@ -39,8 +42,8 @@ export class ModalClassComponent {
     @Inject(MAT_DIALOG_DATA) public data: { singleClass: any; mode: string }
   ) {}
 
-  ngOnInit(){
-    console.log(this.data.singleClass)
+  ngOnInit() {
+    console.log(this.data.singleClass);
   }
   /**
    * Salva as informações da classe, criando uma nova classe ou atualizando uma existente.
@@ -48,9 +51,29 @@ export class ModalClassComponent {
    */
   save(singleClass: any) {
     if (this.data.mode == 'ADD') {
-      this.classService.post(singleClass).subscribe(() => {
-        alert('Cadastrado com sucesso');
+      this.classService.post(singleClass).subscribe((response) => {
+        if (response.alunos_nao_criados.length > 0) {
+
+          const result = confirm('Existem alunos que não foram cadastrados. Deseja cadastrar?');
+
+          if (result) {
+           const data = response.alunos_nao_criados.map((aluno: { matricula: string; nome: string; }) => {
+            return aluno.matricula + ', ' + aluno.nome
+           })
+           console.log(data.join('\r\n'))
+
+            this.studentService.post(data).subscribe(() => {
+              alert('Cadastrado com sucesso');
+              this.dialogRef.close(true);
+            });
+
+          }
+        } else {
+          alert('Cadastrado com sucesso');
+        }
+
         this.dialogRef.close(true);
+
       });
     } else {
       const dataClass = {

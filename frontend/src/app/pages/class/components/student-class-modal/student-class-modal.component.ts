@@ -36,10 +36,10 @@ export class StudentClassModalComponent{
   @ViewChild(StudentClassFormComponent)
   studentClassForm!: StudentClassFormComponent;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { class: string }) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { class: any }) {}
 
   save(singleClass: any) {
-    this.classService.put(this.data.class,singleClass).subscribe(() => {
+    this.classService.put(this.data.class.id,singleClass).subscribe(() => {
       alert('Cadastrado com sucesso');
       this.dialogRef.close(true);
     });

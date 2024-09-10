@@ -22,6 +22,7 @@ export class StudentClassFormComponent {
   private student = inject(StudentService);
 
   @Output() formClass: EventEmitter<any> = new EventEmitter();
+  @Input() class: any;
 
   constructor(private fb: FormBuilder) {}
   students: any;
@@ -33,9 +34,28 @@ export class StudentClassFormComponent {
     this.getStudent();
   }
 
-  getStudent(){
+  getStudent() {
     this.student.get().subscribe((data) => {
-      this.students = data;
+      this.students = this.class.alunos
+        .filter(
+          (aluno1: { nome: any; matricula: any }) =>
+            !data.some(
+              (aluno2: { nome: any; matricula: any }) =>
+                aluno1.nome === aluno2.nome &&
+                aluno1.matricula === aluno2.matricula
+            )
+        )
+        .concat(
+          data.filter(
+            (aluno2: { nome: any; matricula: any }) =>
+              !this.class.alunos.some(
+                (aluno1: { nome: any; matricula: any }) =>
+                  aluno2.nome === aluno1.nome &&
+                  aluno2.matricula === aluno1.matricula
+              )
+          )
+        );
+        console.log(this.students)
     });
   }
 

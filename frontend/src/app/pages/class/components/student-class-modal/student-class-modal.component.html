@@ -3,6 +3,7 @@
 
   <mat-dialog-content class="mat-typography">
     <app-student-class-form
+    [class]="data.class"
       (formClass)="save($event)"
     />
   </mat-dialog-content>
