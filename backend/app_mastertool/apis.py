@@ -78,6 +78,12 @@ def cadastro_turma_txt(data, usuario):
     alunos_existentes = Aluno.objects.filter(matricula__in=matriculas, usuario=usuario)
     nova_turma.aluno.add(*alunos_existentes)
 
+    for aluno in alunos_nao_criados:
+        novo_aluno = Aluno(matricula=aluno['matricula'], nome=aluno['nome'])
+        novo_aluno.save()
+        novo_aluno.usuario.set([usuario])
+        nova_turma.aluno.add(novo_aluno)
+
     if alunos_nao_criados:
         return {'id_turma': nova_turma.id, 'alunos_criados': alunos_existentes, 'alunos_nao_criados': alunos_nao_criados}
     else:
