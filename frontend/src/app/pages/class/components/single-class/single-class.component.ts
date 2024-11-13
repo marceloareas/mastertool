@@ -42,6 +42,13 @@ import { CommonModule } from '@angular/common';
 export class SingleClassComponent implements OnInit {
   private classService = inject(ClassService);
 
+  discardCount: number = 1;  // Valor padrão
+  getFilteredNotes() {
+    // Ordena as notas em ordem crescente e descarta as menores conforme discardCount
+    const sortedNotes = [...this.notaColumns].sort((a, b) => Number(a) - Number(b));
+    return sortedNotes.slice(this.discardCount);
+}
+
   @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
   @Output() closeModalEvent: EventEmitter<any> = new EventEmitter();
   @Input() class!: any;
@@ -140,6 +147,51 @@ export class SingleClassComponent implements OnInit {
       this.getClass();
     });
   }
+
+
+  /**
+   * Remove as menores notas selecionadas.
+   */
+  removeLowestColumns(count: number) {
+    // Ordena as colunas de nota em ordem crescente
+    const sortedColumns = [...this.notaColumns].sort((a, b) => Number(a) - Number(b));
+
+  
+    // Seleciona as menores colunas (notas) com base na quantidade `count`
+    const columnsToRemove = sortedColumns.slice(0, count);
+  
+    columnsToRemove.forEach((name) => {
+      const data = { titulo: name };
+      
+      // Remove a coluna da lista de notas
+      const index = this.notaColumns.indexOf(name);
+      if (index !== -1) {
+        this.notaColumns.splice(index, 1);
+      }
+  
+      // Remove a coluna da lista de colunas exibidas
+      const colIndex = this.displayedColumns.indexOf(name);
+      if (colIndex !== -1) {
+        this.displayedColumns.splice(colIndex, 1);
+      }
+  
+      // Envia a requisição para remover a nota na API
+      this.classService.postNota(this.class.id, data).subscribe({
+        next: () => {
+          console.log(`Coluna ${name} removida com sucesso!`);
+        },
+        error: (err) => {
+          console.error(`Erro ao remover coluna ${name}:`, err);
+        },
+      });
+    });
+  
+    // Mostra uma mensagem de sucesso após remover todas as colunas
+    alert(`${count} menores colunas removidas com sucesso!`);
+    this.closeModal();
+    this.getClass();
+  }
+  
 
   /**
    * Atualiza o nome da coluna com base na entrada do usuário.

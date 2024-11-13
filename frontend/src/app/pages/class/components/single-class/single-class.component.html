@@ -14,6 +14,15 @@
       <button mat-stroked-button (click)="openModalClass(class, 'EDIT')">
         Editar turma
       </button>
+      <label for="discard-notes">Quantidade de notas a descartar:</label>
+      <select id="discard-notes" [(ngModel)]="discardCount">
+          <option *ngFor="let count of availableCounts" [value]="count">{{ count }}</option>
+      </select>
+      <div *ngFor="let note of getFilteredNotes()">
+        {{ note }}
+    </div>
+    
+
     </div>
   </div>
 

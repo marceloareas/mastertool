@@ -1,0 +1,4 @@
+Para rodar a aplicação 
+    1. Primeiro verificar se o servidor está conectado.
+        a) Rodas o comando python manage.py runserver no terminal do backend
+    2. Rodar o comando ng serve no terminal do frontend 
