@@ -72,7 +72,6 @@ export class ModalStudentComponent implements OnInit {
       alert('O nome não pode estar em branco.');
       return;
     }
-    
     if (matricula) {
       this.checkMatricula(matricula);
     }
@@ -82,7 +81,6 @@ export class ModalStudentComponent implements OnInit {
         : { turma: this.file };
       
       this.studentService.post(data).subscribe(() => {
-        console.log(data)
         alert('Cadastrado com sucesso');
         this.dialogRef.close(true);
       });
