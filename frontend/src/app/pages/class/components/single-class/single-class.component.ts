@@ -51,6 +51,7 @@ export class SingleClassComponent implements OnInit {
   displayedColumns: string[] = ['nome', 'editar'];
   notaColumns: string[] = [];
   dataSource!: MatTableDataSource<any>;
+  pesos: Record<string, number> = {};
 
   mode: string = 'VIEW';
 
@@ -108,11 +109,14 @@ export class SingleClassComponent implements OnInit {
       0,
       newColumn
     );
-
+  
+    // Define o peso inicial como 1
+    this.pesos[newColumn] = 1;
+  
     this.dataSource.data.forEach((aluno: any) => {
       aluno.notas.push({ titulo: newColumn, valor: null });
     });
-
+  
     this.refreshTable();
   }
 
@@ -196,6 +200,18 @@ export class SingleClassComponent implements OnInit {
     }
   }
 
+  updatePeso(event: Event, columnName: string) {
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement) {
+      const newPeso = parseFloat(inputElement.value);
+      if (!isNaN(newPeso) && newPeso > 0) {
+        this.pesos[columnName] = newPeso; // Atualiza o peso no objeto 'pesos'
+        console.log(`Peso atualizado para a coluna "${columnName}":`, newPeso);
+      }
+    }
+  }
+  
+
   /**
    * Altera o modo do componente (por exemplo, `VIEW` ou `EDIT`).
    * @param mode Novo modo para o componente.
@@ -278,32 +294,46 @@ export class SingleClassComponent implements OnInit {
       });
   }
 
-  /**
-   * Calcula a média das notas de um aluno, ignorando valores nulos e retornando a média formatada com uma casa decimal.
-   * @param element Objeto do aluno.
-   * @returns Média das notas formatada com uma casa decimal.
-   */
-  media(element: any) {
-    const arraySemNulls = element.notas
-      ?.filter((elemento: any) => {
-        // Verifica se o valor é válido e não é NaN
-        const valor = parseFloat(elemento.valor);
-        return valor !== null && valor !== undefined && !isNaN(valor);
-      })
-      .map((item: { valor: any }) => parseFloat(item.valor)); // Converte diretamente para número
-
-    // Filtra valores inválidos novamente após a conversão
-    const valoresNumericos = arraySemNulls.filter(
-      (valor: number) => !isNaN(valor)
-    );
-
-    const soma = valoresNumericos.reduce(
-      (acumulador: number, valor: number) => acumulador + valor,
-      0
-    );
-    const media = valoresNumericos.length ? soma / valoresNumericos.length : 0;
-
-    // Retorna a média arredondada para 1 casa decimal
-    return media.toFixed(1);
+  getPeso(columnName: string): number {
+    return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
   }
+
+/**
+ * Calcula a média ponderada das notas de um aluno.
+ * Ignora valores nulos ou inválidos e retorna a média formatada com uma casa decimal.
+ * @param element Objeto do aluno.
+ * @returns Média ponderada das notas formatada com uma casa decimal.
+ */
+media(element: any): string {
+  // Filtra as notas válidas que possuem valor e peso
+  const notasValidas = element.notas?.filter((nota: any) => {
+    const valor = parseFloat(nota.valor);
+    const peso = this.pesos[nota.titulo] || 1; // Obtém o peso atualizado ou usa 1 como padrão
+    return !isNaN(valor) && valor !== null && peso > 0;
+  });
+
+  // Se não houver notas válidas, retorna "0.0"
+  if (!notasValidas || notasValidas.length === 0) {
+    return "0.0";
+  }
+
+  // Calcula o somatório ponderado das notas e o somatório dos pesos
+  const { somaPonderada, somaPesos } = notasValidas.reduce(
+    (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
+      const valorNota = parseFloat(nota.valor);
+      const peso = this.pesos[nota.titulo] || 1; // Obtém o peso atualizado ou usa 1 como padrão
+      acc.somaPonderada += valorNota * peso;
+      acc.somaPesos += peso;
+      return acc;
+    },
+    { somaPonderada: 0, somaPesos: 0 }
+  );
+
+  // Calcula a média ponderada (evitando divisão por zero)
+  const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
+
+  // Retorna a média formatada com uma casa decimal
+  return media.toFixed(1);
+}
+
 }

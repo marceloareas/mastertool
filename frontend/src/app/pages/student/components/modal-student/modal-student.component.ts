@@ -63,15 +63,7 @@ export class ModalStudentComponent implements OnInit {
     const matricula = student?.matricula;
     const nome = student?.nome;
 
-    if (!matricula) {
-      alert('A matrícula é obrigatória.');
-      return;
-    }
 
-    if (!nome || nome.trim() === '') {
-      alert('O nome não pode estar em branco.');
-      return;
-    }
     if (matricula) {
       this.checkMatricula(matricula);
     }

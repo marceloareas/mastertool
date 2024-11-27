@@ -44,19 +44,29 @@
       </td>
     </ng-container>
 
-    <!-- Dynamic Nota Columns -->
 
-    @for(notaCol of notaColumns; track notaCol ){
-    <ng-container [matColumnDef]="notaCol">
-      <th mat-header-cell *matHeaderCellDef width="50px">
+
+<!-- Dynamic Nota Columns -->
+@for(notaCol of notaColumns; track notaCol ){
+  <ng-container [matColumnDef]="notaCol">
+    <th mat-header-cell *matHeaderCellDef width="100px">
+      <div class="header-cell">
         <input
-        [ngClass]="mode === 'EDIT' ? 'edit' : ''"
-        matInput
-        type="text"
-        [value]="notaCol"
-        (blur)="updateColumnName($event, $index)"
-        placeholder="Digite o nome"
-      />
+          [ngClass]="mode === 'EDIT' ? 'edit' : ''"
+          matInput
+          type="text"
+          [value]="notaCol"
+          (blur)="updateColumnName($event, $index)"
+          placeholder="Digite o nome"
+        />
+        <input
+          matInput
+          type="number"
+          [value]="getPeso(notaCol)"
+          (input)="updatePeso($event, notaCol)"
+          [disabled]="mode === 'VIEW'"
+          placeholder="Peso"
+        />
         @if(mode !== 'VIEW'){
         <button
           mat-icon-button
@@ -66,19 +76,21 @@
           <mat-icon class="icon__delete" fontIcon="delete"></mat-icon>
         </button>
         }
-      </th>
-      <td mat-cell *matCellDef="let element">
-        <input
-          [ngClass]="mode === 'EDIT' ? 'edit' : ''"
-          matInput
-          type="number"
-          [value]="element.notas[$index]?.valor"
-          (input)="updateNota($event, element, notaCol)"
-          [disabled]="mode === 'VIEW'"
-        />
-      </td>
-    </ng-container>
-    }
+      </div>
+    </th>
+    <td mat-cell *matCellDef="let element">
+      <input
+        [ngClass]="mode === 'EDIT' ? 'edit' : ''"
+        matInput
+        type="number"
+        [value]="element.notas[$index]?.valor"
+        (input)="updateNota($event, element, notaCol)"
+        [disabled]="mode === 'VIEW'"
+      />
+    </td>
+  </ng-container>
+  }
+  
 
     <ng-container matColumnDef="media">
       <th mat-header-cell *matHeaderCellDef width="50px">Média</th>
