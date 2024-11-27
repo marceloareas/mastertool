@@ -24,4 +24,9 @@
     </mat-select>
   </mat-form-field>
 
+  @if(mode == "ADD"){
+    <label for="avatar">Subir arquivo:</label>
+    <input type="file" id="avatar" (change)="onFileChange($event)" />
+  }
+
 </form>
