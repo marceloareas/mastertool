@@ -60,11 +60,27 @@ export class ModalStudentComponent implements OnInit {
    * @param mode Modo de operação, pode ser 'ADD' ou outro para atualização.
    */
   save(student?: any, mode = this.data.mode) {
+    const matricula = student?.matricula;
+    const nome = student?.nome;
+
+    if (!matricula) {
+      alert('A matrícula é obrigatória.');
+      return;
+    }
+
+    if (!nome || nome.trim() === '') {
+      alert('O nome não pode estar em branco.');
+      return;
+    }
+    
+    if (matricula) {
+      this.checkMatricula(matricula);
+    }
     if (mode == 'ADD') {
       const data = student.matricula
         ? { turma: student.matricula + ', ' + student.nome }
         : { turma: this.file };
-
+      
       this.studentService.post(data).subscribe(() => {
         console.log(data)
         alert('Cadastrado com sucesso');
@@ -76,9 +92,27 @@ export class ModalStudentComponent implements OnInit {
         .subscribe(() => {
           alert('Registro atualizado');
           this.dialogRef.close(true);
-        });
+        }
+      )
+      
     }
   }
+
+  /**
+ * Verifica se a matrícula já existe no sistema.
+ * @param matricula Matrícula do estudante.
+ * @returns Observable com um booleano indicando se a matrícula existe.
+ */
+checkMatricula(matricula: string): void {
+  this.studentService.get(matricula).subscribe(
+    (existingStudent) => {
+      if (existingStudent) {
+        alert('Aluno com esta matrícula já existe no sistema.');
+      }
+    }
+  );
+}
+
 
   /**
    * Obtém os dados do estudante com base na matrícula fornecido.

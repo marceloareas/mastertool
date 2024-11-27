@@ -66,6 +66,20 @@ export class StudentComponent {
     });
   }
 
+/**
+ * Verifica se um aluno já existe na base de dados.
+ * @param matricula Matricula do estudante a ser verificado.
+ */
+alunoExiste(matricula: string) {
+  this.student.alunoExiste(matricula).subscribe(
+    (response) => {
+      if (response.existe)
+        alert(`Aluno com matrícula ${matricula} já existe!`);
+    }
+  );
+}
+
+
   /**
    * Abre um modal para adicionar ou editar um estudante.
    * @param data Dados do estudante para edição, se disponível.
@@ -82,6 +96,7 @@ export class StudentComponent {
         this.getStudent();
       });
   }
+  
 
   /**
    * Filtra os dados da tabela com base no valor de entrada.

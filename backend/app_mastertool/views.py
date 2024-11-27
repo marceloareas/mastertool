@@ -49,6 +49,12 @@ def login(request):
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS ALUNOS ----------------------------------------
 # -----------------------------------------------------------------------------------------------
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def aluno_existe(request, matricula):
+        aluno = Aluno.objects.filter(matricula=matricula, usuario=request.user).first()
+        if aluno:
+            return JsonResponse({'existe': True, 'mensagem': f'Aluno com matrícula {matricula} já existe.'}, status=200)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
