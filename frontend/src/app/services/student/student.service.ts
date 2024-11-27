@@ -29,12 +29,5 @@ export class StudentService {
 
   delete = (id: string) => {
     return this.http.delete<any>('http://127.0.0.1:8000/alunos/excluir/' + id);
-  };
-
-  alunoExiste(matricula: string) {
-    return this.http.get<any>(
-      `http://127.0.0.1:8000/alunos/existe/${matricula}`
-    );
-  }
-  
+  };  
 }
