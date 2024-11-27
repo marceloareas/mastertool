@@ -26,4 +26,11 @@ urlpatterns = [
     # # url de notas
     path('notas/<str:id>', views.adicionar_nota, name='adicionar_nota'),
 
+    # url de projetos
+    path('projetos/', views.get_projetos, name='get_projetos'),
+    path('projetos/<str:id>', views.get_projetos, name='get_projeto'),
+    path('projetos/cadastrar/', views.cadastrar_projeto, name='cadastrar_projeto'),
+    path('projetos/excluir/<str:id>', views.excluir_projeto, name='excluir_projeto'),
+    path('projetos/editar/<str:id>', views.editar_projeto, name='editar_projeto'),
+
 ]

@@ -191,3 +191,87 @@ def adicionar_aluno(id, alunos, usuario):
             turma.aluno.add(aluno) 
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Aluno não encontrado")
+
+# -----------------------------------------------------------------------------------------------
+# ----------------------------------------- APIS PROJETOS ---------------------------------------
+# -----------------------------------------------------------------------------------------------
+
+def cadastro_projeto(data, usuario):
+    try:
+        projeto = Projeto(
+            data_inicio=data['data_inicio'],
+            data_fim=data.get('data_fim', None),
+            nome=data['nome'],
+            descricao=data.get('descricao', ''),
+            periodo=data.get('periodo', ''),
+            usuario=usuario
+        )
+        projeto.save()
+        if 'alunos' in data:
+            alunos = Aluno.objects.filter(matricula__in=data['alunos'], usuario=usuario)
+            projeto.aluno.add(*alunos)
+        return JsonResponse({'mensagem': 'Projeto cadastrado com sucesso.', 'id': projeto.id})
+    except Exception as e:
+        return JsonResponse({'erro': str(e)}, status=400)
+
+
+def encontrar_projeto(id=None, usuario=None):
+    if id:
+        try:
+            projeto = Projeto.objects.get(id=id, usuario=usuario)
+            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+            projeto_json = {
+                'id': projeto.id,
+                'nome': projeto.nome,
+                'descricao': projeto.descricao,
+                'data_inicio': projeto.data_inicio,
+                'data_fim': projeto.data_fim,
+                'periodo': projeto.periodo,
+                'alunos': alunos_json,
+            }
+            return JsonResponse(projeto_json)
+        except ObjectDoesNotExist:
+            return HttpResponseNotFound("Projeto não encontrado")
+    else:
+        projetos = Projeto.objects.filter(usuario=usuario)
+        projetos_json = []
+        for projeto in projetos:
+            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+            projetos_json.append({
+                'id': projeto.id,
+                'nome': projeto.nome,
+                'descricao': projeto.descricao,
+                'data_inicio': projeto.data_inicio,
+                'data_fim': projeto.data_fim,
+                'periodo': projeto.periodo,
+                'alunos': alunos_json,
+            })
+        return JsonResponse(projetos_json, safe=False)
+
+
+def atualizar_projeto(id, data, usuario):
+    try:
+        projeto = Projeto.objects.get(id=id, usuario=usuario)
+        projeto.nome = data.get('nome', projeto.nome)
+        projeto.descricao = data.get('descricao', projeto.descricao)
+        projeto.data_inicio = data.get('data_inicio', projeto.data_inicio)
+        projeto.data_fim = data.get('data_fim', projeto.data_fim)
+        projeto.periodo = data.get('periodo', projeto.periodo)
+        if 'alunos' in data:
+            alunos = Aluno.objects.filter(matricula__in=data['alunos'], usuario=usuario)
+            projeto.aluno.set(alunos)
+        projeto.save()
+        return JsonResponse({'mensagem': 'Projeto atualizado com sucesso.'})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Projeto não encontrado")
+    except Exception as e:
+        return JsonResponse({'erro': str(e)}, status=400)
+
+
+def deletar_projeto(id, usuario):
+    try:
+        projeto = Projeto.objects.get(id=id, usuario=usuario)
+        projeto.delete()
+        return JsonResponse({'mensagem': 'Projeto deletado com sucesso.'})
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Projeto não encontrado")
