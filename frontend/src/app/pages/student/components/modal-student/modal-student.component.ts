@@ -16,7 +16,7 @@ import { AuthenticationService } from '../../../../services/authentication/authe
 import { StudentService } from '../../../../services/student/student.service';
 import { FormStudentComponent } from '../form-student/form-student.component';
 import { FormClassComponent } from '../../../class/components/form-class/form-class.component';
-import { finalize } from 'rxjs';
+import { catchError, finalize, map, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-modal-student',
@@ -44,7 +44,7 @@ export class ModalStudentComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { matricula: string; mode: string }
-  ) {}
+  ) { }
 
   ngOnInit() {
     if (this.data.matricula) {
@@ -56,52 +56,60 @@ export class ModalStudentComponent implements OnInit {
    * Salva os dados do estudante.
    * Se o modo for 'ADD', cadastra estudante(é possivel cadastrar vários estudantes através de um arquivo txt,
    * ou cadastrar somente um aluno pelo form); caso contrário, atualiza o registro existente.
-   * @param event Dados do evento do formulário.
+   * @param student Dados do estudante.
    * @param mode Modo de operação, pode ser 'ADD' ou outro para atualização.
    */
-  save(student?: any, mode = this.data.mode) {
+  async save(student?: any, mode = this.data.mode) {
     const matricula = student?.matricula;
-    const nome = student?.nome;
 
-
-    if (matricula) {
-      this.checkMatricula(matricula);
+    if (!matricula) {
+      alert('Matrícula é obrigatória.');
+      return;
     }
-    if (mode == 'ADD') {
+
+    if (mode === 'ADD') {
+      const existe = await this.verificaMatricula(matricula);
+      if (existe) {
+        alert('Aluno com esta matrícula já existe no sistema.');
+        return;
+      }
+  
+      // Cadastra um novo aluno
       const data = student.matricula
         ? { turma: student.matricula + ', ' + student.nome }
         : { turma: this.file };
-      
+  
       this.studentService.post(data).subscribe(() => {
         alert('Cadastrado com sucesso');
         this.dialogRef.close(true);
       });
     } else {
+      // Atualiza o registro existente
       this.studentService
         .put(this.data.matricula, { ...this.student, ...student })
         .subscribe(() => {
           alert('Registro atualizado');
           this.dialogRef.close(true);
-        }
-      )
-      
+        });
     }
   }
 
   /**
- * Verifica se a matrícula já existe no sistema.
- * @param matricula Matrícula do estudante.
- * @returns Observable com um booleano indicando se a matrícula existe.
- */
-checkMatricula(matricula: string): void {
-  this.studentService.get(matricula).subscribe(
-    (existingStudent) => {
-      if (existingStudent) {
-        alert('Aluno com esta matrícula já existe no sistema.');
-      }
+   * Verifica se a matrícula existe no sistema.
+   * @param matricula Matrícula do estudante.
+   * @returns Promise<boolean> indicando se a matrícula existe.
+   */
+  async verificaMatricula(matricula: string): Promise<boolean> {
+    try {
+      const response = this.studentService.get(matricula);
+      return !!response; // Retorna true se o estudante existir
+    } catch (error) {
+      return false; // Retorna false se a matrícula não existir ou ocorrer erro
     }
-  );
-}
+  }
+
+
+
 
 
   /**
