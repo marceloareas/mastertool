@@ -55,13 +55,14 @@ export class SingleClassComponent implements OnInit {
 
   mode: string = 'VIEW';
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog) { }
 
   /**
    * Método do ciclo de vida do Angular que é chamado após a construção do componente.
    * Inicializa as colunas da tabela e atualiza os dados.
    */
   ngOnInit() {
+    this.loadPesosFromLocalStorage();
     this.initializeColumns();
     this.refreshTable();
   }
@@ -109,14 +110,14 @@ export class SingleClassComponent implements OnInit {
       0,
       newColumn
     );
-  
+
     // Define o peso inicial como 1
     this.pesos[newColumn] = 1;
-  
+
     this.dataSource.data.forEach((aluno: any) => {
       aluno.notas.push({ titulo: newColumn, valor: null });
     });
-  
+
     this.refreshTable();
   }
 
@@ -199,6 +200,22 @@ export class SingleClassComponent implements OnInit {
       }
     }
   }
+  /**
+ * Salva o objeto 'pesos' no LocalStorage.
+ */
+  savePesosToLocalStorage() {
+    localStorage.setItem('pesos', JSON.stringify(this.pesos));
+  }
+  /**
+ * Carrega os pesos salvos do LocalStorage, se existirem.
+ */
+  loadPesosFromLocalStorage() {
+    const savedPesos = localStorage.getItem('pesos');
+    if (savedPesos) {
+      this.pesos = JSON.parse(savedPesos);
+      console.log('Pesos carregados do LocalStorage:', this.pesos);
+    }
+  }
 
   updatePeso(event: Event, columnName: string) {
     const inputElement = event.target as HTMLInputElement;
@@ -206,11 +223,12 @@ export class SingleClassComponent implements OnInit {
       const newPeso = parseFloat(inputElement.value);
       if (!isNaN(newPeso) && newPeso > 0) {
         this.pesos[columnName] = newPeso; // Atualiza o peso no objeto 'pesos'
+        this.savePesosToLocalStorage();  // Salva os pesos no localStorage
         console.log(`Peso atualizado para a coluna "${columnName}":`, newPeso);
       }
     }
   }
-  
+
 
   /**
    * Altera o modo do componente (por exemplo, `VIEW` ou `EDIT`).
@@ -298,42 +316,42 @@ export class SingleClassComponent implements OnInit {
     return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
   }
 
-/**
- * Calcula a média ponderada das notas de um aluno.
- * Ignora valores nulos ou inválidos e retorna a média formatada com uma casa decimal.
- * @param element Objeto do aluno.
- * @returns Média ponderada das notas formatada com uma casa decimal.
- */
-media(element: any): string {
-  // Filtra as notas válidas que possuem valor e peso
-  const notasValidas = element.notas?.filter((nota: any) => {
-    const valor = parseFloat(nota.valor);
-    const peso = this.pesos[nota.titulo] || 1; // Obtém o peso atualizado ou usa 1 como padrão
-    return !isNaN(valor) && valor !== null && peso > 0;
-  });
-
-  // Se não houver notas válidas, retorna "0.0"
-  if (!notasValidas || notasValidas.length === 0) {
-    return "0.0";
-  }
-
-  // Calcula o somatório ponderado das notas e o somatório dos pesos
-  const { somaPonderada, somaPesos } = notasValidas.reduce(
-    (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
-      const valorNota = parseFloat(nota.valor);
+  /**
+   * Calcula a média ponderada das notas de um aluno.
+   * Ignora valores nulos ou inválidos e retorna a média formatada com uma casa decimal.
+   * @param element Objeto do aluno.
+   * @returns Média ponderada das notas formatada com uma casa decimal.
+   */
+  media(element: any): string {
+    // Filtra as notas válidas que possuem valor e peso
+    const notasValidas = element.notas?.filter((nota: any) => {
+      const valor = parseFloat(nota.valor);
       const peso = this.pesos[nota.titulo] || 1; // Obtém o peso atualizado ou usa 1 como padrão
-      acc.somaPonderada += valorNota * peso;
-      acc.somaPesos += peso;
-      return acc;
-    },
-    { somaPonderada: 0, somaPesos: 0 }
-  );
+      return !isNaN(valor) && valor !== null && peso > 0;
+    });
 
-  // Calcula a média ponderada (evitando divisão por zero)
-  const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
+    // Se não houver notas válidas, retorna "0.0"
+    if (!notasValidas || notasValidas.length === 0) {
+      return "0.0";
+    }
 
-  // Retorna a média formatada com uma casa decimal
-  return media.toFixed(1);
-}
+    // Calcula o somatório ponderado das notas e o somatório dos pesos
+    const { somaPonderada, somaPesos } = notasValidas.reduce(
+      (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
+        const valorNota = parseFloat(nota.valor);
+        const peso = this.pesos[nota.titulo] || 1; // Obtém o peso atualizado ou usa 1 como padrão
+        acc.somaPonderada += valorNota * peso;
+        acc.somaPesos += peso;
+        return acc;
+      },
+      { somaPonderada: 0, somaPesos: 0 }
+    );
+
+    // Calcula a média ponderada (evitando divisão por zero)
+    const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
+
+    // Retorna a média formatada com uma casa decimal
+    return media.toFixed(1);
+  }
 
 }
