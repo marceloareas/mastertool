@@ -17,6 +17,7 @@ import { StudentService } from '../../../../services/student/student.service';
 import { FormStudentComponent } from '../form-student/form-student.component';
 import { FormClassComponent } from '../../../class/components/form-class/form-class.component';
 import { catchError, finalize, map, Observable, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-modal-student',
@@ -60,29 +61,42 @@ export class ModalStudentComponent implements OnInit {
    * @param mode Modo de operação, pode ser 'ADD' ou outro para atualização.
    */
   async save(student?: any, mode = this.data.mode) {
-    const matricula = student?.matricula;
 
-    if (!matricula) {
+    const isFileMode = !student?.matricula;
+    const matricula = student?.matricula;
+  
+    if (isFileMode && !this.file) {
+      alert('Nenhum arquivo foi fornecido para cadastro.');
+      return;
+    }
+  
+    if (!isFileMode && !matricula) {
       alert('Matrícula é obrigatória.');
       return;
     }
-
+  
     if (mode === 'ADD') {
-      const existe = await this.verificaMatricula(matricula);
-      if (existe) {
-        alert('Aluno com esta matrícula já existe no sistema.');
-        return;
+      if (!isFileMode) {
+        // Verificação para cadastro com matrícula e nome
+        const existe = await this.verificaMatricula(matricula);
+        if (existe) {
+          alert('Aluno com esta matrícula já existe no sistema.');
+          return;
+        }
+  
+        const data = { turma: matricula + ', ' + student.nome };
+        this.studentService.post(data).subscribe(() => {
+          alert('Cadastrado com sucesso');
+          this.dialogRef.close(true);
+        });
+      } else {
+        // Cadastro usando arquivo (file)
+        const data = { turma: this.file };
+        this.studentService.post(data).subscribe(() => {
+          alert('Cadastrado com sucesso via arquivo.');
+          this.dialogRef.close(true);
+        });
       }
-  
-      // Cadastra um novo aluno
-      const data = student.matricula
-        ? { turma: student.matricula + ', ' + student.nome }
-        : { turma: this.file };
-  
-      this.studentService.post(data).subscribe(() => {
-        alert('Cadastrado com sucesso');
-        this.dialogRef.close(true);
-      });
     } else {
       // Atualiza o registro existente
       this.studentService
@@ -93,20 +107,23 @@ export class ModalStudentComponent implements OnInit {
         });
     }
   }
+  
 
-  /**
-   * Verifica se a matrícula existe no sistema.
-   * @param matricula Matrícula do estudante.
-   * @returns Promise<boolean> indicando se a matrícula existe.
-   */
-  async verificaMatricula(matricula: string): Promise<boolean> {
-    try {
-      const response = this.studentService.get(matricula);
-      return !!response; // Retorna true se o estudante existir
-    } catch (error) {
-      return false; // Retorna false se a matrícula não existir ou ocorrer erro
-    }
+/**
+ * Verifica se a matrícula existe no sistema.
+ * @param matricula Matrícula do estudante.
+ * @returns Promise<boolean> indicando se a matrícula existe.
+ */
+async verificaMatricula(matricula: string): Promise<boolean> {
+  try {
+    const response = await firstValueFrom(this.studentService.get(matricula));
+    return !!response; 
+  } catch (error) {
+    console.error('Erro ao verificar matrícula:', error);
+    return false;
   }
+}
+
 
 
 
