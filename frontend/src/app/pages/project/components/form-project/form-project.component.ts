@@ -6,25 +6,27 @@ import {
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
-  selector: 'app-form-class',
+  selector: 'app-form-project',
   standalone: true,
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
-  templateUrl: './form-class.component.html',
-  styleUrl: './form-class.component.scss',
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  templateUrl: './form-project.component.html',
+  styleUrls: ['./form-project.component.scss'],
 })
-export class FormClassComponent {
+export class FormProjectComponent {
   @Input() data: any;
   @Input() mode: any;
   @Output() formClass: EventEmitter<any> = new EventEmitter();
 
   constructor(private fb: FormBuilder) {}
 
-  class: FormGroup = this.fb.group({
+  project: FormGroup = this.fb.group({
     nome: [''],
     periodo: [''],
-    turma: [null],
+    alunos: [null],
+    descricao: [''],
   });
 
   ngOnInit() {
@@ -33,44 +35,27 @@ export class FormClassComponent {
     }
   }
 
-  /**
-   * Lê o conteúdo do arquivo selecionado e o armazena no campo `turma` do formulário.
-   * @param event Evento de mudança de arquivo.
-   */
+  populateForm() {
+    console.log('Dados do formulário', this.data);
+    this.project.patchValue(this.data);
+  }
+
+  save() {
+    console.log('Dados do formulário:', this.project.value);
+    this.formClass.emit(this.project.value);
+  }
+
   onFileChange(event: any) {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        this.class.patchValue({
-          turma: reader.result,
+        this.project.patchValue({
+          alunos: reader.result,
         });
       };
       reader.readAsText(file);
     }
   }
-
-  /**
-   * Emite os dados do formulário. Dependendo do modo, pode emitir dados para adicionar ou editar uma classe.
-   */
-  save() {
-    let data;
-    if (this.mode == 'ADD') {
-      data = this.class.value;
-    } else {
-      data = {
-        nome: this.class.value.nome,
-        periodo: this.class.value.periodo,
-      };
-    }
-
-    this.formClass.emit(data);
-  }
-
-  /**
-   * Preenche o formulário com os dados fornecidos através da entrada `data`.
-   */
-  populateForm() {
-    this.class.patchValue(this.data);
-  }
+  
 }

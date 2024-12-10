@@ -6,79 +6,79 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SingleProjectComponent } from './components/single-project/single-project.component';  
-import { ProjetoService } from '../../services/projeto/projeto.service';
+import { ProjectService } from '../../services/project/project.service';
 import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource } from '@angular/material/table';
 import { StudentService } from '../../services/student/student.service';
 
 @Component({
-  selector: 'app-projeto',
+  selector: 'app-project',
   standalone: true,
   imports: [
-    ModalProjectComponent,  // Pode ser substituído por ModalProjetoComponent, se houver
+    ModalProjectComponent,  // Pode ser substituído por ModalProjectComponent, se houver
     ReactiveFormsModule,
     MatDialogModule,
     MatCardModule,
     MatIcon,
     MatButtonModule,
-    SingleProjectComponent,  // Pode ser substituído por SingleProjetoComponent, se houver
+    SingleProjectComponent,  // Pode ser substituído por SingleProjectComponent, se houver
     CommonModule,
     MatMenuModule,
   ],
-  templateUrl: './projeto.component.html',
-  styleUrls: ['./projeto.component.scss'],
+  templateUrl: './project.component.html',
+  styleUrls: ['./project.component.scss'],
 })
-export project ProjetoComponent {
-  private projetoService = inject(ProjetoService);
+export class ProjectComponent {
+  private projectService = inject(ProjectService);
 
-  projetoIsOpen = false;
-  projetos!: any;
-  singleProjeto!: any;
+  projectIsOpen = false;
+  projects!: any;
+  singleProject!: any;
 
   constructor(public dialog: MatDialog) {
-    this.getProjetos();
+    this.getProjects();
   }
 
   /**
-   * Obtém a lista de projetos do serviço `ProjetoService` e armazena em `projetos`.
+   * Obtém a lista de projects do serviço `ProjectService` e armazena em `projects`.
    */
-  getProjetos() {
-    this.projetoService.get().subscribe((data) => {
-      this.projetos = data;
+  getProjects() {
+    this.projectService.get().subscribe((data) => {
+      this.projects = data;
     });
   }
 
   /**
-   * Abre o modal para adicionar ou editar um projeto.
-   * @param data Dados do projeto a serem editados (opcional).
+   * Abre o modal para adicionar ou editar um project.
+   * @param data Dados do project a serem editados (opcional).
    * @param mode Modo de operação, pode ser 'ADD' ou 'EDIT'. O padrão é 'ADD'.
    */
   openModal(data?: any, mode = 'ADD') {
     this.dialog
-      .open(ModalProjectComponent, {  // Pode ser substituído por ModalProjetoComponent, se houver
+      .open(ModalProjectComponent, {  // Pode ser substituído por ModalProjectComponent, se houver
         data: { data, mode },
         width: '600px',
       })
       .afterClosed()
       .subscribe(() => {
-        this.getProjetos();
+        this.getProjects();
       });
   }
 
   /**
-   * Alterna a visibilidade dos detalhes de um projeto específico.
-   * @param projeto Nome ou identificador do projeto (opcional).
+   * Alterna a visibilidade dos detalhes de um project específico.
+   * @param project Nome ou identificador do project (opcional).
    */
-  openProjeto(projeto = '') {
-    this.projetoIsOpen = !this.projetoIsOpen;
-    this.singleProjeto = projeto;
+  openProject(project = '') {
+    this.projectIsOpen = !this.projectIsOpen;
+    this.singleProject = project;
   }
 
   /**
-   * Gera um acrônimo a partir do nome do projeto.
-   * @param name Nome do projeto.
-   * @returns Acrônimo gerado a partir do nome do projeto.
+   * Gera um acrônimo a partir do nome do project.
+   * @param name Nome do project.
+   * @returns Acrônimo gerado a partir do nome do project.
    */
   generateInitials(name: string) {
     const arrayName = name.split(' ');
@@ -92,13 +92,13 @@ export project ProjetoComponent {
   }
 
   /**
-   * Exclui um projeto com base no ID fornecido.
-   * @param id Identificador do projeto a ser excluído.
+   * Exclui um project com base no ID fornecido.
+   * @param id Identificador do project a ser excluído.
    */
   delete(id: string) {
-    this.projetoService.delete(id).subscribe(() => {
-      alert('Projeto excluído');
-      this.getProjetos();
+    this.projectService.delete(id).subscribe(() => {
+      alert('Project excluído');
+      this.getProjects();
     });
   }
 }
