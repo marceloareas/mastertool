@@ -27,6 +27,8 @@ export class FormProjectComponent {
     periodo: [''],
     alunos: [null],
     descricao: [''],
+    data_inicio: [''],
+    data_fim: ['']
   });
 
   ngOnInit() {
