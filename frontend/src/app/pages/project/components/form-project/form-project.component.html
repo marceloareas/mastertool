@@ -13,8 +13,19 @@
 
   <mat-form-field appearance="outline" >
     <mat-label>Descriçao</mat-label>
-    <textarea matInput formControlName="descrição"></textarea>
+    <textarea matInput formControlName="descricao"></textarea>
   </mat-form-field>
+
+  <div class="container__dates">
+    <mat-form-field appearance="outline">
+      <mat-label>Data de Início</mat-label>
+      <input matInput formControlName="data_inicio" type="date" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Data de Fim</mat-label>
+      <input matInput formControlName="data_fim" type="date" />
+    </mat-form-field>
+  </div>
 
   <mat-form-field appearance="outline">
     <mat-label>Alunos</mat-label>
@@ -23,5 +34,10 @@
       <mat-option value="two">Second option</mat-option>
     </mat-select>
   </mat-form-field>
+
+  @if(mode == "ADD"){
+    <label for="avatar">Subir arquivo:</label>
+    <input type="file" id="avatar" (change)="onFileChange($event)" />
+  }
 
 </form>

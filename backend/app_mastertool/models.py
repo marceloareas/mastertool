@@ -27,3 +27,15 @@ class Nota(models.Model):
 
     def __str__(self):
         return f'{self.aluno.nome} - {self.turma.nome}: {self.valor}'
+    
+class Projeto(models.Model):
+    data_inicio = models.DateField()
+    data_fim = models.DateField(null=True, blank=True)
+    nome = models.CharField(max_length=100)
+    descricao = models.TextField(blank=True)
+    periodo = models.CharField(max_length=100, blank=True)
+    aluno = models.ManyToManyField('Aluno', related_name='projetos')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projetos', default=1)
+
+    def __str__(self):
+        return self.nome

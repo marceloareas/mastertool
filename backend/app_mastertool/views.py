@@ -221,3 +221,105 @@ def adicionar_nota(request, id):
             return JsonResponse({'error': 'Turma não encontrada'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+        
+# -----------------------------------------------------------------------------------------------
+# ---------------------------------------- VIEWS PROJETOS ---------------------------------------
+# -----------------------------------------------------------------------------------------------
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cadastrar_projeto(request):
+    if request.method == 'POST':
+        usuario = request.user
+        data = request.data
+
+        try:
+            projeto = Projeto.objects.create(
+                nome=data['nome'],
+                descricao=data['descricao'],
+                data_inicio=data['data_inicio'],  
+                data_fim=data['data_fim'],
+                periodo=data['periodo'],
+                usuario=usuario
+            )
+            return JsonResponse({'mensagem': 'Projeto criado com sucesso.', 'id_projeto': projeto.id}, status=201)
+        except Exception as e:
+            return JsonResponse({'erro': f'Não foi possível criar o projeto: {str(e)}'}, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_projetos(request, id=None):
+    usuario = request.user
+
+    try:
+        if id:
+            projeto = Projeto.objects.get(id=id, usuario=usuario)
+            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+            
+            projeto_json = {
+                'id': projeto.id,
+                'nome': projeto.nome,
+                'descricao': projeto.descricao,
+                'data_inicio': projeto.data_inicio,
+                'data_fim': projeto.data_fim,
+                'periodo': projeto.periodo,
+                'alunos': alunos_json,
+            }
+            return JsonResponse(projeto_json)
+        
+        else:
+            projetos = Projeto.objects.filter(usuario=usuario)
+            projetos_json = []
+            
+            for projeto in projetos:
+                alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+                
+                projetos_json.append({
+                    'id': projeto.id,
+                    'nome': projeto.nome,
+                    'descricao': projeto.descricao,
+                    'data_inicio': projeto.data_inicio,
+                    'data_fim': projeto.data_fim,
+                    'periodo': projeto.periodo,
+                    'alunos': alunos_json,
+                })
+                
+            return JsonResponse(projetos_json, safe=False)
+
+    except Projeto.DoesNotExist:
+        return HttpResponseNotFound("Projeto não encontrado")
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def excluir_projeto(request, id):
+    if request.method == 'DELETE':
+        usuario = request.user
+        
+        try:
+            projeto = Projeto.objects.get(id=id, usuario=usuario)
+            projeto.delete()
+            return JsonResponse({'mensagem': 'Projeto excluído com sucesso.'}, status=200)
+        except Projeto.DoesNotExist:
+            return HttpResponseNotFound("Projeto não encontrado")
+        except Exception as e:
+            return JsonResponse({'erro': f'Erro ao excluir o projeto: {str(e)}'}, status=400)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def editar_projeto(request, id):
+    if request.method == 'PUT':
+        usuario = request.user
+        data = request.data
+        
+        try:
+            projeto = Projeto.objects.get(id=id, usuario=usuario)
+            projeto.nome = data.get('nome', projeto.nome)
+            projeto.descricao = data.get('descricao', projeto.descricao)
+            projeto.save()
+            return JsonResponse({'mensagem': 'Projeto editado com sucesso.'}, status=200)
+        except Projeto.DoesNotExist:
+            return HttpResponseNotFound("Projeto não encontrado")
+        except Exception as e:
+            return JsonResponse({'erro': f'Erro ao editar o projeto: {str(e)}'}, status=400)

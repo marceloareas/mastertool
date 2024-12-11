@@ -1,0 +1,18 @@
+<section class="modal">
+    <h2 mat-dialog-title>Cadastrar aluno ao projeto</h2>
+  
+    <mat-dialog-content class="mat-typography">
+      <app-student-project-form
+        [project]="data.project"
+        (formProject)="save($event)"
+      />
+    </mat-dialog-content>
+  
+    <mat-dialog-actions align="end">
+      <button mat-raised-button (click)="closeModal()">Fechar</button>
+      <button mat-raised-button (click)="studentProjectForm.save()">
+        Salvar
+      </button>
+    </mat-dialog-actions>
+  </section>
+  
