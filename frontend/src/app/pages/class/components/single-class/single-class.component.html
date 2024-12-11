@@ -14,8 +14,8 @@
       <button mat-stroked-button (click)="openModalClass(class, 'EDIT')">
         Editar turma
       </button>
-      <button mat-raised-button color="warn" (click)="removeLowestGrade()">
-        Remover Menor Nota
+      <button mat-button color="warn" (click)="openRemoveNotesModal()">
+        Remover Notas
       </button>
       
     </div>
@@ -135,4 +135,21 @@
     showFirstLastButtons
     aria-label="Select page of periodic elements"
   ></mat-paginator>
+
+  <!-- Modal para remover notas -->
+<ng-template #removeNotesDialog>
+  <h2 mat-dialog-title>Remover Notas</h2>
+  <mat-dialog-content>
+    <p>Digite a quantidade de notas que deseja remover:</p>
+    <mat-form-field appearance="fill">
+      <mat-label>Quantidade</mat-label>
+      <input matInput type="number" [(ngModel)]="quantityToRemove" min="1" />
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-button color="warn" (click)="confirmRemoveNotes()">Remover</button>
+  </mat-dialog-actions>
+</ng-template>
+
 </section>

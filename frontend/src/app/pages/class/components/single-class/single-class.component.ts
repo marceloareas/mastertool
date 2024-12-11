@@ -20,11 +20,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
+import {MatDialogModule} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-single-class',
   standalone: true,
   imports: [
+    MatDialogModule,
     MatIcon,
     MatButtonModule,
     MatTableModule,
@@ -47,60 +49,106 @@ export class SingleClassComponent implements OnInit {
   @Input() class!: any;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild('removeNotesDialog') removeNotesDialog!: any; // Referência ao modal
 
   displayedColumns: string[] = ['nome', 'editar'];
   notaColumns: string[] = [];
   dataSource!: MatTableDataSource<any>;
   pesos: Record<string, number> = {};
+  quantityToRemove: number = 1;
 
   mode: string = 'VIEW';
 
   constructor(public dialog: MatDialog) { }
 
-/**
- * Remove a menor nota válida (primeira encontrada) de cada aluno
- * e remove a coluna correspondente se todas as notas dela forem nulas.
+  openRemoveNotesModal() {
+    this.dialog.open(this.removeNotesDialog);
+  }
+
+  closeDialog() {
+    this.dialog.closeAll();
+  }
+
+  /**
+ * Confirma a remoção de notas.
+ * Remove a quantidade especificada de notas da tabela.
  */
-removeLowestGrade() {
-  const columnsToCheck: Set<string> = new Set();
-
-  // Itera sobre cada aluno para remover a menor nota válida
-  this.class.alunos.forEach((aluno: any) => {
-    const notasValidas = aluno.notas.filter(
-      (nota: any) => nota.valor !== null && nota.valor !== ''
-    );
-
-    // Identifica a menor nota válida
-    if (notasValidas.length > 0) {
-      const menorNota = Math.min(
-        ...notasValidas.map((nota: any) => parseFloat(nota.valor))
+  confirmRemoveNotes() {
+    const notesToRemove = this.quantityToRemove;
+  
+    // Verificação: impede remoção se a quantidade for inválida
+    if (notesToRemove <= 0) {
+      alert('Por favor, insira uma quantidade válida.');
+      return;
+    }
+  
+    // Verificação: impede remoção se a quantidade for maior que o número de colunas
+    const totalColumns = this.notaColumns.length;
+    if (notesToRemove > totalColumns) {
+      alert(`Quantidade inválida! Existem apenas ${totalColumns} colunas de notas.`);
+      return;
+    }
+  
+    const columnsToCheck: Set<string> = new Set();
+  
+    // Remove notas
+    this.class.alunos.forEach((aluno: any) => {
+      let removedCount = 0;
+  
+      aluno.notas = aluno.notas.map((nota: any) => {
+        if (removedCount < notesToRemove && nota.valor !== null && nota.valor !== '') {
+          removedCount++;
+          columnsToCheck.add(nota.titulo); // Marca a coluna para verificação
+          return { ...nota, valor: null };
+        }
+        return nota;
+      });
+    });
+  
+    // Verifica e remove colunas onde todas as notas são nulas
+    columnsToCheck.forEach((coluna) => {
+      const allNull = this.class.alunos.every((aluno: any) =>
+        aluno.notas.some(
+          (nota: any) => nota.titulo === coluna && (nota.valor === null || nota.valor === '')
+        )
       );
-
-      // Encontra o índice da primeira menor nota e remove
-      const indexToRemove = aluno.notas.findIndex(
-        (nota: any) => parseFloat(nota.valor) === menorNota
-      );
-
-      if (indexToRemove !== -1) {
-        columnsToCheck.add(aluno.notas[indexToRemove].titulo); // Coluna potencialmente vazia
-        aluno.notas[indexToRemove].valor = null; // Define como nula
+  
+      if (allNull) {
+        this.removeColumn(coluna);
       }
-    }
-  });
-
-  // Verifica se as colunas possuem apenas valores nulos e remove as colunas
-  columnsToCheck.forEach((coluna) => {
-    const allNull = this.class.alunos.every((aluno: any) =>
-      aluno.notas.some(
-        (nota: any) => nota.titulo === coluna && (nota.valor === null || nota.valor === '')
-      )
-    );
-
-    if (allNull) {
-      this.removeColumn(coluna);
-    }
-  });
-}
+    });
+  
+    this.refreshTable();
+    this.closeDialog();
+    alert(`Foram removidas ${notesToRemove} notas.`);
+  }
+  
+  
+  
+  /**
+   * Remove a menor nota válida (primeira encontrada) de cada aluno
+   * e remove a coluna correspondente se todas as notas dela forem nulas.
+   */
+  removeLowestGrade() {
+    this.class.alunos.forEach((aluno: any) => {
+      let menorNotaIndex = -1;
+      let menorNota = Infinity;
+  
+      aluno.notas.forEach((nota: any, index: number) => {
+        if (nota.valor !== null && nota.valor !== '' && parseFloat(nota.valor) < menorNota) {
+          menorNota = parseFloat(nota.valor);
+          menorNotaIndex = index;
+        }
+      });
+  
+      if (menorNotaIndex !== -1) {
+        aluno.notas[menorNotaIndex].valor = null; // Remove a menor nota
+      }
+    });
+  
+    this.refreshTable();
+  }
+  
 
 
   /**
