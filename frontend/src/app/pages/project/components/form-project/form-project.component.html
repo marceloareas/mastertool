@@ -13,7 +13,7 @@
 
   <mat-form-field appearance="outline" >
     <mat-label>Descriçao</mat-label>
-    <textarea matInput formControlName="descrição"></textarea>
+    <textarea matInput formControlName="descricao"></textarea>
   </mat-form-field>
 
   <div class="container__dates">
@@ -34,5 +34,10 @@
       <mat-option value="two">Second option</mat-option>
     </mat-select>
   </mat-form-field>
+
+  @if(mode == "ADD"){
+    <label for="avatar">Subir arquivo:</label>
+    <input type="file" id="avatar" (change)="onFileChange($event)" />
+  }
 
 </form>

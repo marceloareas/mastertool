@@ -1,12 +1,35 @@
-<section class="class">
-  <div class="class__top">
+<section class="project">
+  <div class="project__top">
     <h1 class="title">Projetos</h1>
     @if(!projectIsOpen){<button mat-stroked-button (click)="openModal()">
-      Cadastrar Turma</button
+      Cadastrar Projeto</button
     >}
   </div>
 
+  <div class="project__content" [ngClass]="projectIsOpen ? 'single' : ''">
+    @if(!projectIsOpen){ @for (project of projects; track project ) {
+      <div class="project__content__card">
+        <button class="project__content__menu" mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon fontIcon="more_vert" />
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="delete(project.id)">
+            <mat-icon fontIcon="delete" /> Remover
+          </button>
+        </mat-menu>
 
-  <div class="class__content"></div>
+    <mat-card class="card" (click)="openProject(project)">
+      <mat-card-content>
+        <div class="avatar">
+          <span> {{ generateInitials(project.nome) }}</span>
+        </div>
+        <h3 class="title">{{ project.nome.toUpperCase() }}</h3>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
+    } } @if(projectIsOpen){
+    <app-single-project (closeProjectEvent)="openProject()" (closeModalEvent)="getProjects()" [project]="singleProject"/>
+    }
+  </div>
 </section>

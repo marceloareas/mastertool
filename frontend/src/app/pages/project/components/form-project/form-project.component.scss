@@ -1,13 +1,5 @@
-form{
-display: flex;
-flex-direction: column;
-}
-
-.container__top{
+.class {
   display: flex;
-<<<<<<< HEAD
-  gap: 10px;
-=======
   flex-direction: column;
 
   &__content {
@@ -19,5 +11,4 @@ flex-direction: column;
 
 mat-form-field {
   width: 65%;
->>>>>>> 1e5bce4 (feat: cadastro de projeto)
 }
