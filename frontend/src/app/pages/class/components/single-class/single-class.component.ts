@@ -91,17 +91,25 @@ export class SingleClassComponent implements OnInit {
   
     const columnsToCheck: Set<string> = new Set();
   
-    // Remove notas
     this.class.alunos.forEach((aluno: any) => {
+      // Filtra e ordena as notas válidas em ordem crescente
+      const notasOrdenadas = aluno.notas
+        .filter((nota: any) => nota.valor !== null && nota.valor !== '')
+        .sort((a: any, b: any) => parseFloat(a.valor) - parseFloat(b.valor));
+  
       let removedCount = 0;
   
-      aluno.notas = aluno.notas.map((nota: any) => {
-        if (removedCount < notesToRemove && nota.valor !== null && nota.valor !== '') {
-          removedCount++;
-          columnsToCheck.add(nota.titulo); // Marca a coluna para verificação
-          return { ...nota, valor: null };
+      // Remove as menores notas
+      notasOrdenadas.forEach((nota: any) => {
+        if (removedCount < notesToRemove) {
+          // Encontra a nota correspondente e define o valor como nulo
+          const index = aluno.notas.findIndex((n: any) => n.titulo === nota.titulo);
+          if (index !== -1) {
+            columnsToCheck.add(aluno.notas[index].titulo);
+            aluno.notas[index].valor = null;
+            removedCount++;
+          }
         }
-        return nota;
       });
     });
   
@@ -120,8 +128,9 @@ export class SingleClassComponent implements OnInit {
   
     this.refreshTable();
     this.closeDialog();
-    alert(`Foram removidas ${notesToRemove} notas.`);
+    alert(`${notesToRemove} notas foram removidas.`);
   }
+  
   
   
   
