@@ -57,6 +57,52 @@ export class SingleClassComponent implements OnInit {
 
   constructor(public dialog: MatDialog) { }
 
+/**
+ * Remove a menor nota válida (primeira encontrada) de cada aluno
+ * e remove a coluna correspondente se todas as notas dela forem nulas.
+ */
+removeLowestGrade() {
+  const columnsToCheck: Set<string> = new Set();
+
+  // Itera sobre cada aluno para remover a menor nota válida
+  this.class.alunos.forEach((aluno: any) => {
+    const notasValidas = aluno.notas.filter(
+      (nota: any) => nota.valor !== null && nota.valor !== ''
+    );
+
+    // Identifica a menor nota válida
+    if (notasValidas.length > 0) {
+      const menorNota = Math.min(
+        ...notasValidas.map((nota: any) => parseFloat(nota.valor))
+      );
+
+      // Encontra o índice da primeira menor nota e remove
+      const indexToRemove = aluno.notas.findIndex(
+        (nota: any) => parseFloat(nota.valor) === menorNota
+      );
+
+      if (indexToRemove !== -1) {
+        columnsToCheck.add(aluno.notas[indexToRemove].titulo); // Coluna potencialmente vazia
+        aluno.notas[indexToRemove].valor = null; // Define como nula
+      }
+    }
+  });
+
+  // Verifica se as colunas possuem apenas valores nulos e remove as colunas
+  columnsToCheck.forEach((coluna) => {
+    const allNull = this.class.alunos.every((aluno: any) =>
+      aluno.notas.some(
+        (nota: any) => nota.titulo === coluna && (nota.valor === null || nota.valor === '')
+      )
+    );
+
+    if (allNull) {
+      this.removeColumn(coluna);
+    }
+  });
+}
+
+
   /**
    * Método do ciclo de vida do Angular que é chamado após a construção do componente.
    * Inicializa as colunas da tabela e atualiza os dados.
@@ -140,7 +186,6 @@ export class SingleClassComponent implements OnInit {
     }
 
     this.classService.postNota(this.class.id, data).subscribe(() => {
-      alert('Coluna removida com sucesso!');
       this.closeModal();
       this.getClass();
     });
@@ -315,6 +360,7 @@ export class SingleClassComponent implements OnInit {
   getPeso(columnName: string): number {
     return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
   }
+
 
   /**
    * Calcula a média ponderada das notas de um aluno.
