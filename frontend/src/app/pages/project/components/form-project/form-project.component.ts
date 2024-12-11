@@ -14,11 +14,42 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 export class FormProjectComponent {
  @Output() projectForm: EventEmitter<any> = new EventEmitter();
 
-  project: FormGroup = new FormGroup({
-    nome: new FormControl(),
-    periodo: new FormControl(),
-    descrição: new FormControl(),
-    alunos: new FormControl(),
+  project: FormGroup = this.fb.group({
+    nome: [''],
+    periodo: [''],
+    alunos: [null],
+    descricao: [''],
+    data_inicio: [''],
+    data_fim: ['']
   });
 
+  ngOnInit() {
+    if (this.data) {
+      this.populateForm();
+    }
+  }
+
+  populateForm() {
+    console.log('Dados do formulário', this.data);
+    this.project.patchValue(this.data);
+  }
+
+  save() {
+    console.log('Dados do formulário:', this.project.value);
+    this.formClass.emit(this.project.value);
+  }
+
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.project.patchValue({
+          alunos: reader.result,
+        });
+      };
+      reader.readAsText(file);
+    }
+  }
+  
 }

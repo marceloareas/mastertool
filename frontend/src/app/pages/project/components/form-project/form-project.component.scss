@@ -5,5 +5,15 @@ flex-direction: column;
 
 .container__top{
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+
+  &__content {
+    display: flex;
+    gap: 15px;
+    padding: 10px 0;
+  }
+}
+
+mat-form-field {
+  width: 65%;
 }
