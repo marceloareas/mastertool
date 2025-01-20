@@ -23,6 +23,7 @@ class Nota(models.Model):
     turma  = models.ForeignKey(Turma, on_delete=models.CASCADE, related_name='notas')
     valor  = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     titulo =  models.CharField(max_length=100, default="PROVA")
+    peso = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=1.0)
     # usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notas', default=1)
 
     def __str__(self):

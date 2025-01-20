@@ -64,43 +64,39 @@ export class SingleClassComponent implements OnInit {
 removeLowestGrade() {
   const columnsToCheck: Set<string> = new Set();
 
-  // Itera sobre cada aluno para remover a menor nota válida
   this.class.alunos.forEach((aluno: any) => {
     const notasValidas = aluno.notas.filter(
-      (nota: any) => nota.valor !== null && nota.valor !== ''
+      (nota: any) => nota.valor !== null && !isNaN(parseFloat(nota.valor))
     );
 
-    // Identifica a menor nota válida
     if (notasValidas.length > 0) {
-      const menorNota = Math.min(
-        ...notasValidas.map((nota: any) => parseFloat(nota.valor))
-      );
+      const menorNota = Math.min(...notasValidas.map((nota: any) => parseFloat(nota.valor)));
 
-      // Encontra o índice da primeira menor nota e remove
       const indexToRemove = aluno.notas.findIndex(
         (nota: any) => parseFloat(nota.valor) === menorNota
       );
 
       if (indexToRemove !== -1) {
-        columnsToCheck.add(aluno.notas[indexToRemove].titulo); // Coluna potencialmente vazia
-        aluno.notas[indexToRemove].valor = null; // Define como nula
+        columnsToCheck.add(aluno.notas[indexToRemove].titulo);
+        aluno.notas[indexToRemove].valor = null;
       }
     }
   });
 
-  // Verifica se as colunas possuem apenas valores nulos e remove as colunas
   columnsToCheck.forEach((coluna) => {
     const allNull = this.class.alunos.every((aluno: any) =>
-      aluno.notas.some(
-        (nota: any) => nota.titulo === coluna && (nota.valor === null || nota.valor === '')
-      )
+      aluno.notas.every((nota: any) => nota.titulo !== coluna || nota.valor === null)
     );
 
     if (allNull) {
       this.removeColumn(coluna);
     }
   });
+
+  // Recalcula a média após a remoção
+  this.save();
 }
+
 
 
   /**
@@ -108,10 +104,16 @@ removeLowestGrade() {
    * Inicializa as colunas da tabela e atualiza os dados.
    */
   ngOnInit() {
-    this.loadPesosFromLocalStorage();
+    // Recupera pesos do localStorage
+    const storedPesos = localStorage.getItem(`class_${this.class.id}_pesos`);
+    if (storedPesos) {
+      this.pesos = JSON.parse(storedPesos);
+    }
+  
     this.initializeColumns();
     this.refreshTable();
   }
+  
 
   /**
    * Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
@@ -141,9 +143,23 @@ removeLowestGrade() {
   getClass() {
     this.classService.get(this.class.id).subscribe((data) => {
       this.class = data;
+  
+      // Atualiza pesos e armazena no localStorage
+      this.pesos = {};
+      this.class.alunos.forEach((aluno: any) => {
+        aluno.notas.forEach((nota: any) => {
+          this.pesos[nota.titulo] = parseFloat(nota.peso) || 1.0; // Inclui peso no objeto
+        });
+      });
+  
+      // Salva pesos no localStorage
+      localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
+  
+      // Atualiza a tabela
       this.refreshTable();
     });
   }
+  
 
   /**
    * Adiciona uma nova coluna de notas à tabela e atualiza os dados dos alunos para incluir um objeto de nota vazio.
@@ -245,22 +261,7 @@ removeLowestGrade() {
       }
     }
   }
-  /**
- * Salva o objeto 'pesos' no LocalStorage.
- */
-  savePesosToLocalStorage() {
-    localStorage.setItem('pesos', JSON.stringify(this.pesos));
-  }
-  /**
- * Carrega os pesos salvos do LocalStorage, se existirem.
- */
-  loadPesosFromLocalStorage() {
-    const savedPesos = localStorage.getItem('pesos');
-    if (savedPesos) {
-      this.pesos = JSON.parse(savedPesos);
-      console.log('Pesos carregados do LocalStorage:', this.pesos);
-    }
-  }
+
 
   updatePeso(event: Event, columnName: string) {
     const inputElement = event.target as HTMLInputElement;
@@ -268,7 +269,6 @@ removeLowestGrade() {
       const newPeso = parseFloat(inputElement.value);
       if (!isNaN(newPeso) && newPeso > 0) {
         this.pesos[columnName] = newPeso; // Atualiza o peso no objeto 'pesos'
-        this.savePesosToLocalStorage();  // Salva os pesos no localStorage
         console.log(`Peso atualizado para a coluna "${columnName}":`, newPeso);
       }
     }
@@ -347,15 +347,28 @@ removeLowestGrade() {
    * Salva as notas atualizadas no backend e muda o modo para `VIEW`.
    */
   save() {
-    this.mode = 'VIEW';
-    console.log('salvar', this.dataSource.data);
-    this.classService
-      .postNota(this.class.id, this.dataSource.data)
-      .subscribe(() => {
-        alert('Notas atualizadas com sucesso!');
-        this.getClass();
-      });
+    const updatedData = this.dataSource.data.map((aluno: any) => {
+      return {
+        matricula: aluno.matricula,
+        notas: aluno.notas.map((nota: any) => ({
+          id: nota.id,
+          titulo: nota.titulo,
+          valor: nota.valor,
+          peso: this.pesos[nota.titulo] || 1.0, // Envia o peso atualizado
+        })),
+      };
+    });
+  
+    this.classService.postNota(this.class.id, updatedData).subscribe(() => {
+      // Atualiza o localStorage com os pesos
+      localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
+  
+      alert('Notas e pesos atualizados com sucesso!');
+      this.getClass(); // Recarrega os dados atualizados
+    });
   }
+  
+  
 
   getPeso(columnName: string): number {
     return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido

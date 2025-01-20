@@ -99,16 +99,17 @@ def encontrar_turma(id, usuario):
                 notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
                 for nota in notas:
                     notas_json.append({
-                        'id'    : nota.id,
+                        'id': nota.id,
                         'titulo': nota.titulo,
-                        'valor' : nota.valor,
+                        'valor': nota.valor,
+                        'peso': nota.peso,  # Incluindo o peso
                     })
             except Nota.DoesNotExist:
                 notas = None
             alunos_json.append({
-                'matricula' : aluno.matricula,
-                'nome'      : aluno.nome,
-                'notas'     : notas_json
+                'matricula': aluno.matricula,
+                'nome': aluno.nome,
+                'notas': notas_json
             })
 
         turma_dict = {
@@ -118,7 +119,8 @@ def encontrar_turma(id, usuario):
             'alunos': alunos_json,
         }
         return turma_dict
-    
+
+
     turmas = Turma.objects.filter(usuario=usuario)
     turmas_json = []
 
