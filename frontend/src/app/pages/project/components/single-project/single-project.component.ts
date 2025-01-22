@@ -68,7 +68,7 @@ import {
      * Atualiza os dados na tabela.
      */
     refreshTable() {
-      this.dataSource = new MatTableDataSource([this.project]);
+      this.dataSource = new MatTableDataSource(this.project.alunos);
       this.dataSource.paginator = this.paginator;
       console.log('data', this.dataSource.data);
     }
@@ -86,11 +86,15 @@ import {
     /**
      * Abre um modal para adicionar ou editar um projeto.
      * Após o fechamento, atualiza os dados do projeto.
+     *  @param singleProject Objeto do projeto.
+     * @param mode Modo de operação do modal ('ADD' ou 'EDIT').
      */
-    openModalProject(project?: any, mode = 'ADD') {
+    openModalProject(singleProject?: any, mode = 'ADD') {
+      console.log('mode', mode);
+      console.log('singleProject', singleProject);
       this.dialog
         .open(ModalProjectComponent, {
-          data: { project, mode },
+          data: { singleProject, mode },
           width: '600px',
         })
         .afterClosed()

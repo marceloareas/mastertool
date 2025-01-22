@@ -45,27 +45,52 @@ export class ModalProjectComponent {
   ngOnInit() {
     console.log(this.data.singleProject);
   }
+
   /**
-   * Salva as informações da classe, criando uma nova classe ou atualizando uma existente.
+   * Salva as informações da classe, criando um novo projeto ou atualizando um existente.
    * @param event Dados do formulário que devem ser salvos.
    */
-  save() {
-    // Obtém os dados do formulário filho
-    const projectData = this.formProjectComponent.project.value;
-  
+  save(singleProject: any) {
     if (this.data.mode === 'ADD') {
-      // Envia os dados para a API
-      this.projectService.post(projectData).subscribe({
-        next: (response: any) => {
-          console.log('Resposta do servidor:', response);
-          alert(response.mensagem || 'Projeto criado com sucesso!');
-          this.dialogRef.close(true);
-        },
-        error: (error) => {
-          console.error('Erro ao cadastrar projeto:', error);
-          alert('Erro ao cadastrar o projeto.');
-        },
+      this.projectService.post(singleProject).subscribe((response) => {
+        if (response.alunos_nao_criados.length > 0) {
+          const result = confirm(
+            'Existem alunos que não foram cadastrados. Deseja cadastrar?'
+          );
+
+          if (result) {
+            let data = response.alunos_nao_criados.map(
+              (aluno: { matricula: string; nome: string }) => {
+                return aluno.matricula + ', ' + aluno.nome;
+              }
+            );
+
+            data = { turma: data.join('\r\n'), id: response.id_turma };
+
+            this.studentService.post(data).subscribe(() => {
+              alert('Cadastrado com sucesso');
+              this.dialogRef.close(true);
+            });
+          }
+        } else {
+          alert('Cadastrado com sucesso');
+        }
+
+        this.dialogRef.close(true);
       });
+    } else {
+      const dataProject = {
+        nome: this.data.singleProject.id,
+        descricao: this.data.singleProject.descricao,
+        data_inicio: this.data.singleProject.data_inicio,
+        data_fim: this.data.singleProject.data_fim,
+      };
+      this.projectService
+        .put(this.data.singleProject.id, { ...dataProject, ...singleProject })
+        .subscribe(() => {
+          alert('Registro atualizado');
+          this.dialogRef.close(true);
+        });
     }
   }
   

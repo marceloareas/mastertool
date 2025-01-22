@@ -56,7 +56,7 @@ export class ProjectComponent {
    */
   openModal(data?: any, mode = 'ADD') {
     this.dialog
-      .open(ModalProjectComponent, {  // Pode ser substituído por ModalProjectComponent, se houver
+      .open(ModalProjectComponent, {  
         data: { data, mode },
         width: '600px',
       })

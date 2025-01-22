@@ -5,35 +5,22 @@
       <mat-label>Nome</mat-label>
       <input matInput formControlName="nome" />
     </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Período</mat-label>
-      <input matInput formControlName="periodo" />
+
+    <mat-form-field appearance="outline" >
+      <mat-label>Descrição</mat-label>
+      <textarea matInput formControlName="descricao"></textarea>
     </mat-form-field>
-  </div>
-
-  <mat-form-field appearance="outline" >
-    <mat-label>Descriçao</mat-label>
-    <textarea matInput formControlName="descricao"></textarea>
-  </mat-form-field>
-
-  <div class="container__dates">
+  
     <mat-form-field appearance="outline">
       <mat-label>Data de Início</mat-label>
       <input matInput formControlName="data_inicio" type="date" />
     </mat-form-field>
+    
     <mat-form-field appearance="outline">
       <mat-label>Data de Fim</mat-label>
       <input matInput formControlName="data_fim" type="date" />
     </mat-form-field>
   </div>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Alunos</mat-label>
-    <mat-select formControlName="alunos">
-      <mat-option value="one">First option</mat-option>
-      <mat-option value="two">Second option</mat-option>
-    </mat-select>
-  </mat-form-field>
 
   @if(mode == "ADD"){
     <label for="avatar">Subir arquivo:</label>

@@ -1,12 +1,18 @@
 <section class="modal">
-  <h2 mat-dialog-title>Cadastrar Projeto</h2>
+  <h2 mat-dialog-title>{{data.mode === 'ADD' ? 'Cadastrar Projeto' : 'Editar Projeto'}}</h2>
 
   <mat-dialog-content class="mat-typography">
-    <app-form-project />
+    <app-form-project 
+      (formClass)="save($event)"
+      [data]="data.singleProject"
+      [mode]="data.mode"
+    />
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <button mat-raised-button (click)="closeModal()">Fechar</button>
-    <button mat-raised-button color="primary" (click)="save()">Enviar</button>
+    <button mat-raised-button color="primary" (click)="formProjectComponent.save()">
+      Enviar
+    </button>
   </mat-dialog-actions>
 </section>
