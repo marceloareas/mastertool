@@ -1,10 +1,4 @@
 .project {
-  background: white;
-
-  &__content {
-    padding: 20px;
-  }
-
   &__top {
     display: flex;
     justify-content: space-between;
@@ -20,25 +14,58 @@
     }
   }
 
+  &__content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(185px, auto));
+    gap: 60px;
+    padding: 20px;
+    justify-content: flex-start;
 
+    &__card {
+      position: relative;
+    }
 
-  .bottom__content {
-    grid-area: bottom;
-    display: flex;
-    flex-direction: column;
-    margin: 0 20px 20px;
-    padding-top: 15px;
-    border-top: 1px solid gray;
-    align-items: center;
+    &__menu {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 999;
+    }
 
-    &__button {
-      border: none;
-      background: #7a7a7a;
-      border-radius: 12px;
-      width: 130px;
-      height: 55px;
-      font-size: 16px;
-      color: white;
+    &.single {
+      display: initial;
+      justify-content: center;
+    }
+
+    .card {
+      width: 180px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+
+      .avatar {
+        height: 60px;
+        background: #c4ade1;
+        width: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+        border-radius: 6px;
+
+        span {
+          font-weight: 500;
+          font-size: 20px;
+        }
+      }
+      .title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 140px;
+      }
     }
   }
 }
@@ -46,5 +73,22 @@
 ::ng-deep {
   .mat-drawer-side {
     border: none;
+  }
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 1440px) {
+  .class {
+    &__content {
+      &.single {
+        display: flex;
+        justify-content: center;
+      }
+    }
   }
 }
