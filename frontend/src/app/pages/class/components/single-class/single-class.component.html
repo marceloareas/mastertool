@@ -14,9 +14,11 @@
       <button mat-stroked-button (click)="openModalClass(class, 'EDIT')">
         Editar turma
       </button>
-      <button mat-raised-button color="warn" (click)="removeLowestGrade()">
-        Remover Menor Nota
-      </button>
+      <div class="bar__top__button">
+        <button mat-stroked-button (click)="promptRemoveColumns()">
+          Remover Notas
+        </button>
+      </div>
       
     </div>
   </div>
