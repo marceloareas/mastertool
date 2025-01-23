@@ -33,4 +33,8 @@ urlpatterns = [
     path('projetos/excluir/<str:id>', views.excluir_projeto, name='excluir_projeto'),
     path('projetos/editar/<str:id>', views.editar_projeto, name='editar_projeto'),
 
+    path('turmas/<int:turma_id>/exportar_resumido/', views.exportar_relatorio_resumido, name='exportar_relatorio_resumido'),
+    path('turmas/<int:turma_id>/exportar_detalhado/', views.exportar_relatorio_detalhado, name='exportar_relatorio_detalhado'),
+
+
 ]

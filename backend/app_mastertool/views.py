@@ -9,7 +9,9 @@ from .models import *
 from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
-
+import csv
+from django.http import HttpResponse
+from .models import Turma, Aluno, Nota
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS USUARIO ---------------------------------------
 # -----------------------------------------------------------------------------------------------
@@ -164,6 +166,49 @@ def editar_turma(request, id):
 
     turma_editada = atualizar_turma(id, data, usuario)
     return JsonResponse(turma_editada, safe=False)
+
+def exportar_relatorio_resumido(request, turma_id):
+    turma = Turma.objects.get(id=turma_id)
+    alunos = turma.aluno.all()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="relatorio_resumido_turma_{turma_id}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Matrícula', 'Nome', 'Média'])
+
+    for aluno in alunos:
+        notas = Nota.objects.filter(aluno=aluno, turma=turma)
+        media = sum(nota.valor for nota in notas) / len(notas) if notas else 0
+        writer.writerow([aluno.matricula, aluno.nome, media])
+
+    media_turma = sum(sum(nota.valor for nota in Nota.objects.filter(aluno=aluno, turma=turma)) / len(Nota.objects.filter(aluno=aluno, turma=turma)) if Nota.objects.filter(aluno=aluno, turma=turma) else 0 for aluno in alunos) / len(alunos)
+    writer.writerow([])
+    writer.writerow(['', 'Média da turma', media_turma])
+
+    return response
+
+def exportar_relatorio_detalhado(request, turma_id):
+    turma = Turma.objects.get(id=turma_id)
+    alunos = turma.aluno.all()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="relatorio_detalhado_turma_{turma_id}.csv"'
+
+    writer = csv.writer(response)
+    header = ['Matrícula', 'Nome'] + [f'Nota {i+1}' for i in range(len(Nota.objects.filter(turma=turma).values_list('titulo', flat=True).distinct()))] + ['Média']
+    writer.writerow(header)
+
+    for aluno in alunos:
+        notas = Nota.objects.filter(aluno=aluno, turma=turma)
+        notas_valores = [nota.valor for nota in notas]
+        media = sum(notas_valores) / len(notas_valores) if notas_valores else 0
+        writer.writerow([aluno.matricula, aluno.nome] + notas_valores + [media])
+
+    media_turma = sum(sum(nota.valor for nota in Nota.objects.filter(aluno=aluno, turma=turma)) / len(Nota.objects.filter(aluno=aluno, turma=turma)) if Nota.objects.filter(aluno=aluno, turma=turma) else 0 for aluno in alunos) / len(alunos)
+    writer.writerow([])
+    writer.writerow(['', '', 'Média da turma', media_turma])
+
+    return response
+
 
 # -----------------------------------------------------------------------------------------------
 # ---------------------------------------- VIEWS NOTAS ------------------------------------------
