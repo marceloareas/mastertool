@@ -47,7 +47,7 @@ export class ModalProjectComponent {
   }
 
   /**
-   * Salva as informações da classe, criando um novo projeto ou atualizando um existente.
+   * Salva as informações do projeto, criando um novo projeto ou atualizando um existente.
    * @param event Dados do formulário que devem ser salvos.
    */
   save(singleProject: any) {
@@ -80,13 +80,13 @@ export class ModalProjectComponent {
       });
     } else {
       const dataProject = {
-        nome: this.data.singleProject.id,
-        descricao: this.data.singleProject.descricao,
-        data_inicio: this.data.singleProject.data_inicio,
-        data_fim: this.data.singleProject.data_fim,
+        nome: singleProject.nome || this.data.singleProject.nome,
+        descricao: singleProject.descricao || this.data.singleProject.descricao,
+        data_inicio: singleProject.data_inicio || this.data.singleProject.data_inicio,
+        data_fim: singleProject.data_fim || this.data.singleProject.data_fim,
       };
       this.projectService
-        .put(this.data.singleProject.id, { ...dataProject, ...singleProject })
+        .put(this.data.singleProject.id, dataProject )
         .subscribe(() => {
           alert('Registro atualizado');
           this.dialogRef.close(true);

@@ -313,13 +313,6 @@ def editar_projeto(request, id):
         usuario = request.user
         data = request.data
         
-        try:
-            projeto = Projeto.objects.get(id=id, usuario=usuario)
-            projeto.nome = data.get('nome', projeto.nome)
-            projeto.descricao = data.get('descricao', projeto.descricao)
-            projeto.save()
-            return JsonResponse({'mensagem': 'Projeto editado com sucesso.'}, status=200)
-        except Projeto.DoesNotExist:
-            return HttpResponseNotFound("Projeto não encontrado")
-        except Exception as e:
-            return JsonResponse({'erro': f'Erro ao editar o projeto: {str(e)}'}, status=400)
+        projeto_atualizado = atualizar_projeto(id, data, usuario)
+        return JsonResponse(projeto_atualizado, safe=False)
+        

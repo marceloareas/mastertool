@@ -17,7 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class FormProjectComponent {
   @Input() data: any;
   @Input() mode: any;
-  @Output() formClass: EventEmitter<any> = new EventEmitter();
+  @Output() formProject: EventEmitter<any> = new EventEmitter();
 
   constructor(private fb: FormBuilder) {}
 
@@ -68,7 +68,7 @@ export class FormProjectComponent {
       };
     }
 
-    this.formClass.emit(data);
+    this.formProject.emit(data);
   }
 
   /**

@@ -1,6 +1,7 @@
 from .models import *
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse, HttpResponseNotFound
+from datetime import datetime
 
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS ALUNOS -----------------------------------------
@@ -253,25 +254,55 @@ def encontrar_projeto(id=None, usuario=None):
                 'alunos': alunos_json,
             })
         return JsonResponse(projetos_json, safe=False)
-
+    
+def parse_date(date_str):
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
 
 def atualizar_projeto(id, data, usuario):
     try:
-        projeto = Projeto.objects.get(id=id, usuario=usuario)
+        projeto = Projeto.objects.filter(id=id, usuario=usuario).first()
+
+        if not projeto:
+            return HttpResponseNotFound("Projeto não encontrado")
+        
+        if 'alunos' in data:
+            try:
+                alunos = Aluno.objects.filter(matricula__in=data['alunos'], usuario=usuario)
+                projeto.aluno.set(alunos) 
+            except Aluno.DoesNotExist:
+                return HttpResponseNotFound("Um ou mais alunos não foram encontrados")
+
+        elif 'removerAlunos' in data:
+            try:
+                alunos_remover = Aluno.objects.filter(matricula__in=data['removerAlunos'], usuario=usuario)
+                projeto.aluno.remove(*alunos_remover)
+            except Aluno.DoesNotExist:
+                return HttpResponseNotFound("Um ou mais alunos a serem removidos não foram encontrados")
+
         projeto.nome = data.get('nome', projeto.nome)
         projeto.descricao = data.get('descricao', projeto.descricao)
-        projeto.data_inicio = data.get('data_inicio', projeto.data_inicio)
-        projeto.data_fim = data.get('data_fim', projeto.data_fim)
+        projeto.data_inicio = parse_date(data.get('data_inicio')) or projeto.data_inicio
+        projeto.data_fim = parse_date(data.get('data_fim')) or projeto.data_fim
         projeto.periodo = data.get('periodo', projeto.periodo)
-        if 'alunos' in data:
-            alunos = Aluno.objects.filter(matricula__in=data['alunos'], usuario=usuario)
-            projeto.aluno.set(alunos)
         projeto.save()
-        return JsonResponse({'mensagem': 'Projeto atualizado com sucesso.'})
-    except ObjectDoesNotExist:
-        return HttpResponseNotFound("Projeto não encontrado")
+
+        return {
+            'mensagem': 'Projeto atualizado com sucesso.',
+            'projeto': {
+                'id': projeto.id,
+                'nome': projeto.nome,
+                'descricao': projeto.descricao,
+                'data_inicio': projeto.data_inicio,
+                'data_fim': projeto.data_fim,
+                'periodo': projeto.periodo,
+            }
+        }
+
     except Exception as e:
-        return JsonResponse({'erro': str(e)}, status=400)
+        return {'erro': f'Ocorreu um erro ao atualizar o projeto: {str(e)}'}
 
 
 def deletar_projeto(id, usuario):
