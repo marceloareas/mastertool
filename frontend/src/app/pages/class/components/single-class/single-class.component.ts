@@ -462,13 +462,21 @@ export class SingleClassComponent implements OnInit {
   generateCSVDataDetalhado(): string {
     let csvData = `Nome da Turma: ${this.class.nome}\n`;
     csvData += 'Matrícula,Nome,' + this.notaColumns.join(',') + ',Média\n';
+  
     this.class.alunos.forEach((aluno: any) => {
-      const notas = this.notaColumns.map(col => aluno.notas[col] !== undefined ? aluno.notas[col] : '').join(',');
+      const notas = this.notaColumns.map(col => {
+        // Encontra a nota do aluno correspondente à coluna
+        const nota = aluno.notas.find((nota: any) => nota.titulo === col);
+        return nota ? nota.valor ?? '' : ''; // Retorna o valor da nota ou vazio se não houver
+      }).join(',');
+  
       csvData += `${aluno.matricula},${aluno.nome},${notas},${this.media(aluno)}\n`;
     });
+  
     csvData += `,,,,Média da turma: ${this.calculateClassAverage()}`;
     return csvData;
   }
+  
 
 
   /**
