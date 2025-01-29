@@ -14,11 +14,9 @@
       <button mat-stroked-button (click)="openModalClass(class, 'EDIT')">
         Editar turma
       </button>
-      <div class="bar__top__button">
-        <button mat-stroked-button (click)="promptRemoveColumns()">
-          Remover Notas
-        </button>
-      </div>
+      <button mat-button color="warn" (click)="openRemoveNotesModal()">
+        Remover Notas
+      </button>
       
     </div>
   </div>
@@ -29,20 +27,22 @@
       <button mat-flat-button color="primary" (click)="changeMode('EDIT')">
         Editar Notas
       </button>
+      
       } @else{
       <button mat-stroked-button color="primary" (click)="addNewColumn()">
         Adicionar Nota
       </button>
+    }
       <div class="bar__top__button">
         <button mat-stroked-button (click)="changeMode('VIEW')">
           Cancelar
         </button>
         <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+        <button mat-flat-button color="primary" (click)="exportReport('resumido')">Exportar CSV Resumido</button>
+        <button mat-flat-button color="primary" (click)="exportReport('detalhado')">Exportar CSV Detalhado</button>
       </div>
-      }
-    </div>
-  </div>
-
+      </div>
+      </div>
   <table mat-table [dataSource]="this.class.alunos" class="mat-elevation-z8">
     <!-- Nome Column -->
     <ng-container matColumnDef="nome">
@@ -74,7 +74,7 @@
               (input)="updatePeso($event, notaCol)"
               [disabled]="mode === 'VIEW'"
               placeholder="Peso"
-              style="width: 30px; margin-right: 20px"
+              style="width: 30px; margin-right: 10px"
             />
           @if(mode !== 'VIEW'){
           <button
@@ -137,4 +137,21 @@
     showFirstLastButtons
     aria-label="Select page of periodic elements"
   ></mat-paginator>
+
+  <!-- Modal para remover notas -->
+<ng-template #removeNotesDialog>
+  <h2 mat-dialog-title>Remover Notas</h2>
+  <mat-dialog-content>
+    <p>Digite a quantidade de notas que deseja remover:</p>
+    <mat-form-field appearance="fill">
+      <mat-label>Quantidade</mat-label>
+      <input matInput type="number" [(ngModel)]="quantityToRemove" min="1" />
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-button color="warn" (click)="confirmRemoveNotes()">Remover</button>
+  </mat-dialog-actions>
+</ng-template>
+
 </section>
