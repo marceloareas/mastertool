@@ -195,6 +195,16 @@ def adicionar_nota(request, id):
                     # Adicionar ou Atualizar notas
                     for nota in aluno_editar['notas']:
 
+                        # Calcula a média ponderada
+                        notas_validas = Nota.objects.filter(aluno=aluno, turma=turma).exclude(valor__isnull=True)
+                        soma_pesos = sum(nota.peso for nota in notas_validas)
+                        soma_ponderada = sum(nota.valor * nota.peso for nota in notas_validas)
+                        media = soma_ponderada / soma_pesos if soma_pesos > 0 else 0
+
+                        # Salvar a média no aluno (se necessário)
+                        aluno.media = round(media, 1)
+                        aluno.save()
+                        
                         # Atualiza o valor da nota existente
                         if 'id' in nota:
                             nota_existente = Nota.objects.filter(
@@ -204,6 +214,7 @@ def adicionar_nota(request, id):
                             ).first()
                             nota_existente.titulo = nota['titulo']
                             nota_existente.valor = nota['valor']
+                            nota_existente.peso = nota.get('peso', nota_existente.peso)
                             nota_existente.save()
                         else:
                         # Cria uma nova nota
@@ -211,7 +222,8 @@ def adicionar_nota(request, id):
                                 aluno=aluno,
                                 turma=turma,
                                 titulo=nota['titulo'],
-                                valor=nota['valor']
+                                valor=nota['valor'],
+                                peso=nota.get('peso', 1.0)
                             )
 
             return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)

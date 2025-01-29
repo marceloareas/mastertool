@@ -57,49 +57,66 @@ export class SingleClassComponent implements OnInit {
 
   constructor(public dialog: MatDialog) { }
 
-/**
- * Remove a menor nota válida (primeira encontrada) de cada aluno
- * e remove a coluna correspondente se todas as notas dela forem nulas.
+  /**
+ * Recalcula todas as médias após atualizar as notas.
  */
-removeLowestGrade() {
-  const columnsToCheck: Set<string> = new Set();
+recalculateAllMedia() {
+  this.dataSource.data.forEach((aluno: any) => {
+    aluno.media = this.media(aluno); // Atualiza a média de cada aluno
+  });
+  this.refreshTable(); // Atualiza a tabela para refletir as mudanças
+}
 
-  // Itera sobre cada aluno para remover a menor nota válida
+/**
+ * Atualiza os dados no localStorage após qualquer alteração.
+ */
+updateLocalStorage() {
+  localStorage.setItem(
+    `class_${this.class.id}_pesos`,
+    JSON.stringify(this.pesos)
+  );
+  localStorage.setItem(
+    `class_${this.class.id}_alunos`,
+    JSON.stringify(this.class.alunos)
+  );
+}
+
+
+removeMultipleColumns(quantity: number) {
+  if (quantity < 1) {
+    alert('A quantidade de notas a remover deve ser pelo menos 1.');
+    return;
+  }
+
+  if (quantity > this.notaColumns.length) {
+    alert(
+      `Não é possível remover mais notas do que existem. Total de notas: ${this.notaColumns.length}`
+    );
+    return;
+  }
+
+  // Remove as menores notas
   this.class.alunos.forEach((aluno: any) => {
-    const notasValidas = aluno.notas.filter(
-      (nota: any) => nota.valor !== null && nota.valor !== ''
-    );
-
-    // Identifica a menor nota válida
-    if (notasValidas.length > 0) {
-      const menorNota = Math.min(
-        ...notasValidas.map((nota: any) => parseFloat(nota.valor))
-      );
-
-      // Encontra o índice da primeira menor nota e remove
-      const indexToRemove = aluno.notas.findIndex(
-        (nota: any) => parseFloat(nota.valor) === menorNota
-      );
-
-      if (indexToRemove !== -1) {
-        columnsToCheck.add(aluno.notas[indexToRemove].titulo); // Coluna potencialmente vazia
-        aluno.notas[indexToRemove].valor = null; // Define como nula
-      }
-    }
+    aluno.notas = aluno.notas
+      .sort((a: any, b: any) => parseFloat(a.valor || 0) - parseFloat(b.valor || 0))
+      .slice(quantity); // Remove as menores
   });
 
-  // Verifica se as colunas possuem apenas valores nulos e remove as colunas
-  columnsToCheck.forEach((coluna) => {
-    const allNull = this.class.alunos.every((aluno: any) =>
-      aluno.notas.some(
-        (nota: any) => nota.titulo === coluna && (nota.valor === null || nota.valor === '')
-      )
-    );
+  // Atualiza colunas e sincroniza dados
+  this.notaColumns = this.notaColumns.slice(quantity);
+  this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
+  this.updateLocalStorage();
+  this.recalculateAllMedia();
+  alert(`${quantity} notas removidas com sucesso!`);
+}
 
-    if (allNull) {
-      this.removeColumn(coluna);
-    }
-  });
+
+/**
+ * Solicita ao usuário a quantidade de notas a serem removidas.
+ */
+promptRemoveColumns() {
+  const quantity = parseInt(prompt('Digite a quantidade de notas que deseja remover:') || '0', 10);
+  this.removeMultipleColumns(quantity);
 }
 
 
@@ -108,10 +125,16 @@ removeLowestGrade() {
    * Inicializa as colunas da tabela e atualiza os dados.
    */
   ngOnInit() {
-    this.loadPesosFromLocalStorage();
+    // Recupera pesos do localStorage
+    const storedPesos = localStorage.getItem(`class_${this.class.id}_pesos`);
+    if (storedPesos) {
+      this.pesos = JSON.parse(storedPesos);
+    }
+  
     this.initializeColumns();
     this.refreshTable();
   }
+  
 
   /**
    * Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
@@ -130,10 +153,17 @@ removeLowestGrade() {
    * Atualiza a fonte de dados da tabela e configura o paginador.
    */
   refreshTable() {
+    // Ordena os alunos por nome em ordem alfabética
+    if (this.class && this.class.alunos) {
+      this.class.alunos.sort((a: any, b: any) => a.nome.localeCompare(b.nome));
+    }
+  
+    // Atualiza a fonte de dados e configura o paginador
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
     console.log('data', this.dataSource.data);
   }
+  
 
   /**
    * Obtém os dados da classe do serviço `classService` e atualiza a tabela.
@@ -141,9 +171,23 @@ removeLowestGrade() {
   getClass() {
     this.classService.get(this.class.id).subscribe((data) => {
       this.class = data;
+  
+      // Atualiza pesos e armazena no localStorage
+      this.pesos = {};
+      this.class.alunos.forEach((aluno: any) => {
+        aluno.notas.forEach((nota: any) => {
+          this.pesos[nota.titulo] = parseFloat(nota.peso) || 1.0; // Inclui peso no objeto
+        });
+      });
+  
+      // Salva pesos no localStorage
+      localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
+  
+      // Atualiza a tabela
       this.refreshTable();
     });
   }
+  
 
   /**
    * Adiciona uma nova coluna de notas à tabela e atualiza os dados dos alunos para incluir um objeto de nota vazio.
@@ -245,22 +289,7 @@ removeLowestGrade() {
       }
     }
   }
-  /**
- * Salva o objeto 'pesos' no LocalStorage.
- */
-  savePesosToLocalStorage() {
-    localStorage.setItem('pesos', JSON.stringify(this.pesos));
-  }
-  /**
- * Carrega os pesos salvos do LocalStorage, se existirem.
- */
-  loadPesosFromLocalStorage() {
-    const savedPesos = localStorage.getItem('pesos');
-    if (savedPesos) {
-      this.pesos = JSON.parse(savedPesos);
-      console.log('Pesos carregados do LocalStorage:', this.pesos);
-    }
-  }
+
 
   updatePeso(event: Event, columnName: string) {
     const inputElement = event.target as HTMLInputElement;
@@ -268,7 +297,6 @@ removeLowestGrade() {
       const newPeso = parseFloat(inputElement.value);
       if (!isNaN(newPeso) && newPeso > 0) {
         this.pesos[columnName] = newPeso; // Atualiza o peso no objeto 'pesos'
-        this.savePesosToLocalStorage();  // Salva os pesos no localStorage
         console.log(`Peso atualizado para a coluna "${columnName}":`, newPeso);
       }
     }
@@ -347,15 +375,43 @@ removeLowestGrade() {
    * Salva as notas atualizadas no backend e muda o modo para `VIEW`.
    */
   save() {
-    this.mode = 'VIEW';
-    console.log('salvar', this.dataSource.data);
-    this.classService
-      .postNota(this.class.id, this.dataSource.data)
-      .subscribe(() => {
-        alert('Notas atualizadas com sucesso!');
+    // Bloqueia interações durante o salvamento
+    this.mode = 'SAVING';
+  
+    const updatedData = this.dataSource.data.map((aluno: any) => {
+      return {
+        matricula: aluno.matricula,
+        notas: aluno.notas.map((nota: any) => ({
+          id: nota.id,
+          titulo: nota.titulo,
+          valor: nota.valor,
+          peso: this.pesos[nota.titulo] || 1.0,
+        })),
+      };
+    });
+  
+    this.classService.postNota(this.class.id, updatedData).subscribe({
+      next: () => {
+        // Atualiza o localStorage com os pesos
+        localStorage.setItem(
+          `class_${this.class.id}_pesos`,
+          JSON.stringify(this.pesos)
+        );
+  
+        alert('Notas e pesos atualizados com sucesso!');
+        
+        // Atualiza os dados e retorna ao modo de visualização
         this.getClass();
-      });
+        this.mode = 'VIEW'; // Retorna ao modo de visualização
+      },
+      error: (err) => {
+        alert('Erro ao salvar notas. Tente novamente.');
+        console.error(err);
+        this.mode = 'EDIT'; // Retorna ao modo de edição em caso de erro
+      },
+    });
   }
+  
 
   getPeso(columnName: string): number {
     return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
@@ -368,36 +424,31 @@ removeLowestGrade() {
    * @param element Objeto do aluno.
    * @returns Média ponderada das notas formatada com uma casa decimal.
    */
-  media(element: any): string {
-    // Filtra as notas válidas que possuem valor e peso
-    const notasValidas = element.notas?.filter((nota: any) => {
-      const valor = parseFloat(nota.valor);
-      const peso = this.pesos[nota.titulo] || 1; // Obtém o peso atualizado ou usa 1 como padrão
-      return !isNaN(valor) && valor !== null && peso > 0;
-    });
+media(element: any): string {
+  const notasValidas = element.notas?.filter((nota: any) => {
+    const valor = parseFloat(nota.valor);
+    const peso = this.pesos[nota.titulo] || 1;
+    return !isNaN(valor) && valor !== null && peso > 0;
+  });
 
-    // Se não houver notas válidas, retorna "0.0"
-    if (!notasValidas || notasValidas.length === 0) {
-      return "0.0";
-    }
-
-    // Calcula o somatório ponderado das notas e o somatório dos pesos
-    const { somaPonderada, somaPesos } = notasValidas.reduce(
-      (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
-        const valorNota = parseFloat(nota.valor);
-        const peso = this.pesos[nota.titulo] || 1; // Obtém o peso atualizado ou usa 1 como padrão
-        acc.somaPonderada += valorNota * peso;
-        acc.somaPesos += peso;
-        return acc;
-      },
-      { somaPonderada: 0, somaPesos: 0 }
-    );
-
-    // Calcula a média ponderada (evitando divisão por zero)
-    const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
-
-    // Retorna a média formatada com uma casa decimal
-    return media.toFixed(1);
+  if (!notasValidas || notasValidas.length === 0) {
+    return "0.0";
   }
+
+  const { somaPonderada, somaPesos } = notasValidas.reduce(
+    (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
+      const valorNota = parseFloat(nota.valor);
+      const peso = this.pesos[nota.titulo] || 1;
+      acc.somaPonderada += valorNota * peso;
+      acc.somaPesos += peso;
+      return acc;
+    },
+    { somaPonderada: 0, somaPesos: 0 }
+  );
+
+  const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
+  return media.toFixed(1);
+}
+
 
 }
