@@ -22,7 +22,7 @@ import { StudentService } from '../../services/student/student.service';
     MatCardModule,
     MatIcon,
     MatButtonModule,
-    SingleProjectComponent,  // Pode ser substituído por SingleProjectComponent, se houver
+    SingleProjectComponent, 
     CommonModule,
     MatMenuModule,
   ],
@@ -45,8 +45,32 @@ export class ProjectComponent {
    */
   getProjects() {
     this.projectService.get().subscribe((data) => {
-      this.projects = data;
+      this.projects = data.map((project: any) => {
+        project.status = this.getStatus(project);
+        console.log(project);
+        return project;
+      });
     });
+  }
+
+  /**
+  * Lógica para retornar o status de um projeto.
+  */
+  getStatus(project: any) {
+    const today = new Date();
+    const dataFim = project?.data_fim ? new Date(project.data_fim) : null;
+
+    if (!dataFim || dataFim > today) {
+      console.log("ANDAMENTO", dataFim);
+      return 'ANDAMENTO';
+    } else {
+    console.log("concluido", dataFim);
+      return 'CONCLUÍDO';
+    }
+  }
+
+  status(element: any): string {
+    return element.status || 'INDEFINIDO';
   }
 
   /**

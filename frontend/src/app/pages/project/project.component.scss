@@ -39,7 +39,7 @@
 
     .card {
       width: 180px;
-      height: 150px;
+      height: 200px;
       display: flex;
       align-items: center;
       text-align: center;
@@ -59,12 +59,27 @@
           font-weight: 500;
           font-size: 20px;
         }
+        
       }
       .title {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         width: 140px;
+      }
+
+      .status-andamento {
+        background-color: #ffcc80; 
+        color: #e65100; 
+        border-radius: 5px;
+        padding: 5px 10px;
+      }
+      
+      .status-concluido {
+        background-color: #a5d6a7; 
+        color: #1b5e20; 
+        border-radius: 5px;
+        padding: 5px 10px;
       }
     }
   }

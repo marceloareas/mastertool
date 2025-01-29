@@ -24,6 +24,9 @@
           <span> {{ generateInitials(project.nome) }}</span>
         </div>
         <h3 class="title">{{ project.nome.toUpperCase() }}</h3>
+        <h4 [ngClass]="project.status === 'CONCLUÍDO' ? 'status-concluido' : 'status-andamento'">
+          {{ project.status }} 
+        </h4>
       </mat-card-content>
     </mat-card>
   </div>
