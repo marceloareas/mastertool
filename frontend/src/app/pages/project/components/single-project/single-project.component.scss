@@ -1,77 +1,97 @@
 .bar__top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+
+  &__content {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  &__button {
+    display: flex;
+    gap: 10px;
+  }
+
+  h2,
+  h3 {
+    margin: 0;
+  }
+}
+  
+.single-project {
+  padding: 0 20px;
+
+  &__top {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 30px;
-  
-    &__content {
+    margin-bottom: 15px;
+
+    .action-button {
       display: flex;
-      gap: 15px;
-      align-items: center;
+      width: 100%;
+      justify-content: space-between;
     }
-  
-    &__button {
-      display: flex;
-      gap: 10px;
+  }
+
+  table {
+    margin-bottom: 20px;
+
+    input {
+      width: 60px;
+      height: 25px;
+      border: none;
+      background: transparent;
+      text-align: center;
+
+      &.edit {
+        border: #cfcfcf 1px solid;
+        border-radius: 3px;
+      }
     }
-  
-    h2,
+
+    .button__delete {
+      width: 17px;
+      height: 17px;
+      padding: 0;
+
+      mat-icon {
+        width: 17px;
+        height: 17px;
+
+        &.icon__delete {
+          font-size: 16px;
+          color: red;
+        }
+      }
+    }
+  }
+}
+
+.single-project__infos {
+  display: flex;
+  flex-direction: column;
+
+  &__datas {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 15px; 
+
     h3 {
+      display: inline-block; 
       margin: 0;
     }
   }
-  
+
+  &__descricao {
+    margin-top: 15px;
+  }
+}
+
+@media (min-width: 1440px) {
   .single-project {
-    padding: 0 20px;
-  
-    &__top {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-  
-      .action-button {
-        display: flex;
-        width: 100%;
-        justify-content: space-between;
-      }
-    }
-  
-    table {
-      margin-bottom: 20px;
-  
-      input {
-        width: 60px;
-        height: 25px;
-        border: none;
-        background: transparent;
-        text-align: center;
-  
-        &.edit {
-          border: #cfcfcf 1px solid;
-          border-radius: 3px;
-        }
-      }
-  
-      .button__delete {
-        width: 17px;
-        height: 17px;
-        padding: 0;
-  
-        mat-icon {
-          width: 17px;
-          height: 17px;
-  
-          &.icon__delete {
-            font-size: 16px;
-            color: red;
-          }
-        }
-      }
-    }
+    width: 1200px;
   }
-  
-  @media (min-width: 1440px) {
-    .single-project {
-      width: 1200px;
-    }
-  }
-  
+}

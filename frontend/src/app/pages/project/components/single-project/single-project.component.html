@@ -5,7 +5,9 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
       <h2>{{ project.nome }}</h2>
+      <h3>{{ project.periodo }}</h3>
     </div>
+    
     <div class="bar__top__button">
       <button mat-stroked-button (click)="openModalStudent()">
         Adicionar Aluno
@@ -15,13 +17,21 @@
       </button>
     </div>
   </div>
-  
-  <h3>{{ project.descricao }}</h3>
+
+  <div class="single-project__infos">
+    <div class="single-project__infos__datas">
+      <h3><b>Data início:</b> {{ project.data_inicio | date: 'dd/MM/yyyy' }}</h3>
+      <h3><b>Data fim:</b> {{ project.data_fim | date: 'dd/MM/yyyy' }}</h3>
+    </div>
+    <div class="single-project__infos__descricao">
+      <h3><b>Descrição:</b> {{ project.descricao }}</h3>
+    </div>
+  </div>
 
   <table mat-table [dataSource]="this.project.alunos" class="mat-elevation-z8">
     <!-- Nome Column -->
     <ng-container matColumnDef="nome">
-      <th mat-header-cell *matHeaderCellDef width="200px">Alunos</th>
+      <th mat-header-cell *matHeaderCellDef width="200px">Membros</th>
       <td mat-cell *matCellDef="let element">
         {{ element.matricula }} - {{ element.nome }}
       </td>
@@ -60,4 +70,3 @@
     aria-label="Select page of periodic elements"
   ></mat-paginator>
 </section>
-  
