@@ -24,6 +24,7 @@ export class ProjectService {
   };
 
   put = (id: string, dados: any) => {
+    console.log('put', id, dados);
     return this.http.put<any>(
       'http://127.0.0.1:8000/projetos/editar/' + id,
       dados

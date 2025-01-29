@@ -22,18 +22,14 @@ export class StudentProjectFormComponent {
   private studentService = inject(StudentService);
 
   @Output() formProject: EventEmitter<any> = new EventEmitter();
-  @Input() project: any; // Agora é `project` em vez de `class`
+  @Input() project: any; 
 
   constructor(private fb: FormBuilder) {}
-
   students: any;
   form: FormGroup = this.fb.group({
-    matricula: [''], // Campo de matrícula para associar estudante ao projeto
+    matricula: [''], 
   });
 
-  /**
-   * Método executado após a inicialização do componente.
-   */
   ngOnInit() {
     this.getStudents();
   }
@@ -45,20 +41,20 @@ export class StudentProjectFormComponent {
     this.studentService.get().subscribe((data) => {
       this.students = this.project.estudantes
         .filter(
-          (student1: { nome: any; matricula: any }) =>
+          (aluno1: { nome: any; matricula: any }) =>
             !data.some(
-              (student2: { nome: any; matricula: any }) =>
-                student1.nome === student2.nome &&
-                student1.matricula === student2.matricula
+              (aluno2: { nome: any; matricula: any }) =>
+                aluno1.nome === aluno2.nome &&
+                aluno1.matricula === aluno2.matricula
             )
         )
         .concat(
           data.filter(
-            (student2: { nome: any; matricula: any }) =>
+            (aluno2: { nome: any; matricula: any }) =>
               !this.project.estudantes.some(
-                (student1: { nome: any; matricula: any }) =>
-                  student2.nome === student1.nome &&
-                  student2.matricula === student1.matricula
+                (aluno1: { nome: any; matricula: any }) =>
+                  aluno2.nome === aluno1.nome &&
+                  aluno2.matricula === aluno1.matricula
               )
           )
         );
@@ -67,7 +63,7 @@ export class StudentProjectFormComponent {
   }
 
   /**
-   * Emite os dados do formulário ao componente pai.
+   * Emite os dados do formulário. Dependendo do modo, pode emitir dados para adicionar ou editar uma classe.
    */
   save() {
     this.formProject.emit(this.form.value);

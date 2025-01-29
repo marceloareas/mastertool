@@ -3,11 +3,11 @@
     <mat-form-field>
       <mat-label>Aluno</mat-label>
       <mat-select formControlName="matricula">
-        <!-- Lista de alunos ajustada para refletir os alunos do projeto -->
-        *ngFor="let student of students; let i = index">
-        <mat-option [value]="students.matricula">
-          {{ students.matricula + " - " + students.nome }}
-        </mat-option>
+        @for (student of students; track student) {
+          <mat-option [value]="student.matricula">{{
+            student.matricula +" - "+ student.nome
+          }}</mat-option>
+          }
       </mat-select>
     </mat-form-field>
   </div>

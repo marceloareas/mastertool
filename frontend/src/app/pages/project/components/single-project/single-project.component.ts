@@ -90,8 +90,6 @@ import {
      * @param mode Modo de operação do modal ('ADD' ou 'EDIT').
      */
     openModalProject(singleProject?: any, mode = 'ADD') {
-      console.log('mode', mode);
-      console.log('singleProject', singleProject);
       this.dialog
         .open(ModalProjectComponent, {
           data: { singleProject, mode },
