@@ -1,4 +1,4 @@
-.class {
+.project {
   display: flex;
   flex-direction: column;
 
@@ -10,5 +10,15 @@
 }
 
 mat-form-field {
-  width: 65%;
+  width: 45%;
+}
+
+mat-form-field.descricao {
+  width: 100%;
+  padding-right: 40px;
+}
+
+mat-form-field.descricao textarea {
+  height: auto; 
+  min-height: 3em; 
 }
