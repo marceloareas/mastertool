@@ -83,12 +83,27 @@
       display: inline-block; 
       margin: 0;
     }
+
+    .status-andamento {
+      background-color: #ffcc80; 
+      color: #e65100; 
+      border-radius: 5px;
+      padding: 5px 10px;
+    }
+    
+    .status-concluido {
+      background-color: #a5d6a7; 
+      color: #1b5e20; 
+      border-radius: 5px;
+      padding: 5px 10px;
+    }
   }
 
   &__descricao {
     margin-top: 15px;
   }
 }
+
 
 @media (min-width: 1440px) {
   .single-project {

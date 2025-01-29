@@ -164,17 +164,19 @@ import {
   */
   evaluateStatus() {
     const today = new Date();
-    const dataFim = this.project?.dataFim ? new Date(this.project.dataFim) : null;
+    const dataFim = this.project?.data_fim ? new Date(this.project.data_fim) : null;
 
     if (!dataFim || dataFim > today) {
-      this.project.status = 'Em Andamento';
+      console.log("ANDAMENTO", dataFim);
+      this.project.status = 'ANDAMENTO';
     } else {
-      this.project.status = 'Encerrado';
+    console.log("concluido", dataFim);
+      this.project.status = 'CONCLUÍDO';
     }
   }
 
   status(element: any): string {
-    return element.status || 'Status Indefinido';
+    return element.status || 'INDEFINIDO';
   }
 
   /**
