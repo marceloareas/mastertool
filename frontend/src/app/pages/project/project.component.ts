@@ -47,7 +47,6 @@ export class ProjectComponent {
     this.projectService.get().subscribe((data) => {
       this.projects = data.map((project: any) => {
         project.status = this.getStatus(project);
-        console.log(project);
         return project;
       });
     });
@@ -61,10 +60,8 @@ export class ProjectComponent {
     const dataFim = project?.data_fim ? new Date(project.data_fim) : null;
 
     if (!dataFim || dataFim > today) {
-      console.log("ANDAMENTO", dataFim);
       return 'ANDAMENTO';
     } else {
-    console.log("concluido", dataFim);
       return 'CONCLUÍDO';
     }
   }

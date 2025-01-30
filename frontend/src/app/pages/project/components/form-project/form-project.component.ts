@@ -23,10 +23,11 @@ export class FormProjectComponent {
 
   project: FormGroup = this.fb.group({
     nome: [''],
+    periodo: [''],
     alunos: [null],
     descricao: [''],
     data_inicio: [''],
-    data_fim: ['']
+    data_fim: [null]
   });
 
   ngOnInit() {
@@ -62,12 +63,12 @@ export class FormProjectComponent {
     } else {
       data = {
         nome: this.project.value.nome,
+        periodo: this.project.value.periodo,
         descricao: this.project.value.descricao,
         data_inicio: this.project.value.data_inicio,
         data_fim: this.project.value.data_fim,
       };
     }
-
     this.formProject.emit(data);
   }
 

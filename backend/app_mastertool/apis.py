@@ -285,7 +285,7 @@ def atualizar_projeto(id, data, usuario):
         projeto.nome = data.get('nome', projeto.nome)
         projeto.descricao = data.get('descricao', projeto.descricao)
         projeto.data_inicio = parse_date(data.get('data_inicio')) or projeto.data_inicio
-        projeto.data_fim = parse_date(data.get('data_fim')) or projeto.data_fim
+        projeto.data_fim = parse_date(data.get('data_fim')) if data.get('data_fim') else None
         projeto.periodo = data.get('periodo', projeto.periodo)
         projeto.save()
 

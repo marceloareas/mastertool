@@ -80,6 +80,7 @@ import {
       this.projectService.get(this.project.id).subscribe((data) => {
         this.project = data;
         this.refreshTable();
+        this.evaluateStatus();
       });
     }
   
@@ -167,10 +168,8 @@ import {
     const dataFim = this.project?.data_fim ? new Date(this.project.data_fim) : null;
 
     if (!dataFim || dataFim > today) {
-      console.log("ANDAMENTO", dataFim);
       this.project.status = 'ANDAMENTO';
     } else {
-    console.log("concluido", dataFim);
       this.project.status = 'CONCLUÍDO';
     }
   }

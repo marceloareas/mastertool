@@ -32,6 +32,7 @@ import { StudentService } from '../../../../services/student/student.service';
   styleUrl: './modal-project.component.scss',
 })
 export class ModalProjectComponent {
+
   private dialogRef = inject(DialogRef);
   private studentService = inject(StudentService);
   private projectService = inject(ProjectService);
@@ -43,7 +44,7 @@ export class ModalProjectComponent {
   ) {}
 
   ngOnInit() {
-    console.log(this.data.singleProject);
+    //console.log(this.data.singleProject);
   }
 
   /**
@@ -53,7 +54,7 @@ export class ModalProjectComponent {
   save(singleProject: any) {
     if (this.data.mode === 'ADD') {
       this.projectService.post(singleProject).subscribe((response) => {
-        if (response.alunos_nao_criados.length > 0) {
+        if (response.alunos_nao_criados && response.alunos_nao_criados.length > 0) {
           const result = confirm(
             'Existem alunos que não foram cadastrados. Deseja cadastrar?'
           );
@@ -81,15 +82,17 @@ export class ModalProjectComponent {
     } else {
       const dataProject = {
         nome: singleProject.nome || this.data.singleProject.nome,
+        periodo: singleProject.periodo || this.data.singleProject.periodo,
         descricao: singleProject.descricao || this.data.singleProject.descricao,
         data_inicio: singleProject.data_inicio || this.data.singleProject.data_inicio,
-        data_fim: singleProject.data_fim || this.data.singleProject.data_fim,
+        data_fim: singleProject.data_fim ,
       };
       this.projectService
         .put(this.data.singleProject.id, dataProject )
         .subscribe(() => {
           alert('Registro atualizado');
           this.dialogRef.close(true);
+          console.log("Registro atualizado", dataProject);
         });
     }
   }
