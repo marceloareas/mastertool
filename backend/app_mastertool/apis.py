@@ -11,6 +11,7 @@ def cadastro_alunos_txt(data, usuario):
     alunos              = []
     alunos_criados      = []
     id_turma            = data.get('id', None)
+    tipo                = data.get('tipo', None)
     conteudo_arquivo    = data['turma']
     linhas              = conteudo_arquivo.splitlines()
 
@@ -35,7 +36,10 @@ def cadastro_alunos_txt(data, usuario):
         aluno.save()
         aluno.usuario.add(usuario)
     if id_turma:
-        adicionar_aluno(id_turma, alunos, usuario)
+        if tipo == 'class':
+            adicionar_aluno_turma(id_turma, alunos, usuario)
+        elif tipo == 'project':
+            adicionar_aluno_projeto(id_turma, alunos, usuario)
     
     return alunos_criados
 
@@ -188,7 +192,7 @@ def atualizar_turma(id, data, usuario):
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Turma não encontrada")
     
-def adicionar_aluno(id, alunos, usuario):
+def adicionar_aluno_turma(id, alunos, usuario):
     try:
         turma = Turma.objects.filter(id=id, usuario=usuario).first()
 
@@ -203,23 +207,48 @@ def adicionar_aluno(id, alunos, usuario):
 # ----------------------------------------- APIS PROJETOS ---------------------------------------
 # -----------------------------------------------------------------------------------------------
 
-def cadastro_projeto(data, usuario):
-    try:
-        projeto = Projeto(
-            data_inicio=data['data_inicio'],
-            data_fim=data.get('data_fim', None),
+def cadastro_projeto_txt(data, usuario):
+    matriculas = []
+    alunos_nao_criados = [] 
+    alunos = []
+    conteudo_arquivo = data['turma']
+    linhas = conteudo_arquivo.splitlines()
+    
+    novo_projeto = Projeto(
             nome=data['nome'],
-            descricao=data.get('descricao', ''),
-            periodo=data.get('periodo', ''),
+            descricao=data['descricao'],
+            periodo=data['periodo'],
+            data_inicio=data['data_inicio'],
+            data_fim=data['data_fim'],
             usuario=usuario
         )
-        projeto.save()
-        if 'alunos' in data:
-            alunos = Aluno.objects.filter(matricula__in=data['alunos'], usuario=usuario)
-            projeto.aluno.add(*alunos)
-        return JsonResponse({'mensagem': 'Projeto cadastrado com sucesso.', 'id': projeto.id})
-    except Exception as e:
-        return JsonResponse({'erro': str(e)}, status=400)
+    novo_projeto.save()
+
+    for linha in linhas:
+        matricula, nome = linha.split(', ')
+        alunos.append({
+            'matricula': matricula,
+            'nome': nome
+        })
+    
+    for aluno in alunos:
+        if Aluno.objects.filter(matricula=aluno['matricula']).first():
+            matriculas.append(aluno['matricula'])
+        else:
+            alunos_nao_criados.append(aluno)
+    alunos_existentes = Aluno.objects.filter(matricula__in=matriculas, usuario=usuario)
+    novo_projeto.aluno.add(*alunos_existentes)
+
+    for aluno in alunos_nao_criados:
+        novo_aluno = Aluno(matricula=aluno['matricula'], nome=aluno['nome'])
+        novo_aluno.save()
+        novo_aluno.usuario.set([usuario])
+        novo_projeto.aluno.add(novo_aluno)
+
+    if alunos_nao_criados:
+        return {'id_turma': novo_projeto.id, 'alunos_criados': alunos_existentes, 'alunos_nao_criados': alunos_nao_criados}
+    else:
+        return {'id_turma': novo_projeto.id, 'alunos_criados': alunos_existentes}
 
 
 def encontrar_projeto(id=None, usuario=None):
@@ -312,3 +341,14 @@ def deletar_projeto(id, usuario):
         return JsonResponse({'mensagem': 'Projeto deletado com sucesso.'})
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Projeto não encontrado")
+    
+def adicionar_aluno_projeto(id, alunos, usuario):
+    try:
+        projeto = Projeto.objects.filter(id=id, usuario=usuario).first()
+
+        for aluno in alunos:
+            aluno = Aluno.objects.filter(matricula=aluno['matricula'], usuario=usuario).first()
+
+            projeto.aluno.add(aluno) 
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Aluno não encontrado")

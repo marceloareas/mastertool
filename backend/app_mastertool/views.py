@@ -233,18 +233,22 @@ def cadastrar_projeto(request):
         usuario = request.user
         data = request.data
 
-        try:
-            projeto = Projeto.objects.create(
-                nome=data['nome'],
-                descricao=data['descricao'],
-                data_inicio=data['data_inicio'],  
-                data_fim=data['data_fim'],
-                periodo=data['periodo'],
-                usuario=usuario
-            )
-            return JsonResponse({'mensagem': 'Projeto criado com sucesso.', 'id_projeto': projeto.id}, status=201)
-        except Exception as e:
-            return JsonResponse({'erro': f'Não foi possível criar o projeto: {str(e)}'}, status=400)
+        resultado  = cadastro_projeto_txt(request.data, usuario)
+
+        alunos_criados = resultado.get('alunos_criados', [])
+        alunos_nao_criados = resultado.get('alunos_nao_criados', [])
+        id_turma = resultado.get('id_turma', [])
+
+        if alunos_criados:
+            response_data = {
+                'mensagem': 'Arquivo processado com sucesso.',
+                'id_turma': id_turma,
+                'alunos_criados': [aluno.nome for aluno in alunos_criados],
+                'alunos_nao_criados': alunos_nao_criados
+            }
+            return JsonResponse(response_data)
+        else:
+            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
