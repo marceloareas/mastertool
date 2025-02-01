@@ -68,7 +68,7 @@ import {
      * Atualiza os dados na tabela.
      */
     refreshTable() {
-      this.dataSource = new MatTableDataSource(this.project.alunos);
+      this.dataSource = new MatTableDataSource(this.project.turma);
       this.dataSource.paginator = this.paginator;
       console.log('data', this.dataSource.data);
     }

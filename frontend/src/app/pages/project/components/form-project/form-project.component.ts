@@ -24,7 +24,7 @@ export class FormProjectComponent {
   project: FormGroup = this.fb.group({
     nome: [''],
     periodo: [''],
-    alunos: [null],
+    turma: [null],
     descricao: [''],
     data_inicio: [''],
     data_fim: [null]

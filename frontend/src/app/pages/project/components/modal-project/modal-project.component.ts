@@ -66,7 +66,7 @@ export class ModalProjectComponent {
               }
             );
 
-            data = { turma: data.join('\r\n'), id: response.id_turma };
+            data = { turma: data.join('\r\n'), id: response.id_project, tipo: 'project' };
 
             this.studentService.post(data).subscribe(() => {
               alert('Cadastrado com sucesso');
