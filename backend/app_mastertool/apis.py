@@ -298,19 +298,19 @@ def atualizar_projeto(id, data, usuario):
         if not projeto:
             return HttpResponseNotFound("Projeto não encontrado")
         
-        if 'alunos' in data:
+        if 'matricula' in data:
             try:
-                alunos = Aluno.objects.filter(matricula__in=data['alunos'], usuario=usuario)
-                projeto.aluno.set(alunos) 
+                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+                projeto.aluno.add(aluno) 
             except Aluno.DoesNotExist:
-                return HttpResponseNotFound("Um ou mais alunos não foram encontrados")
+                return HttpResponseNotFound("Aluno não encontrado")
 
-        elif 'removerAlunos' in data:
+        elif 'removerMatricula' in data:
             try:
-                alunos_remover = Aluno.objects.filter(matricula__in=data['removerAlunos'], usuario=usuario)
-                projeto.aluno.remove(*alunos_remover)
+                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+                projeto.aluno.remove(aluno)
             except Aluno.DoesNotExist:
-                return HttpResponseNotFound("Um ou mais alunos a serem removidos não foram encontrados")
+                return HttpResponseNotFound("Aluno não encontrado")
 
         projeto.nome = data.get('nome', projeto.nome)
         projeto.descricao = data.get('descricao', projeto.descricao)
