@@ -17,6 +17,8 @@
       <button mat-button color="warn" (click)="openRemoveNotesModal()">
         Remover Notas
       </button>
+      <button mat-flat-button color="primary" (click)="exportReport('resumido')">Exportar CSV Resumido</button>
+      <button mat-flat-button color="primary" (click)="exportReport('detalhado')">Exportar CSV Detalhado</button>
       
     </div>
   </div>
@@ -24,23 +26,25 @@
   <div class="single-class__top">
     <div class="action-button">
       @if(mode === 'VIEW'){
-      <button mat-flat-button color="primary" (click)="changeMode('EDIT')">
-        Editar Notas
-      </button>
-      } @else{
-      <button mat-stroked-button color="primary" (click)="addNewColumn()">
-        Adicionar Nota
-      </button>
-      <div class="bar__top__button">
-        <button mat-stroked-button (click)="changeMode('VIEW')">
-          Cancelar
+        <button mat-flat-button color="primary" (click)="changeMode('EDIT')">
+          Editar Notas
         </button>
-        <button mat-flat-button color="primary" (click)="save()">Salvar</button>
-      </div>
+      } @else{
+        <button mat-stroked-button color="primary" (click)="addNewColumn()">
+          Adicionar Nota
+        </button>
+  
+        <!-- Exibe "Cancelar" e "Salvar" somente no modo EDIT -->
+        <div class="bar__top__button" *ngIf="mode === 'EDIT'">
+          <button mat-stroked-button (click)="changeMode('VIEW')">
+            Cancelar
+          </button>
+          <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+        </div>
       }
     </div>
-  </div>
-
+  </div>  
+  
   <table mat-table [dataSource]="this.class.alunos" class="mat-elevation-z8">
     <!-- Nome Column -->
     <ng-container matColumnDef="nome">

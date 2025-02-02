@@ -6,6 +6,7 @@ import {
   ViewChild,
   inject,
   OnInit,
+
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -21,6 +22,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
 import {MatDialogModule} from '@angular/material/dialog';
+
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-single-class',
@@ -417,6 +420,63 @@ export class SingleClassComponent implements OnInit {
   getPeso(columnName: string): number {
     return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
   }
+
+
+  exportReport(type: string) {
+    if (type === 'resumido') {
+      this.exportCSVResumido();
+    } else if (type === 'detalhado') {
+      this.exportCSVDetalhado();
+    }
+  }
+
+  exportCSVResumido() {
+    const csvData = this.generateCSVDataResumido();
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    saveAs(blob, 'relatorio_turma_resumido.csv');
+  }
+
+  generateCSVDataResumido(): string {
+    let csvData = `Nome da Turma: ${this.class.nome}\n`;
+    csvData += 'Matrícula,Nome,Média\n';
+    this.class.alunos.forEach((aluno: any) => {
+      csvData += `${aluno.matricula},${aluno.nome},${this.media(aluno)}\n`;
+    });
+    csvData += `,,Média da turma: ${this.calculateClassAverage()}`;
+    return csvData;
+  }
+
+  calculateClassAverage(): string {
+    const totalAlunos = this.class.alunos.length;
+    const somaMedias = this.class.alunos.reduce((acc: number, aluno: any) => acc + parseFloat(this.media(aluno)), 0);
+    const mediaTurma = totalAlunos > 0 ? somaMedias / totalAlunos : 0;
+    return mediaTurma.toFixed(1);
+  }
+
+  exportCSVDetalhado() {
+    const csvData = this.generateCSVDataDetalhado();
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    saveAs(blob, 'relatorio_turma_detalhado.csv');
+  }
+
+  generateCSVDataDetalhado(): string {
+    let csvData = `Nome da Turma: ${this.class.nome}\n`;
+    csvData += 'Matrícula,Nome,' + this.notaColumns.join(',') + ',Média\n';
+  
+    this.class.alunos.forEach((aluno: any) => {
+      const notas = this.notaColumns.map(col => {
+        // Encontra a nota do aluno correspondente à coluna
+        const nota = aluno.notas.find((nota: any) => nota.titulo === col);
+        return nota ? nota.valor ?? '' : ''; // Retorna o valor da nota ou vazio se não houver
+      }).join(',');
+  
+      csvData += `${aluno.matricula},${aluno.nome},${notas},${this.media(aluno)}\n`;
+    });
+  
+    csvData += `,,,,Média da turma: ${this.calculateClassAverage()}`;
+    return csvData;
+  }
+  
 
 
   /**
