@@ -60,25 +60,19 @@ export class SingleClassComponent implements OnInit {
   /**
  * Recalcula todas as médias após atualizar as notas.
  */
-recalculateAllMedia() {
-  this.dataSource.data.forEach((aluno: any) => {
-    aluno.media = this.media(aluno); // Atualiza a média de cada aluno
-  });
-  this.refreshTable(); // Atualiza a tabela para refletir as mudanças
-}
+  recalculateAllMedia() {
+    this.dataSource.data.forEach((aluno: any) => {
+      aluno.media = this.media(aluno);
+    });
+    this.refreshTable();
+  }
 
 /**
  * Atualiza os dados no localStorage após qualquer alteração.
  */
 updateLocalStorage() {
-  localStorage.setItem(
-    `class_${this.class.id}_pesos`,
-    JSON.stringify(this.pesos)
-  );
-  localStorage.setItem(
-    `class_${this.class.id}_alunos`,
-    JSON.stringify(this.class.alunos)
-  );
+  localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
+  localStorage.setItem(`class_${this.class.id}_alunos`, JSON.stringify(this.class.alunos));
 }
 
 
@@ -130,7 +124,13 @@ promptRemoveColumns() {
     if (storedPesos) {
       this.pesos = JSON.parse(storedPesos);
     }
-  
+
+    // Recupera alunos do localStorage
+    const storedAlunos = localStorage.getItem(`class_${this.class.id}_alunos`);
+    if (storedAlunos) {
+      this.class.alunos = JSON.parse(storedAlunos);
+    }
+
     this.initializeColumns();
     this.refreshTable();
   }
@@ -153,41 +153,37 @@ promptRemoveColumns() {
    * Atualiza a fonte de dados da tabela e configura o paginador.
    */
   refreshTable() {
-    // Ordena os alunos por nome em ordem alfabética
     if (this.class && this.class.alunos) {
       this.class.alunos.sort((a: any, b: any) => a.nome.localeCompare(b.nome));
     }
-  
-    // Atualiza a fonte de dados e configura o paginador
+
     this.dataSource = new MatTableDataSource(this.class.alunos);
     this.dataSource.paginator = this.paginator;
-    console.log('data', this.dataSource.data);
+    this.updateLocalStorage();
   }
   
 
   /**
    * Obtém os dados da classe do serviço `classService` e atualiza a tabela.
    */
-  getClass() {
+  getClass(resetPesos: boolean = true) {
     this.classService.get(this.class.id).subscribe((data) => {
       this.class = data;
-  
-      // Atualiza pesos e armazena no localStorage
-      this.pesos = {};
-      this.class.alunos.forEach((aluno: any) => {
-        aluno.notas.forEach((nota: any) => {
-          this.pesos[nota.titulo] = parseFloat(nota.peso) || 1.0; // Inclui peso no objeto
+
+      if (resetPesos) {
+        this.pesos = {};
+        this.class.alunos.forEach((aluno: any) => {
+          aluno.notas.forEach((nota: any) => {
+            this.pesos[nota.titulo] = parseFloat(nota.peso) || 1.0;
+          });
         });
-      });
-  
-      // Salva pesos no localStorage
-      localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
-  
-      // Atualiza a tabela
+
+        localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
+      }
+
       this.refreshTable();
     });
   }
-  
 
   /**
    * Adiciona uma nova coluna de notas à tabela e atualiza os dados dos alunos para incluir um objeto de nota vazio.
@@ -275,17 +271,11 @@ promptRemoveColumns() {
     if (inputElement) {
       const value = inputElement.value;
 
-      const notaIndex = element.notas.findIndex(
-        (nota: any) => nota.titulo === columnName
-      );
-
+      const notaIndex = element.notas.findIndex((nota: any) => nota.titulo === columnName);
       if (notaIndex !== -1) {
         element.notas[notaIndex].valor = value === '' ? null : value;
-        console.log('nota', value);
-      } else {
-        console.error(
-          `Nota com título "${columnName}" não encontrada para o aluno.`
-        );
+        this.updateLocalStorage(); // Atualiza localStorage ao alterar a nota
+        console.log(`Nota atualizada: ${columnName} = ${value}`);
       }
     }
   }
@@ -296,8 +286,9 @@ promptRemoveColumns() {
     if (inputElement) {
       const newPeso = parseFloat(inputElement.value);
       if (!isNaN(newPeso) && newPeso > 0) {
-        this.pesos[columnName] = newPeso; // Atualiza o peso no objeto 'pesos'
-        console.log(`Peso atualizado para a coluna "${columnName}":`, newPeso);
+        this.pesos[columnName] = newPeso;
+        this.updateLocalStorage(); // Atualiza localStorage ao alterar o peso
+        console.log(`Peso atualizado para "${columnName}": ${newPeso}`);
       }
     }
   }
@@ -375,39 +366,29 @@ promptRemoveColumns() {
    * Salva as notas atualizadas no backend e muda o modo para `VIEW`.
    */
   save() {
-    // Bloqueia interações durante o salvamento
     this.mode = 'SAVING';
-  
-    const updatedData = this.dataSource.data.map((aluno: any) => {
-      return {
-        matricula: aluno.matricula,
-        notas: aluno.notas.map((nota: any) => ({
-          id: nota.id,
-          titulo: nota.titulo,
-          valor: nota.valor,
-          peso: this.pesos[nota.titulo] || 1.0,
-        })),
-      };
-    });
-  
+
+    const updatedData = this.dataSource.data.map((aluno: any) => ({
+      matricula: aluno.matricula,
+      notas: aluno.notas.map((nota: any) => ({
+        id: nota.id,
+        titulo: nota.titulo,
+        valor: nota.valor,
+        peso: this.pesos[nota.titulo] || 1.0, // Agora envia corretamente o peso atualizado
+      })),
+    }));
+
     this.classService.postNota(this.class.id, updatedData).subscribe({
       next: () => {
-        // Atualiza o localStorage com os pesos
-        localStorage.setItem(
-          `class_${this.class.id}_pesos`,
-          JSON.stringify(this.pesos)
-        );
-  
+        this.updateLocalStorage(); // Mantém os pesos no localStorage antes de chamar getClass()
         alert('Notas e pesos atualizados com sucesso!');
-        
-        // Atualiza os dados e retorna ao modo de visualização
-        this.getClass();
-        this.mode = 'VIEW'; // Retorna ao modo de visualização
+        this.getClass(false); // Evita resetar pesos após salvar
+        this.mode = 'VIEW';
       },
       error: (err) => {
         alert('Erro ao salvar notas. Tente novamente.');
         console.error(err);
-        this.mode = 'EDIT'; // Retorna ao modo de edição em caso de erro
+        this.mode = 'EDIT';
       },
     });
   }
@@ -424,31 +405,29 @@ promptRemoveColumns() {
    * @param element Objeto do aluno.
    * @returns Média ponderada das notas formatada com uma casa decimal.
    */
-media(element: any): string {
-  const notasValidas = element.notas?.filter((nota: any) => {
-    const valor = parseFloat(nota.valor);
-    const peso = this.pesos[nota.titulo] || 1;
-    return !isNaN(valor) && valor !== null && peso > 0;
-  });
-
-  if (!notasValidas || notasValidas.length === 0) {
-    return "0.0";
-  }
-
-  const { somaPonderada, somaPesos } = notasValidas.reduce(
-    (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
-      const valorNota = parseFloat(nota.valor);
+  media(element: any): string {
+    const notasValidas = element.notas?.filter((nota: any) => {
+      const valor = parseFloat(nota.valor);
       const peso = this.pesos[nota.titulo] || 1;
-      acc.somaPonderada += valorNota * peso;
-      acc.somaPesos += peso;
-      return acc;
-    },
-    { somaPonderada: 0, somaPesos: 0 }
-  );
+      return !isNaN(valor) && valor !== null && peso > 0;
+    });
 
-  const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
-  return media.toFixed(1);
-}
+    if (!notasValidas || notasValidas.length === 0) {
+      return "0.0";
+    }
 
+    const { somaPonderada, somaPesos } = notasValidas.reduce(
+      (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
+        const valorNota = parseFloat(nota.valor);
+        const peso = this.pesos[nota.titulo] || 1;
+        acc.somaPonderada += valorNota * peso;
+        acc.somaPesos += peso;
+        return acc;
+      },
+      { somaPonderada: 0, somaPesos: 0 }
+    );
 
+    const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
+    return media.toFixed(1);
+  }
 }
