@@ -438,11 +438,11 @@ export class SingleClassComponent implements OnInit {
 
   generateCSVDataResumido(): string {
     let csvData = `Nome da Turma: ${this.class.nome}\n`;
-    csvData += 'Matrícula,Nome,Média\n';
+    csvData += 'Matricula,Nome,Media\n';
     this.class.alunos.forEach((aluno: any) => {
       csvData += `${aluno.matricula},${aluno.nome},${this.media(aluno)}\n`;
     });
-    csvData += `,,Média da turma: ${this.calculateClassAverage()}`;
+    csvData += `,,Media da turma: ${this.calculateClassAverage()}`;
     return csvData;
   }
 
@@ -461,7 +461,7 @@ export class SingleClassComponent implements OnInit {
 
   generateCSVDataDetalhado(): string {
     let csvData = `Nome da Turma: ${this.class.nome}\n`;
-    csvData += 'Matrícula,Nome,' + this.notaColumns.join(',') + ',Média\n';
+    csvData += 'Matricula,Nome,' + this.notaColumns.join(',') + ',Media\n';
   
     this.class.alunos.forEach((aluno: any) => {
       const notas = this.notaColumns.map(col => {
@@ -469,11 +469,14 @@ export class SingleClassComponent implements OnInit {
         const nota = aluno.notas.find((nota: any) => nota.titulo === col);
         return nota ? nota.valor ?? '' : ''; // Retorna o valor da nota ou vazio se não houver
       }).join(',');
-  
-      csvData += `${aluno.matricula},${aluno.nome},${notas},${this.media(aluno)}\n`;
+
+      const alunoMedia = parseFloat(this.media(aluno));
+      const mediaFormatada = isNaN(alunoMedia) || alunoMedia === 0 ? '' : alunoMedia;
+      const media = notas.includes('') ? '' : parseFloat(this.media(aluno));
+      csvData += `${aluno.matricula},${aluno.nome},${notas},${mediaFormatada}\n`;
     });
   
-    csvData += `,,,,Média da turma: ${this.calculateClassAverage()}`;
+    csvData += `,,,,Media da turma: ${this.calculateClassAverage()}`;
     return csvData;
   }
   
