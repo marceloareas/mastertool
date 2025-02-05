@@ -18,6 +18,8 @@
         <button mat-stroked-button (click)="promptRemoveColumns()">
           Remover Notas
         </button>
+        <button mat-flat-button color="primary" (click)="exportReport('resumido')">Exportar CSV Resumido</button>
+        <button mat-flat-button color="primary" (click)="exportReport('detalhado')">Exportar CSV Detalhado</button>
       </div>
       
     </div>
@@ -38,6 +40,7 @@
           Cancelar
         </button>
         <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+        
       </div>
       }
     </div>
