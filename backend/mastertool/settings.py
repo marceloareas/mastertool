@@ -33,7 +33,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -59,6 +58,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware'
 ]
 
+# TODO: Isso aqui, com certeza pode melhorar
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
 ]

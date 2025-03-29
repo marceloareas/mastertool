@@ -1,17 +1,20 @@
 from django.http import JsonResponse, HttpResponseNotFound
-from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import authenticate, login as login_django
-from rest_framework.permissions import IsAuthenticated
-from .apis import *
-from .models import *
-from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
-import csv
 from django.http import HttpResponse
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
+from .apis import *
+from .models import *
+
+from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 from .models import Turma, Aluno, Nota
+import csv
 
 
 # -----------------------------------------------------------------------------------------------

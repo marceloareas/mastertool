@@ -3,6 +3,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse, HttpResponseNotFound
 from datetime import datetime
 
+# TODO: Modular essas funções em 3 arquivos diff para simplificar o debugging
+
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS ALUNOS -----------------------------------------
 # -----------------------------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# Definição dos atributos de cada entidade
+
 class Aluno(models.Model):
     matricula = models.CharField(primary_key=True, max_length=100)
     nome      = models.CharField(max_length=100)

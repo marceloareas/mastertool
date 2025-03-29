@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.urls import include, path
 from app_mastertool import views
 
+# Tipos de URLs do proj
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
