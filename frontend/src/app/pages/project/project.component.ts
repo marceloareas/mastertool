@@ -55,15 +55,20 @@ export class ProjectComponent {
   /**
   * Lógica para retornar o status de um projeto.
   */
-  getStatus(project: any) {
+  getStatus(project: any): string {
     const today = new Date();
+    const dataInicio = project?.data_inicio ? new Date(project.data_inicio) : null;
     const dataFim = project?.data_fim ? new Date(project.data_fim) : null;
-
-    if (!dataFim || dataFim > today) {
-      return 'ANDAMENTO';
-    } else {
+  
+    if (dataInicio && dataInicio > today) {
+      return 'A INICIAR';
+    }
+  
+    if (dataFim && dataFim <= today) {
       return 'CONCLUÍDO';
     }
+  
+    return 'ANDAMENTO';
   }
 
   status(element: any): string {

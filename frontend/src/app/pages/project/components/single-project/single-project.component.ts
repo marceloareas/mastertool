@@ -165,14 +165,18 @@ import {
   */
   evaluateStatus() {
     const today = new Date();
+    const dataInicio = this.project?.data_inicio ? new Date(this.project.data_inicio) : null;
     const dataFim = this.project?.data_fim ? new Date(this.project.data_fim) : null;
-
-    if (!dataFim || dataFim > today) {
-      this.project.status = 'ANDAMENTO';
-    } else {
+  
+    if (dataInicio && dataInicio > today) {
+      this.project.status = 'A INICIAR';
+    } else if (dataFim && dataFim <= today) {
       this.project.status = 'CONCLUÍDO';
+    } else {
+      this.project.status = 'ANDAMENTO';
     }
   }
+  
 
   status(element: any): string {
     return element.status || 'INDEFINIDO';
