@@ -31,7 +31,7 @@ def cadastrar_usuario(request):
 
             if usuario:
                 return JsonResponse({'erro': 'Usuario já existente'}, status=400)
-            
+
             usuario = User.objects.create_user(username=novo_cadastro['email'], password=novo_cadastro['senha'])
             usuario.save()
 
@@ -43,7 +43,7 @@ def cadastrar_usuario(request):
 def login(request):
     if request.method == 'POST':
         novo_cadastro = request.data
-        
+
         usuario = authenticate(username=novo_cadastro['email'], password=novo_cadastro['senha'])
         if usuario is not None:
             login_django(request, usuario)
@@ -198,7 +198,7 @@ def exportar_relatorio_resumido(request, turma_id):
 
     media_turma = sum(sum(nota.valor for nota in Nota.objects.filter(aluno=aluno, turma=turma)) / len(
         Nota.objects.filter(aluno=aluno, turma=turma)) if Nota.objects.filter(aluno=aluno, turma=turma) else 0 for aluno
-                      in alunos) / len(alunos)
+        in alunos) / len(alunos)
     writer.writerow([])
     writer.writerow(['', 'Média da turma', media_turma])
 
@@ -224,7 +224,7 @@ def exportar_relatorio_detalhado(request, turma_id):
 
     media_turma = sum(sum(nota.valor for nota in Nota.objects.filter(aluno=aluno, turma=turma)) / len(
         Nota.objects.filter(aluno=aluno, turma=turma)) if Nota.objects.filter(aluno=aluno, turma=turma) else 0 for aluno
-                      in alunos) / len(alunos)
+        in alunos) / len(alunos)
     writer.writerow([])
     writer.writerow(['', '', 'Média da turma', media_turma])
 
@@ -298,24 +298,23 @@ def adicionar_nota(request, id):
 def cadastrar_projeto(request):
     if request.method == 'POST':
         usuario = request.user
-        data = request.data
 
-        resultado  = cadastro_projeto_txt(request.data, usuario)
+        resultado = cadastrar_projeto_api(request.data, usuario)
 
+        id_projeto = resultado.get('id_projeto', [])
         alunos_criados = resultado.get('alunos_criados', [])
         alunos_nao_criados = resultado.get('alunos_nao_criados', [])
-        id_turma = resultado.get('id_turma', [])
 
-        if alunos_criados:
-            response_data = {
+        if not id_projeto:
+            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+        else:
+            return JsonResponse({
                 'mensagem': 'Arquivo processado com sucesso.',
-                'id_turma': id_turma,
+                # FAZER O TRACEBACK NO FRONT E NOMEAR ESSA MERDA CORRETAMENTE
+                'id_turma': id_projeto,
                 'alunos_criados': [aluno.nome for aluno in alunos_criados],
                 'alunos_nao_criados': alunos_nao_criados
-            }
-            return JsonResponse(response_data)
-        else:
-            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+            })
 
 
 @api_view(['GET'])
@@ -326,7 +325,8 @@ def get_projetos(request, id=None):
     try:
         if id:
             projeto = Projeto.objects.get(id=id, usuario=usuario)
-            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome}
+                           for aluno in projeto.aluno.all()]
 
             projeto_json = {
                 'id': projeto.id,
@@ -344,7 +344,8 @@ def get_projetos(request, id=None):
             projetos_json = []
 
             for projeto in projetos:
-                alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+                alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome}
+                               for aluno in projeto.aluno.all()]
 
                 projetos_json.append({
                     'id': projeto.id,
@@ -384,7 +385,6 @@ def editar_projeto(request, id):
     if request.method == 'PUT':
         usuario = request.user
         data = request.data
-        
+
         projeto_atualizado = atualizar_projeto(id, data, usuario)
         return JsonResponse(projeto_atualizado, safe=False)
-        
