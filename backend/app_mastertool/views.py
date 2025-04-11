@@ -130,22 +130,22 @@ def editar_aluno(request, matricula):
 def cadastrar_turma(request):
     if request.method == 'POST':
         usuario = request.user
-        resultado = cadastro_turma_txt(request.data, usuario)
+        # TODO: Rename function
+        resultado = cadastrar_turma_api(request.data, usuario)
 
+        id_turma = resultado.get('id_turma', [])
         alunos_criados = resultado.get('alunos_criados', [])
         alunos_nao_criados = resultado.get('alunos_nao_criados', [])
-        id_turma = resultado.get('id_turma', [])
 
-        if alunos_criados:
-            response_data = {
+        if not id_turma:
+            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+        else:
+            return JsonResponse({
                 'mensagem': 'Arquivo processado com sucesso.',
                 'id_turma': id_turma,
                 'alunos_criados': [aluno.nome for aluno in alunos_criados],
                 'alunos_nao_criados': alunos_nao_criados
-            }
-            return JsonResponse(response_data)
-        else:
-            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+            })
 
 
 @api_view(['GET'])

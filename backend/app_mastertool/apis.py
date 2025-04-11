@@ -3,11 +3,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse, HttpResponseNotFound
 from datetime import datetime
 
+from .models import Aluno, Turma, Projeto, Nota
+
 # TODO: Modular essas funções em 3 arquivos diff para simplificar o debugging
 
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS ALUNOS -----------------------------------------
 # -----------------------------------------------------------------------------------------------
+
 
 def cadastro_alunos_txt(data, usuario):
     alunos              = []
@@ -60,41 +63,56 @@ def encontrar_aluno(matricula, usuario):
 # ----------------------------------------- APIS TURMA ------------------------------------------
 # -----------------------------------------------------------------------------------------------
 
-def cadastro_turma_txt(data, usuario):
+
+def cadastrar_turma_api(data, usuario):
     matriculas = []
     alunos_nao_criados = [] 
     alunos = []
     conteudo_arquivo = data['turma']
-    linhas = conteudo_arquivo.splitlines()
 
-    nova_turma = Turma(nome=data['nome'], periodo=data['periodo'], usuario=usuario)
+    nova_turma = Turma(nome=data['nome'],
+                       periodo=data['periodo'], usuario=usuario)
     nova_turma.save()
 
-    for linha in linhas:
+    # Quando a turma foi criada junto com uma listagem de alunos
+    if conteudo_arquivo:
+
+        # TODO: Pode ocorrer um erro se o arquivo não está formatado corretamente
+        for linha in conteudo_arquivo.splitlines():
         matricula, nome = linha.split(', ')
-        alunos.append({
-            'matricula': matricula,
-            'nome': nome
-        })
+            alunos.append({'matricula': matricula, 'nome': nome})
     
+        # Checa se TODOS da listagem de alunos existem e agurpa as matriculas de acordo
     for aluno in alunos:
         if Aluno.objects.filter(matricula=aluno['matricula']).first():
             matriculas.append(aluno['matricula'])
         else:
             alunos_nao_criados.append(aluno)
-    alunos_existentes = Aluno.objects.filter(matricula__in=matriculas, usuario=usuario)
+
+        # Coleta todos os alunos existentes e add a turma criada
+        alunos_existentes = Aluno.objects.filter(
+            matricula__in=matriculas, usuario=usuario)
     nova_turma.aluno.add(*alunos_existentes)
 
+        # Tratamento dos alunos inexistentes:
     for aluno in alunos_nao_criados:
-        novo_aluno = Aluno(matricula=aluno['matricula'], nome=aluno['nome'])
+            # Cria o aluno inexistente
+            novo_aluno = Aluno(
+                matricula=aluno['matricula'], nome=aluno['nome'])
         novo_aluno.save()
+            # O que isso significa?
         novo_aluno.usuario.set([usuario])
+
+            # Adiciona o aluno a turma
         nova_turma.aluno.add(novo_aluno)
 
     if alunos_nao_criados:
         return {'id_turma': nova_turma.id, 'alunos_criados': alunos_existentes, 'alunos_nao_criados': alunos_nao_criados}
     else:
         return {'id_turma': nova_turma.id, 'alunos_criados': alunos_existentes}
+    else:
+        return {'id_turma': nova_turma.id, 'alunos_criados': []}
+
 
 def encontrar_turma(id, usuario):
     if id:
