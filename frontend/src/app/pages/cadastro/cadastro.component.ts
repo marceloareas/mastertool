@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { FormLoginComponent } from '../../components/form-login/form-login.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-cadastro',
@@ -25,6 +26,7 @@ import { FormLoginComponent } from '../../components/form-login/form-login.compo
     MatIcon,
     MatButtonModule,
     FormLoginComponent,
+    MatSnackBarModule
   ],
   templateUrl: './cadastro.component.html',
   styleUrl: './cadastro.component.scss',
@@ -32,18 +34,26 @@ import { FormLoginComponent } from '../../components/form-login/form-login.compo
 export class CadastroComponent {
   private _auth = inject(AuthenticationService);
   private router = inject(Router);
+  private snackbar = inject(MatSnackBar);
 
   onSubmit(data: any) {
     this._auth.post(data).subscribe({
       next: () => {
-        alert('Cadastrado com sucesso');
+        this.snackbar.open('Cadastrado com sucesso!', 'Fechar', {
+          duration: 3000,
+          panelClass: ['snackbar-success'],
+        });
         this.router.navigate(['']);
       },
       error: (res) => {
-        alert('Usuário já cadastrado');
+        this.snackbar.open('Usuário já cadastrado.', 'Fechar', {
+          duration: 3000,
+          panelClass: ['snackbar-error'],
+        });
       },
     });
   }
+
 
   voltar() {
     this.router.navigate(['']);

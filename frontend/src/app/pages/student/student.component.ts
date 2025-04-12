@@ -10,6 +10,7 @@ import { MatInput } from '@angular/material/input';
 import { StudentService } from '../../services/student/student.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-student',
@@ -24,13 +25,15 @@ import { MatMenuModule } from '@angular/material/menu';
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
+    MatSnackBarModule, 
   ],
   templateUrl: './student.component.html',
-  styleUrl: './student.component.scss',
+  styleUrls: ['./student.component.scss'],
 })
 export class StudentComponent {
   private dialog = inject(MatDialog);
   private student = inject(StudentService);
+  private snackBar = inject(MatSnackBar);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -61,7 +64,9 @@ export class StudentComponent {
    */
   delete(id: string) {
     this.student.delete(id).subscribe(() => {
-      alert('Aluno excluído');
+      this.snackBar.open('Aluno excluído com sucesso!', 'Fechar', {
+        duration: 5000,
+      });
       this.getStudent();
     });
   }
@@ -82,7 +87,6 @@ export class StudentComponent {
         this.getStudent();
       });
   }
-  
 
   /**
    * Filtra os dados da tabela com base no valor de entrada.

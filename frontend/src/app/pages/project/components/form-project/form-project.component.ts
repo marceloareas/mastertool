@@ -5,16 +5,34 @@ import {
 } from '@angular/forms';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import {
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-form-project',
   standalone: true,
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule ],
+  imports: [
+    ReactiveFormsModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatIconModule, 
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatDialogClose,
+    MatButtonModule ],
   templateUrl: './form-project.component.html',
   styleUrls: ['./form-project.component.scss'],
 })
 export class FormProjectComponent {
+  showInfo = false;
   @Input() data: any;
   @Input() mode: any;
   @Output() formProject: EventEmitter<any> = new EventEmitter();

@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource } from '@angular/material/table';
 import { StudentService } from '../../services/student/student.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-project',
@@ -25,12 +26,14 @@ import { StudentService } from '../../services/student/student.service';
     SingleProjectComponent, 
     CommonModule,
     MatMenuModule,
+    MatSnackBarModule,  // Importando MatSnackBarModule
   ],
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
 })
 export class ProjectComponent {
   private projectService = inject(ProjectService);
+  private snackBar = inject(MatSnackBar);  // Injetando o MatSnackBar
 
   projectIsOpen = false;
   projects!: any;
@@ -123,7 +126,9 @@ export class ProjectComponent {
    */
   delete(id: string) {
     this.projectService.delete(id).subscribe(() => {
-      alert('Project excluído');
+      this.snackBar.open('Projeto excluído com sucesso', 'Fechar', {
+        duration: 5000,
+      });
       this.getProjects();
     });
   }

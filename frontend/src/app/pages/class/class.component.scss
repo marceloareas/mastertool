@@ -75,6 +75,11 @@
     border: none;
   }
 }
+::ng-deep .snackbar-success {
+  background-color: #4caf50; 
+  color: white;
+}
+
 
 mat-card-content {
   display: flex;

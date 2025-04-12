@@ -3,14 +3,31 @@
     {{ data.mode === "ADD" ? "Cadastrar Aluno" : "Editar Aluno" }}
   </h2>
 
-  @if(data.mode == 'ADD'){
+  @if(data.mode == 'ADD') {
   <mat-dialog-content class="mat-typography">
     <p>Suba um arquivo txt com os dados dos alunos</p>
-    <input (change)="onFileChange($event)" type="file" id="fileUpload" />
+    <div class="file-upload-container">
+      <input (change)="onFileChange($event)" type="file" id="fileUpload" accept=".txt" />
+      <button mat-icon-button class="info-button" (click)="showInfo = !showInfo">
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
+    
+    @if(showInfo) {
+    <div class="info-box">
+      <h4>Formato do arquivo .txt:</h4>
+      <p>• Uma linha por aluno</p>
+      <p>• Formato: "matrícula, nome do aluno"</p>
+      <p>• Exemplo: <code>1111111BCC, João Silva</code></p>
+      <p>• Sem cabeçalho</p>
+      <p>• Codificação UTF-8</p>
+    </div>
+    }
   </mat-dialog-content>
   }
+
   <mat-dialog-content class="mat-typography">
-    @if(data.mode == 'ADD'){
+    @if(data.mode == 'ADD') {
     <p>Ou cadastre somente um aluno</p>
     }
     <app-form-student

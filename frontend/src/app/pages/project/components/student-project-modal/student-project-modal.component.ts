@@ -1,4 +1,4 @@
-import { Component, inject, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, Inject, ViewChild } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -12,9 +12,10 @@ import {
 import { DialogRef } from '@angular/cdk/dialog';
 import { StudentProjectFormComponent } from '../student-project-form/student-project-form.component';
 import { ProjectService } from '../../../../services/project/project.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; 
 
 @Component({
-  selector: 'app-student-project-modal', 
+  selector: 'app-student-project-modal',
   standalone: true,
   imports: [
     MatDialogTitle,
@@ -24,23 +25,27 @@ import { ProjectService } from '../../../../services/project/project.service';
     MatButtonModule,
     ReactiveFormsModule,
     MatDialogModule,
-    StudentProjectFormComponent
+    StudentProjectFormComponent,
+    MatSnackBarModule,
   ],
   templateUrl: './student-project-modal.component.html',
-  styleUrls: ['./student-project-modal.component.scss'], 
+  styleUrls: ['./student-project-modal.component.scss'],
 })
 export class StudentProjectModalComponent {
   private dialogRef = inject(DialogRef);
   private projectService = inject(ProjectService);
+  private snackBar = inject(MatSnackBar);
 
   @ViewChild(StudentProjectFormComponent)
-  studentProjectForm!: StudentProjectFormComponent; 
+  studentProjectForm!: StudentProjectFormComponent;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { project: any }) {}
 
   save(singleProject: any) {
     this.projectService.put(this.data.project.id, singleProject).subscribe(() => {
-      alert('Cadastrado com sucesso');
+      this.snackBar.open('Cadastrado com sucesso', 'Fechar', {
+        duration: 5000,
+      });
       this.dialogRef.close(true);
     });
   }

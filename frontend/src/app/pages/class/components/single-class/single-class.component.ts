@@ -20,6 +20,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 import saveAs from 'file-saver';
 
 @Component({
@@ -36,6 +38,7 @@ import saveAs from 'file-saver';
     MatInputModule,
     FormsModule,
     CommonModule,
+    MatSnackBarModule
   ],
   templateUrl: './single-class.component.html',
   styleUrls: ['./single-class.component.scss'],
@@ -56,7 +59,8 @@ export class SingleClassComponent implements OnInit {
 
   mode: string = 'VIEW';
 
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog, private snackBar: MatSnackBar) { }
+
 
   /**
  * Recalcula todas as médias após atualizar as notas.
@@ -68,51 +72,49 @@ export class SingleClassComponent implements OnInit {
     this.refreshTable();
   }
 
-/**
- * Atualiza os dados no localStorage após qualquer alteração.
- */
-updateLocalStorage() {
-  localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
-  localStorage.setItem(`class_${this.class.id}_alunos`, JSON.stringify(this.class.alunos));
-}
-
-
-removeMultipleColumns(quantity: number) {
-  if (quantity < 1) {
-    alert('A quantidade de notas a remover deve ser pelo menos 1.');
-    return;
+  /**
+   * Atualiza os dados no localStorage após qualquer alteração.
+   */
+  updateLocalStorage() {
+    localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
+    localStorage.setItem(`class_${this.class.id}_alunos`, JSON.stringify(this.class.alunos));
   }
 
-  if (quantity > this.notaColumns.length) {
-    alert(
-      `Não é possível remover mais notas do que existem. Total de notas: ${this.notaColumns.length}`
-    );
-    return;
+
+  removeMultipleColumns(quantity: number) {
+    if (quantity < 1) {
+      this.snackBar.open('A quantidade de notas a remover deve ser pelo menos 1.', 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    if (quantity > this.notaColumns.length) {
+      this.snackBar.open(`Não é possível remover mais notas do que existem. Total de notas: ${this.notaColumns.length}`, 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    // Remove as menores notas
+    this.class.alunos.forEach((aluno: any) => {
+      aluno.notas = aluno.notas
+        .sort((a: any, b: any) => parseFloat(a.valor || 0) - parseFloat(b.valor || 0))
+        .slice(quantity); // Remove as menores
+    });
+
+    // Atualiza colunas e sincroniza dados
+    this.notaColumns = this.notaColumns.slice(quantity);
+    this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
+    this.updateLocalStorage();
+    this.recalculateAllMedia();
+    this.snackBar.open(`${quantity} notas removidas com sucesso!`, 'Fechar', { duration: 3000 });
   }
 
-  // Remove as menores notas
-  this.class.alunos.forEach((aluno: any) => {
-    aluno.notas = aluno.notas
-      .sort((a: any, b: any) => parseFloat(a.valor || 0) - parseFloat(b.valor || 0))
-      .slice(quantity); // Remove as menores
-  });
 
-  // Atualiza colunas e sincroniza dados
-  this.notaColumns = this.notaColumns.slice(quantity);
-  this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
-  this.updateLocalStorage();
-  this.recalculateAllMedia();
-  alert(`${quantity} notas removidas com sucesso!`);
-}
-
-
-/**
- * Solicita ao usuário a quantidade de notas a serem removidas.
- */
-promptRemoveColumns() {
-  const quantity = parseInt(prompt('Digite a quantidade de notas que deseja remover:') || '0', 10);
-  this.removeMultipleColumns(quantity);
-}
+  /**
+   * Solicita ao usuário a quantidade de notas a serem removidas.
+   */
+  promptRemoveColumns() {
+    const quantity = parseInt(prompt('Digite a quantidade de notas que deseja remover:') || '0', 10);
+    this.removeMultipleColumns(quantity);
+  }
 
 
   /**
@@ -135,7 +137,7 @@ promptRemoveColumns() {
     this.initializeColumns();
     this.refreshTable();
   }
-  
+
 
   /**
    * Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
@@ -162,7 +164,7 @@ promptRemoveColumns() {
     this.dataSource.paginator = this.paginator;
     this.updateLocalStorage();
   }
-  
+
 
   /**
    * Obtém os dados da classe do serviço `classService` e atualiza a tabela.
@@ -310,7 +312,7 @@ promptRemoveColumns() {
   deleteStudent(matricula: any) {
     const data = { removerMatricula: matricula };
     this.classService.put(this.class.id, data).subscribe(() => {
-      alert('Registro deletado');
+      this.snackBar.open('Registro deletado', 'Fechar', { duration: 3000 });
       this.getClass();
       this.closeModal();
     });
@@ -375,25 +377,26 @@ promptRemoveColumns() {
         id: nota.id,
         titulo: nota.titulo,
         valor: nota.valor,
-        peso: this.pesos[nota.titulo] || 1.0, // Agora envia corretamente o peso atualizado
+        peso: this.pesos[nota.titulo] || 1.0,
       })),
     }));
 
     this.classService.postNota(this.class.id, updatedData).subscribe({
       next: () => {
-        this.updateLocalStorage(); // Mantém os pesos no localStorage antes de chamar getClass()
-        alert('Notas e pesos atualizados com sucesso!');
-        this.getClass(false); // Evita resetar pesos após salvar
+        this.updateLocalStorage();
+        this.snackBar.open('Notas e pesos atualizados com sucesso!', 'Fechar', { duration: 3000 });
+        this.getClass(false);
         this.mode = 'VIEW';
       },
       error: (err) => {
-        alert('Erro ao salvar notas. Tente novamente.');
+        this.snackBar.open('Erro ao salvar notas. Tente novamente.', 'Fechar', { duration: 3000 });
         console.error(err);
         this.mode = 'EDIT';
       },
     });
+    
   }
-  
+
 
   getPeso(columnName: string): number {
     return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
@@ -439,12 +442,11 @@ promptRemoveColumns() {
   generateCSVDataDetalhado(): string {
     let csvData = `Nome da Turma: ${this.class.nome}\n`;
     csvData += 'Matricula,Nome,' + this.notaColumns.join(',') + ',Media\n';
-  
+
     this.class.alunos.forEach((aluno: any) => {
       const notas = this.notaColumns.map(col => {
-        // Encontra a nota do aluno correspondente à coluna
         const nota = aluno.notas.find((nota: any) => nota.titulo === col);
-        return nota ? nota.valor ?? '' : ''; 
+        return nota ? nota.valor ?? '' : '';
       }).join(',');
 
       const alunoMedia = parseFloat(this.media(aluno));
@@ -452,7 +454,7 @@ promptRemoveColumns() {
       const media = notas.includes('') ? '' : parseFloat(this.media(aluno));
       csvData += `${aluno.matricula},${aluno.nome},${notas},${mediaFormatada}\n`;
     });
-  
+
     csvData += `,,,,Media da turma: ${this.calculateClassAverage()}`;
     return csvData;
   }

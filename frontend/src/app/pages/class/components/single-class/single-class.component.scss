@@ -1,4 +1,3 @@
-
 .bar__top {
   display: flex;
   justify-content: space-between;
@@ -32,8 +31,21 @@
     .action-button {
       display: flex;
       width: 100%;
-      justify-content: space-between;
+      justify-content: flex-end !important;
+
+      .edit-mode-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        .confirm-buttons {
+          display: flex;
+          gap: 10px;
+          margin-left: 20px;
+        }
+      }
     }
+
   }
 
   table {
@@ -69,6 +81,7 @@
     }
   }
 }
+
 @media (min-width: 1440px) {
   .single-class {
     width: 1200px;

@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource } from '@angular/material/table';
 import { StudentService } from '../../services/student/student.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-class',
@@ -25,12 +26,14 @@ import { StudentService } from '../../services/student/student.service';
     SingleClassComponent,
     CommonModule,
     MatMenuModule,
+    MatSnackBarModule
   ],
   templateUrl: './class.component.html',
   styleUrl: './class.component.scss',
 })
 export class ClassComponent {
   private classService = inject(ClassService);
+  private snackbar = inject(MatSnackBar);
 
   classIsOpen = false;
   classes!: any;
@@ -97,8 +100,11 @@ export class ClassComponent {
    */
   delete(id: string) {
     this.classService.delete(id).subscribe(() => {
-      alert('Turma excluída');
+      this.snackbar.open('Turma excluída com sucesso!', 'Fechar', {
+        duration: 3000,
+        panelClass: ['snackbar-success'],
+      });
       this.getClass();
     });
-  }
+  }  
 }

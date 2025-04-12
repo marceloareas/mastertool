@@ -16,7 +16,7 @@
       </button>
       <div class="bar__top__button">
         <button mat-stroked-button (click)="promptRemoveColumns()">
-          Remover Notas
+          Descartar menor nota
         </button>
         <button mat-flat-button color="primary" (click)="exportReport('resumido')">Exportar CSV Resumido</button>
         <button mat-flat-button color="primary" (click)="exportReport('detalhado')">Exportar CSV Detalhado</button>
@@ -27,24 +27,30 @@
 
   <div class="single-class__top">
     <div class="action-button">
-      @if(mode === 'VIEW'){
-      <button mat-flat-button color="primary" (click)="changeMode('EDIT')">
-        Editar Notas
-      </button>
-      } @else{
-      <button mat-stroked-button color="primary" (click)="addNewColumn()">
-        Adicionar Nota
-      </button>
-      <div class="bar__top__button">
-        <button mat-stroked-button (click)="changeMode('VIEW')">
-          Cancelar
-        </button>
-        <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+      @if(mode === 'VIEW') {
         
-      </div>
+        <button mat-stroked-button style="margin-left: 20px; margin-right: 20px;" color="primary" (click)="addNewColumn()">
+          Adicionar Nota
+        </button>
+        <button mat-flat-button color="primary" (click)="changeMode('EDIT')">
+          Editar Notas
+        </button>
+      } @else {
+        <div class="edit-mode-buttons" style="margin-left: 20px; margin-right: 20px;">
+          <button mat-stroked-button color="primary" (click)="addNewColumn()">
+            Adicionar Nota
+          </button>
+          <div class="confirm-buttons">
+            <button mat-stroked-button (click)="changeMode('VIEW')">
+              Cancelar
+            </button>
+            <button mat-flat-button color="primary" (click)="save()">Salvar</button>
+          </div>
+        </div>
       }
     </div>
   </div>
+  
 
   <table mat-table [dataSource]="this.class.alunos" class="mat-elevation-z8">
     <!-- Nome Column -->
