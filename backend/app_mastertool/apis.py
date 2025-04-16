@@ -328,7 +328,7 @@ def atualizar_projeto(id, data, usuario):
 
         if 'matricula' in data:
             try:
-                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+                aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
                 projeto.aluno.add(aluno)
             except Aluno.DoesNotExist:
                 return HttpResponseNotFound("Aluno não encontrado")

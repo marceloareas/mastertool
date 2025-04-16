@@ -1,12 +1,4 @@
-import {
-  Component,
-  Output,
-  EventEmitter,
-  Input,
-  ViewChild,
-  inject,
-  OnInit,
-} from '@angular/core';
+import { Component,Output, EventEmitter, Input, ViewChild, inject, OnInit} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -73,7 +65,7 @@ export class SingleProjectComponent implements OnInit {
   refreshTable() {
     this.dataSource = new MatTableDataSource(this.project.turma);
     this.dataSource.paginator = this.paginator;
-    console.log('data', this.dataSource.data);
+    // console.log('data', this.dataSource.data);
   }
 
   /**
