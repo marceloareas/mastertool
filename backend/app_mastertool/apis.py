@@ -320,26 +320,21 @@ def parse_date(date_str):
         return None
 
 def atualizar_projeto(id, data, usuario):
+    
     try:
         projeto = Projeto.objects.filter(id=id, usuario=usuario).first()
-
         if not projeto:
             return HttpResponseNotFound("Projeto não encontrado")
-
-        if 'matricula' in data:
-            try:
-                aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
-                projeto.aluno.add(aluno)
-            except Aluno.DoesNotExist:
-                return HttpResponseNotFound("Aluno não encontrado")
-
-        elif 'removerMatricula' in data:
-            try:
-                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+        
+        # Caso haja o campo matricula, então é add ou remoção de aluno... dependendo do campo 'remove'
+        if data.get("matricula"):
+            aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
+            
+            if data["remove"]:
                 projeto.aluno.remove(aluno)
-            except Aluno.DoesNotExist:
-                return HttpResponseNotFound("Aluno não encontrado")
-
+            else:
+                projeto.aluno.add(aluno)
+    
         projeto.nome = data.get('nome', projeto.nome)
         projeto.descricao = data.get('descricao', projeto.descricao)
         projeto.data_inicio = parse_date(data.get('data_inicio')) or projeto.data_inicio
@@ -356,9 +351,12 @@ def atualizar_projeto(id, data, usuario):
                 'data_inicio': projeto.data_inicio,
                 'data_fim': projeto.data_fim,
                 'periodo': projeto.periodo,
+                # 'alunos': list(projeto.aluno)
             }
         }
 
+    except Aluno.DoesNotExist:
+        return HttpResponseNotFound("Aluno não encontrado")
     except Exception as e:
         return {'erro': f'Ocorreu um erro ao atualizar o projeto: {str(e)}'}
 

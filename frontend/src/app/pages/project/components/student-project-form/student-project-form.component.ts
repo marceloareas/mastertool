@@ -24,6 +24,7 @@ import { StudentService } from '../../../../services/student/student.service';
 	templateUrl: './student-project-form.component.html',
 	styleUrls: ['./student-project-form.component.scss'],
 })
+
 export class StudentProjectFormComponent {
 	private studentService = inject(StudentService);
 
@@ -34,11 +35,9 @@ export class StudentProjectFormComponent {
 	students: any;
 	form: FormGroup = this.fb.group({
 		matricula: [''],
+		remove: false
 	});
 
-	//   ngOnInit() {
-	//     this.getStudents();
-	//   }
 	ngOnChanges(changes: SimpleChanges) {
 		if (changes['project'] && this.project) {
 			// Aguarda o Angular terminar o ciclo de renderização antes de chamar getStudents
