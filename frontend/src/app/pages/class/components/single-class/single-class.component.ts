@@ -31,7 +31,7 @@ import saveAs from 'file-saver';
 		MatInputModule,
 		FormsModule,
 		CommonModule,
-		MatSnackBarModule, 
+		MatSnackBarModule,
 		MatTooltipModule
 	],
 	templateUrl: './single-class.component.html',
@@ -57,63 +57,6 @@ export class SingleClassComponent implements OnInit {
 
 	constructor(public dialog: MatDialog, private snackBar: MatSnackBar) { }
 
-
-	/**
-   * Recalcula todas as médias após atualizar as notas.
-   */
-	recalculateAllMedia() {
-		this.dataSource.data.forEach((aluno: any) => {
-			aluno.media = this.media(aluno);
-		});
-		this.refreshTable();
-	}
-
-	/**
-	 * Atualiza os dados no localStorage após qualquer alteração.
-	 */
-	// TODO: Usa localStorage...???
-	updateLocalStorage() {
-		localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
-		localStorage.setItem(`class_${this.class.id}_alunos`, JSON.stringify(this.class.alunos));
-	}
-
-
-	removeMultipleColumns(quantity: number) {
-		if (quantity < 1) {
-			this.snackBar.open('A quantidade de notas a remover deve ser pelo menos 1.', 'Fechar', { duration: 3000 });
-			return;
-		}
-
-		if (quantity > this.notaColumns.length) {
-			this.snackBar.open(`Não é possível remover mais notas do que existem. Total de notas: ${this.notaColumns.length}`, 'Fechar', { duration: 3000 });
-			return;
-		}
-
-		// Remove as menores notas
-		this.class.alunos.forEach((aluno: any) => {
-			aluno.notas = aluno.notas
-				.sort((a: any, b: any) => parseFloat(a.valor || 0) - parseFloat(b.valor || 0))
-				.slice(quantity); // Remove as menores
-		});
-
-		// Atualiza colunas e sincroniza dados
-		this.notaColumns = this.notaColumns.slice(quantity);
-		this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
-		this.updateLocalStorage();
-		this.recalculateAllMedia();
-		this.snackBar.open(`${quantity} notas removidas com sucesso!`, 'Fechar', { duration: 3000 });
-	}
-
-
-	/**
-	 * Solicita ao usuário a quantidade de notas a serem removidas.
-	 */
-	promptRemoveColumns() {
-		const quantity = parseInt(prompt('Digite a quantidade de notas que deseja remover:') || '0', 10);
-		this.removeMultipleColumns(quantity);
-	}
-
-
 	/**
 	 * Método do ciclo de vida do Angular que é chamado após a construção do componente.
 	 * Inicializa as colunas da tabela e atualiza os dados.
@@ -135,18 +78,22 @@ export class SingleClassComponent implements OnInit {
 		this.refreshTable();
 	}
 
-
 	/**
-	 * Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
-	 * Configura `notaColumns` e `displayedColumns`.
-	 */
+ 	* Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
+ 	* Configura `notaColumns` e `displayedColumns`.
+ 	*/
 	initializeColumns() {
 		if (this.class && this.class.alunos && this.class.alunos.length > 0) {
 			this.notaColumns = this.class.alunos[0].notas.map(
 				(nota: any) => nota.titulo
 			);
 			this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
+			
+			// console.log(this.class.alunos)
+			// console.log("notaColumns",this.notaColumns)
+			// console.log("displayedColumns",this.displayedColumns)
 		}
+
 	}
 
 	/**
@@ -160,7 +107,45 @@ export class SingleClassComponent implements OnInit {
 		this.dataSource = new MatTableDataSource(this.class.alunos);
 		this.dataSource.paginator = this.paginator;
 		this.updateLocalStorage();
+
+
+		console.log("Displayed columns:", this.displayedColumns)
+		console.log("Pesos:", this.pesos)
+		console.log("Data_source", this.dataSource.data)
 	}
+
+
+
+
+
+	/**
+   * Recalcula todas as médias após atualizar as notas.
+   */
+	recalculateAllMedia() {
+		this.dataSource.data.forEach((aluno: any) => {
+			aluno.media = this.media(aluno);
+		});
+		this.refreshTable();
+	}
+
+	/**
+	 * Atualiza os dados no localStorage após qualquer alteração.
+	 */
+	// TODO: Usa localStorage...???
+	updateLocalStorage() {
+		localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
+		localStorage.setItem(`class_${this.class.id}_alunos`, JSON.stringify(this.class.alunos));
+	}
+
+	/**
+	 * Solicita ao usuário a quantidade de notas a serem removidas.
+	 */
+	promptRemoveColumns() {
+		const quantity = parseInt(prompt('Digite a quantidade de notas que deseja remover:') || '0', 10);
+		this.removeMultipleColumns(quantity);
+	}
+
+
 
 
 	/**
@@ -193,6 +178,7 @@ export class SingleClassComponent implements OnInit {
 
 		this.notaColumns.push(newColumn);
 
+		// Add uma nova 'coluna' em this.displayedColumns.length - 2
 		this.displayedColumns.splice(this.displayedColumns.length - 2, 0, newColumn);
 
 		// Define o peso inicial como 1
@@ -206,27 +192,34 @@ export class SingleClassComponent implements OnInit {
 	}
 
 	/**
-	 * Remove uma coluna de notas com base no nome e notifica o serviço `classService` para atualizar os dados no backend.
+	 * Remove do dado centralizado (data_source?) uma coluna de notas (e peso) com base no nome. Após isso, fica a mercer do botão 'Salvar' para enviar os dados ao backend.
 	 * @param name Nome da coluna a ser removida.
 	 */
 	removeColumn(name: string) {
-		const data = { titulo: name };
-		// Remove a coluna da lista de notas
-		const index = this.notaColumns.indexOf(name);
-		if (index !== -1) {
-			this.notaColumns.splice(index, 1);
-		}
 
-		// Remove a coluna da lista de colunas exibidas
-		const colIndex = this.displayedColumns.indexOf(name);
-		if (colIndex !== -1) {
-			this.displayedColumns.splice(colIndex, 1);
-		}
+		// Devo ajustar a variável data_source (acho) e remover a coluna X (ref a nota que quero remover) de TODOS os alunos e seus respectivos PESOS
+		
+		
+		// ! Como essa função não deveria fazer isso, ela está temporáriamente inutilizada
+		// const data = { titulo: name };
 
-		this.classService.postNota(this.class.id, data).subscribe(() => {
-			this.closeModal();
-			this.getClass();
-		});
+		// // Remove a coluna da lista de notas
+		// const index = this.notaColumns.indexOf(name);
+		// if (index !== -1) {
+		// 	this.notaColumns.splice(index, 1);
+		// }
+
+		// // Remove a coluna da lista de colunas exibidas
+		// const colIndex = this.displayedColumns.indexOf(name);
+		// if (colIndex !== -1) {
+		// 	this.displayedColumns.splice(colIndex, 1);
+		// }
+
+		// ! ISSO ESTÁ ERRADO!!!!!!!
+		// this.classService.postNota(this.class.id, data).subscribe(() => {
+		// 	this.closeModal();
+		// 	this.getClass();
+		// });
 	}
 
 	/**
@@ -273,7 +266,7 @@ export class SingleClassComponent implements OnInit {
 			if (notaIndex !== -1) {
 				element.notas[notaIndex].valor = value === '' ? null : value;
 				this.updateLocalStorage(); // Atualiza localStorage ao alterar a nota
-				console.log(`Nota atualizada: ${columnName} = ${value}`);
+				// console.log(`Nota atualizada: ${columnName} = ${value}`);
 			}
 		}
 	}
@@ -286,7 +279,7 @@ export class SingleClassComponent implements OnInit {
 			if (!isNaN(newPeso) && newPeso > 0) {
 				this.pesos[columnName] = newPeso;
 				this.updateLocalStorage(); // Atualiza localStorage ao alterar o peso
-				console.log(`Peso atualizado para "${columnName}": ${newPeso}`);
+				// console.log(`Peso atualizado para "${columnName}": ${newPeso}`);
 			}
 		}
 	}
@@ -366,13 +359,10 @@ export class SingleClassComponent implements OnInit {
 	save() {
 		this.mode = 'SAVING';
 
-		console.log("Salvando o estado:")
-		console.log("datasource", this.dataSource.data)
-
 		const updatedData = this.dataSource.data.map((aluno: any) => ({
 			matricula: aluno.matricula,
 			notas: aluno.notas.map((nota: any) => ({
-				id: nota.id,
+				// id: nota.id,
 				titulo: nota.titulo,
 				valor: nota.valor,
 				peso: this.pesos[nota.titulo] || 1.0,
@@ -487,6 +477,33 @@ export class SingleClassComponent implements OnInit {
 
 		const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
 		return media.toFixed(1);
+	}
+
+
+	removeMultipleColumns(quantity: number) {
+		if (quantity < 1) {
+			this.snackBar.open('A quantidade de notas a remover deve ser pelo menos 1.', 'Fechar', { duration: 3000 });
+			return;
+		}
+
+		if (quantity > this.notaColumns.length) {
+			this.snackBar.open(`Não é possível remover mais notas do que existem. Total de notas: ${this.notaColumns.length}`, 'Fechar', { duration: 3000 });
+			return;
+		}
+
+		// Remove as menores notas
+		this.class.alunos.forEach((aluno: any) => {
+			aluno.notas = aluno.notas
+				.sort((a: any, b: any) => parseFloat(a.valor || 0) - parseFloat(b.valor || 0))
+				.slice(quantity); // Remove as menores
+		});
+
+		// Atualiza colunas e sincroniza dados
+		this.notaColumns = this.notaColumns.slice(quantity);
+		this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
+		this.updateLocalStorage();
+		this.recalculateAllMedia();
+		this.snackBar.open(`${quantity} notas removidas com sucesso!`, 'Fechar', { duration: 3000 });
 	}
 
 	// Função utilizada no html para checar se há alunos na turma.

@@ -241,10 +241,23 @@ def adicionar_nota(request, id):
     if request.method == 'POST':
         data = request.data
         usuario = request.user
-
+        
+        # Exemplo de payload que chega:
+        """
+        [
+            {
+                matricula: "2021944BCC", 
+                notas: 
+                	[
+                    	{ titulo: "Nota 1", valor: "10", peso: 1}
+                    ]
+            }
+        ]
+        """
         try:
             turma = Turma.objects.get(id=id)
-
+            
+            # ! TODO: Esta Lógica de verificação de campo 'titulo' está muito confusa, precisa ser reimplementada e adaptada ao frontend
             # Excluir notas
             if 'titulo' in data:
                 alunos = Aluno.objects.filter(turma=turma)
@@ -254,37 +267,42 @@ def adicionar_nota(request, id):
                         turma=turma,
                         aluno=aluno
                     ).first().delete()
+                    
+                return JsonResponse({'message': 'Nota removida com sucesso'}, status=200)
             else:
-                for aluno_editar in data:
-                    aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
+                # Preenchimento de nota ou add de nota, acredito
+                
+                for aluno_data in data:
+                    aluno = Aluno.objects.get(matricula=aluno_data['matricula'])
 
                     # Adicionar ou Atualizar notas
-                    for nota in aluno_editar['notas']:
-
-                        # Atualiza o valor da nota existente
+                    for nota in aluno_data['notas']:
+                        
+                        
+                        # Se a nota já existe, atualiza pelo id dela
                         if 'id' in nota:
-                            nota_existente = Nota.objects.filter(
-                                aluno=aluno,
-                                turma=turma,
-                                id=nota['id']
-                            ).first()
+                            nota_existente = Nota.objects.filter(aluno=aluno,turma=turma, id=nota['id']).first()
+                            
                             nota_existente.titulo = nota['titulo']
                             nota_existente.valor = nota['valor']
+                            nota_existente.peso = nota["peso"]
+                            
                             nota_existente.save()
                         else:
-                            # Cria uma nova nota
+                            # Se a nota não existe, cria ela e associa ao aluno
                             Nota.objects.create(
                                 aluno=aluno,
                                 turma=turma,
                                 titulo=nota['titulo'],
-                                valor=nota['valor']
+                                valor=nota['valor'],
+                                peso=nota["peso"]
                             )
-
-            return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
-        except Aluno.DoesNotExist:
-            return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
+                return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
+            
         except Turma.DoesNotExist:
             return JsonResponse({'error': 'Turma não encontrada'}, status=404)
+        except Aluno.DoesNotExist:
+            return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
