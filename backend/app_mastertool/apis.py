@@ -12,12 +12,12 @@ from .models import Aluno, Turma, Projeto, Nota
 
 
 def cadastro_alunos_txt(data, usuario):
-    alunos              = []
-    alunos_criados      = []
-    id_turma            = data.get('id', None)
-    tipo                = data.get('tipo', None)
-    conteudo_arquivo    = data['turma']
-    linhas              = conteudo_arquivo.splitlines()
+    alunos = []
+    alunos_criados = []
+    id_turma = data.get('id', None)
+    tipo = data.get('tipo', None)
+    conteudo_arquivo = data['turma']
+    linhas = conteudo_arquivo.splitlines()
 
     for linha in linhas:
         matricula, nome = linha.split(', ')
@@ -30,7 +30,8 @@ def cadastro_alunos_txt(data, usuario):
 
     for aluno in alunos:
         if not Aluno.objects.filter(matricula=aluno['matricula'], usuario=usuario).exists():
-            novo_aluno = Aluno(matricula=aluno['matricula'], nome=aluno['nome'])
+            novo_aluno = Aluno(
+                matricula=aluno['matricula'], nome=aluno['nome'])
             novo_aluno.save()
             novo_aluno.usuario.add(usuario)
             alunos_criados.append(aluno['nome'])
@@ -47,16 +48,18 @@ def cadastro_alunos_txt(data, usuario):
 
     return alunos_criados
 
+
 def encontrar_aluno(matricula, usuario):
     if matricula:
-        aluno = Aluno.objects.filter(matricula=matricula, usuario=usuario).first()
-        aluno_json = {  'matricula' : aluno.matricula, 
-                        'nome'      : aluno.nome}
+        aluno = Aluno.objects.filter(
+            matricula=matricula, usuario=usuario).first()
+        aluno_json = {'matricula': aluno.matricula,
+                      'nome': aluno.nome}
         return aluno_json
 
     alunos = Aluno.objects.filter(usuario=usuario)
-    alunos_json = [{'matricula' : aluno.matricula, 
-                    'nome'      : aluno.nome} for aluno in alunos]
+    alunos_json = [{'matricula': aluno.matricula,
+                    'nome': aluno.nome} for aluno in alunos]
     return alunos_json
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS TURMA ------------------------------------------
@@ -114,6 +117,8 @@ def cadastrar_turma_api(data, usuario):
 
 
 def encontrar_turma(id, usuario):
+
+    # Caso tenha o id da turma de interesse busca a turma e cruza com as informações de alunos e suas respectivas notas para cada avaliação
     if id:
         turma = Turma.objects.get(id=id, usuario=usuario)
         alunos_json = []
@@ -126,10 +131,10 @@ def encontrar_turma(id, usuario):
                         'id': nota.id,
                         'titulo': nota.titulo,
                         'valor': nota.valor,
-                        'peso': nota.peso,  # Incluindo o peso
+                        'peso': int(nota.peso),  # Incluindo o peso
                     })
             except Nota.DoesNotExist:
-                notas = None
+                notas = []
             alunos_json.append({
                 'matricula': aluno.matricula,
                 'nome': aluno.nome,
@@ -144,10 +149,13 @@ def encontrar_turma(id, usuario):
         }
         return turma_dict
 
+    # Caso NÃO tenha o id da turma de interesse, VAI FAZER A MESMA COISA, SÓ QUE PARA TODAS AS TURMAS QUE O USUARIO TEM
+
     turmas = Turma.objects.filter(usuario=usuario)
     turmas_json = []
 
     for turma in turmas:
+        # Busca a turma e cruza com as informações de alunos e suas respectivas notas para cada avaliação
         alunos_json = []
         for aluno in turma.aluno.all():
             try:
@@ -158,9 +166,10 @@ def encontrar_turma(id, usuario):
                         'id'    : nota.id,
                         'titulo': nota.titulo,
                         'valor' : nota.valor,
+                        'peso': nota.peso,  # Incluindo o peso
                     })
             except Nota.DoesNotExist:
-                notas = None
+                notas = []
             alunos_json.append({
                 'matricula' : aluno.matricula,
                 'nome'      : aluno.nome,
@@ -174,7 +183,9 @@ def encontrar_turma(id, usuario):
             'alunos': alunos_json,
         }
         turmas_json.append(turma_dict)
+
     return turmas_json
+
 
 def atualizar_turma(id, data, usuario):
     try:
@@ -182,12 +193,15 @@ def atualizar_turma(id, data, usuario):
 
         if 'matricula' in data:
             try:
-                aluno_existente = Aluno.objects.filter(turma=turma, usuario=usuario).first()
-                aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
+                aluno_existente = Aluno.objects.filter(
+                    turma=turma, usuario=usuario).first()
+                aluno = Aluno.objects.filter(
+                    matricula=data['matricula'], usuario=usuario).first()
 
                 turma.aluno.add(aluno)
                 if aluno_existente:
-                    numero_notas = Nota.objects.filter(turma=turma, aluno=aluno_existente)
+                    numero_notas = Nota.objects.filter(
+                        turma=turma, aluno=aluno_existente)
                     for nota in numero_notas:
                         Nota.objects.create(
                             aluno=aluno,
@@ -199,25 +213,28 @@ def atualizar_turma(id, data, usuario):
                 return HttpResponseNotFound("Aluno não encontrado")
         elif 'removerMatricula' in data:
             try:
-                aluno = Aluno.objects.filter(matricula=data['removerMatricula'], usuario=usuario).first()
+                aluno = Aluno.objects.filter(
+                    matricula=data['removerMatricula'], usuario=usuario).first()
                 Nota.objects.filter(aluno=aluno, turma=turma).delete()
                 turma.aluno.remove(aluno)
             except ObjectDoesNotExist:
                 return HttpResponseNotFound("Aluno não encontrado")
         else:
-            turma.nome    = data['nome']
+            turma.nome = data['nome']
             turma.periodo = data['periodo']
         turma.save()
         return ({'mensagem': 'Turma editada.'})
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Turma não encontrada")
 
+
 def adicionar_aluno_turma(id, alunos, usuario):
     try:
         turma = Turma.objects.filter(id=id, usuario=usuario).first()
 
         for aluno in alunos:
-            aluno = Aluno.objects.filter(matricula=aluno['matricula'], usuario=usuario).first()
+            aluno = Aluno.objects.filter(
+                matricula=aluno['matricula'], usuario=usuario).first()
 
             turma.aluno.add(aluno)
     except ObjectDoesNotExist:
@@ -226,6 +243,7 @@ def adicionar_aluno_turma(id, alunos, usuario):
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- APIS PROJETOS ---------------------------------------
 # -----------------------------------------------------------------------------------------------
+
 
 def cadastrar_projeto_api(data, usuario):
     matriculas = []
@@ -284,7 +302,8 @@ def encontrar_projeto(id=None, usuario=None):
     if id:
         try:
             projeto = Projeto.objects.get(id=id, usuario=usuario)
-            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome}
+                           for aluno in projeto.aluno.all()]
             projeto_json = {
                 'id': projeto.id,
                 'nome': projeto.nome,
@@ -301,7 +320,8 @@ def encontrar_projeto(id=None, usuario=None):
         projetos = Projeto.objects.filter(usuario=usuario)
         projetos_json = []
         for projeto in projetos:
-            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome}
+                           for aluno in projeto.aluno.all()]
             projetos_json.append({
                 'id': projeto.id,
                 'nome': projeto.nome,
@@ -313,32 +333,37 @@ def encontrar_projeto(id=None, usuario=None):
             })
         return JsonResponse(projetos_json, safe=False)
 
+
 def parse_date(date_str):
     try:
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except (ValueError, TypeError):
         return None
 
+
 def atualizar_projeto(id, data, usuario):
-    
+
     try:
         projeto = Projeto.objects.filter(id=id, usuario=usuario).first()
         if not projeto:
             return HttpResponseNotFound("Projeto não encontrado")
-        
+
         # Caso haja o campo matricula, então é add ou remoção de aluno... dependendo do campo 'remove'
         if data.get("matricula"):
-            aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
-            
+            aluno = Aluno.objects.filter(
+                matricula=data['matricula'], usuario=usuario).first()
+
             if data["remove"]:
                 projeto.aluno.remove(aluno)
             else:
                 projeto.aluno.add(aluno)
-    
+
         projeto.nome = data.get('nome', projeto.nome)
         projeto.descricao = data.get('descricao', projeto.descricao)
-        projeto.data_inicio = parse_date(data.get('data_inicio')) or projeto.data_inicio
-        projeto.data_fim = parse_date(data.get('data_fim')) if data.get('data_fim') else None
+        projeto.data_inicio = parse_date(
+            data.get('data_inicio')) or projeto.data_inicio
+        projeto.data_fim = parse_date(
+            data.get('data_fim')) if data.get('data_fim') else None
         projeto.periodo = data.get('periodo', projeto.periodo)
         projeto.save()
 
@@ -369,12 +394,14 @@ def deletar_projeto(id, usuario):
     except ObjectDoesNotExist:
         return HttpResponseNotFound("Projeto não encontrado")
 
+
 def adicionar_aluno_projeto(id, alunos, usuario):
     try:
         projeto = Projeto.objects.filter(id=id, usuario=usuario).first()
 
         for aluno in alunos:
-            aluno = Aluno.objects.filter(matricula=aluno['matricula'], usuario=usuario).first()
+            aluno = Aluno.objects.filter(
+                matricula=aluno['matricula'], usuario=usuario).first()
 
             projeto.aluno.add(aluno)
     except ObjectDoesNotExist:
