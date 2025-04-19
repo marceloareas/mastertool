@@ -257,10 +257,10 @@ def adicionar_nota(request, id):
                 'notas': [
                     {'titulo': 'P2', 'valor': None, 'peso': 1},
                     {'titulo': 'Nota 2', 'valor': None, 'peso': 1}
-                    ]
+                ]
             }
         ]
-        """
+    """
 
     if request.method == 'POST':
         data = request.data
@@ -280,18 +280,18 @@ def adicionar_nota(request, id):
                     # Se a nota não existe, cria ela e associa ao aluno
                     if 'id' not in nota:
                         Nota.objects.create(aluno=curr_aluno, turma=turma, titulo=nota['titulo'], valor=nota['valor'], peso=nota["peso"])
-            else:
+                    else:
                         # Se a nota já existe, atualiza pelo id dela
                         nota_existente = Nota.objects.filter(id=nota['id'], aluno=curr_aluno, turma=turma).first()
-                            
-                            nota_existente.titulo = nota['titulo']
-                            nota_existente.valor = nota['valor']
-                            nota_existente.peso = nota["peso"]
-                            
-                            nota_existente.save()
+
+                        nota_existente.titulo = nota['titulo']
+                        nota_existente.valor = nota['valor']
+                        nota_existente.peso = nota["peso"]
+
+                        nota_existente.save()
 
                 return JsonResponse({'message': 'Dados da turma atualizados com sucesso'}, status=200)
-            
+
         except Turma.DoesNotExist:
             return JsonResponse({'error': 'Turma não encontrada'}, status=404)
         except Aluno.DoesNotExist:
@@ -299,7 +299,7 @@ def adicionar_nota(request, id):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
-
+        
         # try:
         #     turma = Turma.objects.get(id=id)
 
