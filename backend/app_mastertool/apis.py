@@ -118,73 +118,41 @@ def cadastrar_turma_api(data, usuario):
 
 def encontrar_turma(id, usuario):
 
-    # Caso tenha o id da turma de interesse busca a turma e cruza com as informações de alunos e suas respectivas notas para cada avaliação
-    if id:
-        turma = Turma.objects.get(id=id, usuario=usuario)
-        alunos_json = []
-        for aluno in turma.aluno.all():
-            try:
-                notas_json = []
-                notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
-                for nota in notas:
-                    notas_json.append({
-                        'id': nota.id,
-                        'titulo': nota.titulo,
-                        'valor': nota.valor,
-                        'peso': int(nota.peso),  # Incluindo o peso
-                    })
-            except Nota.DoesNotExist:
-                notas = []
-            alunos_json.append({
-                'matricula': aluno.matricula,
-                'nome': aluno.nome,
-                'notas': notas_json
-            })
+    def serializar_nota(nota):
+        return {
+            'id': nota.id,
+            'titulo': nota.titulo,
+            'valor': nota.valor,
+            'peso': int(nota.peso),
+        }
 
-        turma_dict = {
+    def serializar_aluno(aluno, turma):
+        notas = Nota.objects.filter(aluno=aluno, turma=turma)
+        notas_json = [serializar_nota(nota) for nota in notas]
+        return {
+            'matricula': aluno.matricula,
+            'nome': aluno.nome,
+            'notas': notas_json
+        }
+
+    def serializar_turma(turma):
+        alunos_json = [serializar_aluno(aluno, turma) for aluno in turma.aluno.all()]
+        return {
             'id': turma.id,
             'nome': turma.nome,
             'periodo': turma.periodo,
-            'alunos': alunos_json,
+            'alunos': alunos_json
         }
-        return turma_dict
 
-    # Caso NÃO tenha o id da turma de interesse, VAI FAZER A MESMA COISA, SÓ QUE PARA TODAS AS TURMAS QUE O USUARIO TEM
+    if id:
+        try:
+            turma = Turma.objects.get(id=id, usuario=usuario)
+            return serializar_turma(turma)
+        except Turma.DoesNotExist:
+            return None  # ou lançar uma exceção, dependendo do seu uso
 
     turmas = Turma.objects.filter(usuario=usuario)
-    turmas_json = []
-
-    for turma in turmas:
-        # Busca a turma e cruza com as informações de alunos e suas respectivas notas para cada avaliação
-        alunos_json = []
-        for aluno in turma.aluno.all():
-            try:
-                notas_json = []
-                notas = list(Nota.objects.filter(aluno=aluno, turma=turma))
-                for nota in notas:
-                    notas_json.append({
-                        'id'    : nota.id,
-                        'titulo': nota.titulo,
-                        'valor' : nota.valor,
-                        'peso': nota.peso,  # Incluindo o peso
-                    })
-            except Nota.DoesNotExist:
-                notas = []
-            alunos_json.append({
-                'matricula' : aluno.matricula,
-                'nome'      : aluno.nome,
-                'notas'     : notas_json
-
-            })
-        turma_dict = {
-            'id': turma.id,
-            'nome': turma.nome,
-            'periodo': turma.periodo,
-            'alunos': alunos_json,
-        }
-        turmas_json.append(turma_dict)
-
-    return turmas_json
+    return [serializar_turma(turma) for turma in turmas]
 
 
 def atualizar_turma(id, data, usuario):
