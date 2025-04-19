@@ -44,7 +44,6 @@ export class ModalClassComponent {
   ) {}
 
   ngOnInit() {
-    console.log(this.data.singleClass);
   }
 
   /**
