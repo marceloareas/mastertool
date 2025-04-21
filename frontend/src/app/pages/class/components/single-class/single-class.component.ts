@@ -48,39 +48,33 @@ export class SingleClassComponent implements OnInit {
 
 	@ViewChild(MatPaginator) paginator!: MatPaginator;
 
-	displayedColumns: string[] = ['nome', 'editar'];
-	notaColumns: string[] = [];
 	dataSource!: MatTableDataSource<any>;
+
 	pesos: Record<string, number> = {};
+	notaColumns: string[] = [];
+	displayedColumns: string[] = ['nome', 'editar'];
+
+	private checkpoint: {
+		class: any;
+		pesos: Record<string, number>;
+		notaColumns: string[];
+		displayedColumns: string[];
+	} | null = null;
+
 
 	mode: string = 'VIEW';
 
 	constructor(public dialog: MatDialog, private snackBar: MatSnackBar) { }
 
 	/**
-	 * PARA ENTENDIMENTO DO CÓDIGO, TODOS AS OPERAÇÕES COM LOCALSTORAGE FORAM COMENTADAS E NÃO HOUVE QUEBRA DE LÓGICA APARENTE 
-	 */
-
-	/**
 	 * Método do ciclo de vida do Angular que é chamado após a construção do componente.
 	 * Inicializa as colunas da tabela e atualiza os dados.
 	 */
 	ngOnInit() {
-		// //Recupera pesos do localStorage
-		// const storedPesos = localStorage.getItem(`class_${this.class.id}_pesos`);
-		// if (storedPesos) {
-		// 	this.pesos = JSON.parse(storedPesos);
-		// }
-
-		// // Recupera alunos do localStorage
-		// const storedAlunos = localStorage.getItem(`class_${this.class.id}_alunos`);
-		// if (storedAlunos) {
-		// 	this.class.alunos = JSON.parse(storedAlunos);
-		// }
-
 		this.initializeColumns();
 		this.refreshTable();
 	}
+
 
 	/**
 	  * Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
@@ -109,7 +103,7 @@ export class SingleClassComponent implements OnInit {
 
 		this.dataSource = new MatTableDataSource(this.class.alunos);
 		this.dataSource.paginator = this.paginator;
-		// this.updateLocalStorage();
+
 	}
 
 	/**
@@ -123,7 +117,6 @@ export class SingleClassComponent implements OnInit {
 	/**
 	 * Atualiza os dados no localStorage após qualquer alteração.
 	 */
-	// TODO: Usa localStorage...???
 	updateLocalStorage() {
 		localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
 		localStorage.setItem(`class_${this.class.id}_alunos`, JSON.stringify(this.class.alunos));
@@ -152,7 +145,6 @@ export class SingleClassComponent implements OnInit {
 					});
 				});
 
-				// localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
 			}
 
 			this.refreshTable();
@@ -264,7 +256,6 @@ export class SingleClassComponent implements OnInit {
 			if (notaIndex !== -1) {
 
 				aluno.notas[notaIndex].valor = value === '' ? null : value;
-				// this.updateLocalStorage(); // Atualiza localStorage ao alterar a nota
 				// console.log(`Nota atualizada: ${aluno.nome} - ${columnName} = ${value}`);
 			}
 		}
@@ -277,7 +268,6 @@ export class SingleClassComponent implements OnInit {
 			const newPeso = parseFloat(inputElement.value);
 			if (!isNaN(newPeso) && newPeso > 0) {
 				this.pesos[columnName] = newPeso;
-				// this.updateLocalStorage(); // Atualiza localStorage ao alterar o peso
 				// console.log(`Peso atualizado para "${columnName}": ${newPeso}`);
 			}
 		}
@@ -288,6 +278,29 @@ export class SingleClassComponent implements OnInit {
 	 * @param mode Novo modo para o componente.
 	 */
 	changeMode(mode: string) {
+
+		if (mode === 'EDIT') {
+			this.checkpoint = {
+				class: JSON.parse(JSON.stringify(this.class)),
+				pesos: JSON.parse(JSON.stringify(this.pesos)),
+				notaColumns: [...this.notaColumns],
+				displayedColumns: [...this.displayedColumns],
+			};
+		}
+
+		if (mode === 'VIEW' && this.checkpoint) {
+			this.class = JSON.parse(JSON.stringify(this.checkpoint.class));
+			this.pesos = JSON.parse(JSON.stringify(this.checkpoint.pesos));
+			this.notaColumns = [...this.checkpoint.notaColumns];
+			this.displayedColumns = [...this.checkpoint.displayedColumns];
+
+			// Atualiza dataSource com os dados restaurados
+			this.dataSource = new MatTableDataSource(this.class.alunos);
+			this.dataSource.paginator = this.paginator;
+
+			this.checkpoint = null;
+		}
+
 		this.mode = mode;
 	}
 
@@ -334,8 +347,8 @@ export class SingleClassComponent implements OnInit {
 
 		this.classService.postNota(this.class.id, updatedData).subscribe({
 			next: () => {
-				// this.updateLocalStorage();
 				this.snackBar.open('Notas e pesos atualizados com sucesso!', 'Fechar', { duration: 3000 });
+				this.checkpoint = null;
 				this.getClass(false);
 				this.mode = 'VIEW';
 			},
@@ -353,6 +366,59 @@ export class SingleClassComponent implements OnInit {
 		return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
 	}
 
+
+	/**
+	 * Abre um modal para adicionar ou editar uma turma. Após o fechamento do modal, atualiza os dados da classe.
+	 * @param singleClass Objeto da turma.
+	 * @param mode Modo de operação do modal ('ADD' ou 'EDIT').
+	 */
+	openModalClass(singleClass?: any, mode = 'ADD') {
+		this.dialog
+			.open(ModalClassComponent, {
+				data: { singleClass, mode },
+				width: '600px',
+			})
+			.afterClosed()
+			.subscribe(() => {
+				this.getClass();
+				this.closeModal();
+			});
+	}
+
+	/**
+	 * Abre um modal para adicionar um novo aluno à classe. Após o fechamento do modal, atualiza os dados da classe.
+	 */
+	openModalStudent() {
+		this.dialog
+			.open(StudentClassModalComponent, {
+				data: { class: this.class },
+			})
+			.afterClosed()
+			.subscribe(() => {
+				this.getClass();
+				this.closeModal();
+			});
+	}
+
+	/**
+	 * Emite um evento para fechar a visualização da classe.
+	 */
+	closeClass() {
+		this.closeClassEvent.emit();
+	}
+
+	/**
+	 * Emite um evento para fechar o modal aberto.
+	 */
+	closeModal() {
+		this.closeModalEvent.emit();
+	}
+
+
+	// Função utilizada no html para checar se há alunos na turma.
+	get hasAlunos(): boolean {
+		return this.class?.alunos?.length > 0;
+	}
 
 	// -----------------------------------------------------------------------------------------------
 	// -------------------------------- Seção para emissão de relatórios -----------------------------
@@ -475,69 +541,7 @@ export class SingleClassComponent implements OnInit {
 		// Atualiza colunas e sincroniza dados
 		this.notaColumns = this.notaColumns.slice(quantity);
 		this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
-		// this.updateLocalStorage();
 		this.recalculateAllMedia();
 		this.snackBar.open(`${quantity} notas removidas com sucesso!`, 'Fechar', { duration: 3000 });
 	}
-
-	/**
-	 * Abre um modal para adicionar ou editar uma turma. Após o fechamento do modal, atualiza os dados da classe.
-	 * @param singleClass Objeto da turma.
-	 * @param mode Modo de operação do modal ('ADD' ou 'EDIT').
-	 */
-	openModalClass(singleClass?: any, mode = 'ADD') {
-		this.dialog
-			.open(ModalClassComponent, {
-				data: { singleClass, mode },
-				width: '600px',
-			})
-			.afterClosed()
-			.subscribe(() => {
-				this.getClass();
-				this.closeModal();
-			});
-	}
-
-	/**
-	 * Abre um modal para adicionar um novo aluno à classe. Após o fechamento do modal, atualiza os dados da classe.
-	 */
-	openModalStudent() {
-		this.dialog
-			.open(StudentClassModalComponent, {
-				data: { class: this.class },
-			})
-			.afterClosed()
-			.subscribe(() => {
-				this.getClass();
-				this.closeModal();
-			});
-	}
-
-	/**
-	 * Emite um evento para fechar a visualização da classe.
-	 */
-	closeClass() {
-		this.closeClassEvent.emit();
-	}
-
-	/**
-	 * Emite um evento para fechar o modal aberto.
-	 */
-	closeModal() {
-		this.closeModalEvent.emit();
-	}
-
-
-	// Função utilizada no html para checar se há alunos na turma.
-	get hasAlunos(): boolean {
-		return this.class?.alunos?.length > 0;
-	}
-
-
 }
-// ENTENDIMENTOS:
-// ! Não há uma verificação que impeça os professor de: Adicionar/Editar Notas, Descartar Menor Nota, Exportar relatório resumido e Exportar relatório detalhado QUANDO NÃO HÁ ALUNOS
-
-// As informações de notas e pesos estão sendo armazenadas no localStorage
-// 	class_id_notas
-// 	class_id_pesos

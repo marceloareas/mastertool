@@ -267,7 +267,7 @@ def adicionar_nota(request, id):
 
         # print(data)
 
-        if isinstance(data, list):
+        if not isinstance(data, list):
             print("CHEGADA DE DADOS ERRADA", data)
 
         try:

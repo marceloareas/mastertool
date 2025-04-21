@@ -13,86 +13,87 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-student',
-  standalone: true,
-  imports: [
-    MatDialogModule,
-    MatTableModule,
-    MatLabel,
-    MatFormFieldModule,
-    MatInput,
-    MatPaginatorModule,
-    MatIconModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatSnackBarModule, 
-  ],
-  templateUrl: './student.component.html',
-  styleUrls: ['./student.component.scss'],
+	selector: 'app-student',
+	standalone: true,
+	imports: [
+		MatDialogModule,
+		MatTableModule,
+		MatLabel,
+		MatFormFieldModule,
+		MatInput,
+		MatPaginatorModule,
+		MatIconModule,
+		MatButtonModule,
+		MatMenuModule,
+		MatSnackBarModule,
+	],
+	templateUrl: './student.component.html',
+	styleUrls: ['./student.component.scss'],
 })
 export class StudentComponent {
-  private dialog = inject(MatDialog);
-  private student = inject(StudentService);
-  private snackBar = inject(MatSnackBar);
+	private dialog = inject(MatDialog);
+	private student = inject(StudentService);
+	private snackBar = inject(MatSnackBar);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+	@ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  displayedColumns: string[] = ['matricula', 'nome', 'editar'];
-  dataSource!: MatTableDataSource<MatPaginator>;
+	displayedColumns: string[] = ['matricula', 'nome', 'editar'];
+	dataSource!: MatTableDataSource<MatPaginator>;
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
+	ngAfterViewInit() {
+		this.dataSource.paginator = this.paginator;
+	}
 
-  ngOnInit() {
-    this.getStudent();
-  }
+	ngOnInit() {
+		this.getStudent();
+		// this.dataSource.paginator = this.paginator;
+	}
 
-  /**
-   * Obtém a lista de estudantes do serviço e popula a fonte de dados da tabela.
-   */
-  getStudent() {
-    this.student.get().subscribe((data) => {
-      this.dataSource = new MatTableDataSource(data);
-      this.dataSource.paginator = this.paginator;
-    });
-  }
+	/**
+	 * Obtém a lista de estudantes do serviço e popula a fonte de dados da tabela.
+	 */
+	getStudent() {
+		this.student.get().subscribe((data) => {
+			this.dataSource = new MatTableDataSource(data);
+			this.dataSource.paginator = this.paginator;
+		});
+	}
 
-  /**
-   * Exclui um estudante pelo ID fornecido.
-   * @param id ID do estudante a ser excluído.
-   */
-  delete(id: string) {
-    this.student.delete(id).subscribe(() => {
-      this.snackBar.open('Aluno excluído com sucesso!', 'Fechar', {
-        duration: 5000,
-      });
-      this.getStudent();
-    });
-  }
+	/**
+	 * Exclui um estudante pelo ID fornecido.
+	 * @param id ID do estudante a ser excluído.
+	 */
+	delete(id: string) {
+		this.student.delete(id).subscribe(() => {
+			this.snackBar.open('Aluno excluído com sucesso!', 'Fechar', {
+				duration: 5000,
+			});
+			this.getStudent();
+		});
+	}
 
-  /**
-   * Abre um modal para adicionar ou editar um estudante.
-   * @param data Dados do estudante para edição, se disponível.
-   * @param mode Modo do modal, padrão é 'ADD' para adicionar.
-   */
-  openModal(matricula?: string, mode = 'ADD') {
-    this.dialog
-      .open(ModalStudentComponent, {
-        width: '600px',
-        data: { matricula, mode },
-      })
-      .afterClosed()
-      .subscribe(() => {
-        this.getStudent();
-      });
-  }
+	/**
+	 * Abre um modal para adicionar ou editar um estudante.
+	 * @param data Dados do estudante para edição, se disponível.
+	 * @param mode Modo do modal, padrão é 'ADD' para adicionar.
+	 */
+	openModal(matricula?: string, mode = 'ADD') {
+		this.dialog
+			.open(ModalStudentComponent, {
+				width: '600px',
+				data: { matricula, mode },
+			})
+			.afterClosed()
+			.subscribe(() => {
+				this.getStudent();
+			});
+	}
 
-  /**
-   * Filtra os dados da tabela com base no valor de entrada.
-   * @param event Evento de entrada que acionou o filtro.
-   */
-  filter(event: Event) {
-    this.dataSource.filter = (event.target as HTMLInputElement)?.value;
-  }
+	/**
+	 * Filtra os dados da tabela com base no valor de entrada.
+	 * @param event Evento de entrada que acionou o filtro.
+	 */
+	filter(event: Event) {
+		this.dataSource.filter = (event.target as HTMLInputElement)?.value;
+	}
 }

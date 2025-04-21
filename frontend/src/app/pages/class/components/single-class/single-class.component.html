@@ -46,7 +46,7 @@
 
 			<button mat-stroked-button style="margin-left: 20px; margin-right: 20px;"
 				color="primary"
-				(click)="addNewColumn();changeMode('EDIT');"
+				(click)="changeMode('EDIT');addNewColumn();"
 				[disabled]="!hasAlunos"
 				[matTooltip]="!hasAlunos ? 'Adicione alunos para adicionar notas' : ''">
 				Adicionar Nota
@@ -68,7 +68,7 @@
 					Adicionar Nota
 				</button>
 				<div class="confirm-buttons">
-					<button mat-stroked-button (click)="changeMode('VIEW');getClass(true);">Cancelar</button>
+					<button mat-stroked-button (click)="changeMode('VIEW');">Cancelar</button>
 					<button mat-flat-button color="primary" (click)="save()">Salvar</button>
 				</div>
 			</div>
