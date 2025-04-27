@@ -158,17 +158,24 @@ export class SingleClassComponent implements OnInit {
 	addNewColumn() {
 		const newColumn = `Nota ${this.notaColumns.length + 1}`;
 
-		this.notaColumns.push(newColumn);
+		let columnExists = this.notaColumns.some(Column => Column === newColumn);
 
-		// Add uma nova 'coluna' em this.displayedColumns.length - 2
-		this.displayedColumns.splice(this.displayedColumns.length - 2, 0, newColumn);
+		if (!columnExists) {
 
-		// Define o peso inicial como 1
-		this.pesos[newColumn] = 1;
+			this.notaColumns.push(newColumn);
 
-		this.dataSource.data.forEach((aluno: any) => {
-			aluno.notas.push({ titulo: newColumn, valor: null, peso: this.pesos[newColumn] });
-		});
+			// Add uma nova 'coluna' em this.displayedColumns.length - 2
+			this.displayedColumns.splice(this.displayedColumns.length - 2, 0, newColumn);
+
+			// Define o peso inicial como 1
+			this.pesos[newColumn] = 1;
+
+			this.dataSource.data.forEach((aluno: any) => {
+				aluno.notas.push({ titulo: newColumn, valor: null, peso: this.pesos[newColumn] });
+			});
+		} else {
+			this.snackBar.open(`Renomeie o titulo "${newColumn}" para adicionar uma nova nota.`, 'Fechar', { duration: 7000 });
+		}
 
 		this.refreshTable();
 	}
@@ -225,11 +232,17 @@ export class SingleClassComponent implements OnInit {
 	 * @param columnIndex Índice da coluna a ser atualizada.
 	 */
 	updateColumnName(event: any, columnIndex: any) {
+
+		const oldName = this.notaColumns[columnIndex];
 		const newName = event.target.value.trim();
 
-		if (newName) {
+		// Se o novo nome for vazio, restaura o valor antigo
+		if (!newName) { event.target.value = oldName; return; }
 
-			const oldName = this.notaColumns[columnIndex];
+		// Checar se já existe alguma coluna com newName, se existe, cancela tudo e avisa o usuário
+		const columnExists = this.notaColumns.some((column: string) => column === newName);
+		if (!columnExists) {
+
 			this.notaColumns[columnIndex] = newName;
 
 			const oldTitleIndex = this.displayedColumns.indexOf(oldName);
@@ -250,10 +263,16 @@ export class SingleClassComponent implements OnInit {
 			delete this.pesos[oldName]
 			this.pesos[newName] = temp_peso;
 
-			// Atualiza a tabela para refletir as mudanças
-			this.refreshTable();
+
+		} else {
+			this.snackBar.open(`Já existe uma coluna com o nome "${newName}".`, 'Fechar', { duration: 5000 });
+			event.target.value = oldName; // Restaura o valor antigo
 		}
+
+		// Atualiza a tabela para refletir as mudanças
+		this.refreshTable();
 	}
+
 
 	/**
 	 * Atualiza o valor da nota para um aluno em uma posição específica com base na entrada do usuário.
