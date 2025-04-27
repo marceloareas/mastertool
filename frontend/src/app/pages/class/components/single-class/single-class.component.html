@@ -12,11 +12,11 @@
 				(click)="openModalStudent()">
 				Adicionar Aluno
 			</button>
-			<!-- <button mat-stroked-button
+			<button mat-stroked-button
 				(click)="openModalClass(class, 'EDIT')">
 				Editar turma
-			</button> -->
-			<!-- <div class="bar__top__button">
+			</button>
+			<div class="bar__top__button">
 				<button mat-stroked-button
 					(click)="promptRemoveColumns()"
 					[disabled]="!hasAlunos"
@@ -26,16 +26,16 @@
 
 				<button mat-flat-button color="primary"
 					(click)="exportReport('resumido')"
-					[disabled]="!hasAlunos"
+					[disabled]="!hasAlunos || mode == 'EDIT'"
 					[matTooltip]="!hasAlunos ? 'Adicione alunos para exportar relatório' : ''">Exportar
 					CSV Resumido</button>
 
 				<button mat-flat-button color="primary"
 					(click)="exportReport('detalhado')"
-					[disabled]="!hasAlunos"
+					[disabled]="!hasAlunos || mode == 'EDIT'"
 					[matTooltip]="!hasAlunos ? 'Adicione alunos para exportar relatório' : ''">Exportar
 					CSV Detalhado</button>
-			</div> -->
+			</div>
 
 		</div>
 	</div>
