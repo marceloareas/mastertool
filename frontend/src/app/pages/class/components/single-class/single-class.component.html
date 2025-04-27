@@ -43,14 +43,14 @@
 	<div class="single-class__top">
 		<div class="action-button">
 			@if(mode === 'VIEW') {
-
-			<button mat-stroked-button style="margin-left: 20px; margin-right: 20px;"
+			<!-- Não vejo sentido desse botão, faz mais sentido add nota ao entrar no modo de edição -->
+			<!-- <button mat-stroked-button style="margin-left: 20px; margin-right: 20px;"
 				color="primary"
 				(click)="changeMode('EDIT');addNewColumn();"
 				[disabled]="!hasAlunos"
 				[matTooltip]="!hasAlunos ? 'Adicione alunos para adicionar notas' : ''">
 				Adicionar Nota
-			</button>
+			</button> -->
 
 			<button mat-flat-button color="primary"
 				(click)="changeMode('EDIT')"
@@ -80,7 +80,8 @@
 		<!-- Coluna de Nomes dos Alunos -->
 		<ng-container matColumnDef="nome">
 			<th mat-header-cell *matHeaderCellDef width="200px">Alunos</th>
-			<td mat-cell *matCellDef="let element">{{ element.matricula }} - {{ element.nome }}</td>
+			<td mat-cell *matCellDef="let element">{{ element.matricula }} - {{
+				element.nome }}</td>
 		</ng-container>
 
 		<!-- Cabaçalho de Notas Dinâmico -->
@@ -89,15 +90,21 @@
 			<th mat-header-cell *matHeaderCellDef width="100px">
 				<div class="header-cell">
 					<!-- Titulo da Coluna - Ex: P1 -->
-					<input matInput type="text" placeholder="Digite o nome" [ngClass]="mode === 'EDIT' ? 'edit' : ''" [value]="notaCol" (blur)="updateColumnName($event, $index)" [disabled]="mode === 'VIEW'" />
+					<input matInput type="text" placeholder="Digite o nome"
+						[ngClass]="mode === 'EDIT' ? 'edit' : ''" [value]="notaCol"
+						(blur)="updateColumnName($event, $index)" [disabled]="mode === 'VIEW'" />
 
 					<!-- Peso -->
 					<span style="margin-left: 10px">Peso</span>
-					<input matInput type="number" style="width: 30px; margin-right: 20px" placeholder="Peso" [value]="getPeso(notaCol)" (input)="updatePeso($event, notaCol)" [disabled]="mode === 'VIEW'" />
+					<input matInput type="number" style="width: 30px; margin-right: 20px"
+						placeholder="Peso" [value]="getPeso(notaCol)"
+						(input)="updatePeso($event, notaCol)" [disabled]="mode === 'VIEW'" />
 
 					@if(mode !== 'VIEW'){
 					<!-- Botão para remoção de coluna -->
-					<button mat-icon-button class="button__delete" (click)="removeColumn(notaCol)"> <mat-icon class="icon__delete" fontIcon="delete"></mat-icon> </button>
+					<button mat-icon-button class="button__delete"
+						(click)="removeColumn(notaCol)"> <mat-icon class="icon__delete"
+							fontIcon="delete"></mat-icon> </button>
 					}
 				</div>
 			</th>

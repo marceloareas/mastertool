@@ -354,7 +354,28 @@ def adicionar_nota(request, id):
         #     return JsonResponse({'error': str(e)}, status=400)
 
 
-# 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def deletar_nota(request, id):
+    # Dado um id de uma turma e o nome de uma nota, deletar todas as notas correspondentes da turma em especifico
+
+    nomes_notas = request.data
+
+    # Checar se o id da turma é válido
+    if Turma.objects.filter(id=id).first() is None:
+        return JsonResponse({'error': 'Turma não encontrada'}, status=404)
+
+    for nota in nomes_notas:
+        # Checar se existe essa nota
+        if Nota.objects.filter(turma=id, titulo=nota).first() is None:
+            # return JsonResponse({'error': 'Nota não encontrada'}, status=404)
+            continue
+
+        # Deletar a nota
+        Nota.objects.filter(turma=id, titulo=nota).delete()
+
+    return JsonResponse({'message': 'Notas deletadas com sucesso'}, status=200)
+
 
 # -----------------------------------------------------------------------------------------------
 # ---------------------------------------- VIEWS PROJETOS ---------------------------------------

@@ -53,6 +53,7 @@ export class SingleClassComponent implements OnInit {
 	pesos: Record<string, number> = {};
 	notaColumns: string[] = [];
 	displayedColumns: string[] = ['nome', 'editar'];
+	toDelete: string[] = [];
 
 	private checkpoint: {
 		class: any;
@@ -184,17 +185,32 @@ export class SingleClassComponent implements OnInit {
 		// ! Como essa função não deveria fazer isso, ela está temporáriamente inutilizada
 		// const data = { titulo: name };
 
-		// // Remove a coluna da lista de notas
-		// const index = this.notaColumns.indexOf(name);
-		// if (index !== -1) {
-		// 	this.notaColumns.splice(index, 1);
-		// }
+		// Coleta e remove o indice da coluna
+		const index = this.notaColumns.indexOf(name);
+		if (index !== -1) {
+			this.notaColumns.splice(index, 1);
+		}
 
-		// // Remove a coluna da lista de colunas exibidas
-		// const colIndex = this.displayedColumns.indexOf(name);
-		// if (colIndex !== -1) {
-		// 	this.displayedColumns.splice(colIndex, 1);
-		// }
+		// Remove a coluna da lista de colunas exibidas
+		const colIndex = this.displayedColumns.indexOf(name);
+		if (colIndex !== -1) {
+			this.displayedColumns.splice(colIndex, 1);
+		}
+
+		// Remove a coluna da info de pesos
+		delete this.pesos[name];
+
+		// Remove a prova de cada aluno
+		this.dataSource.data.forEach((aluno: any) => {
+			console.log("Aluno", aluno);
+			aluno.notas = aluno.notas.filter((prova: { titulo: string; }) => prova.titulo !== name);
+		});
+
+		// Adiciona o nome da coluna removida na lista de colunas a serem deletadas
+		this.toDelete.push(name);
+
+		this.print_status();
+
 
 		// ! ISSO ESTÁ ERRADO!!!!!!!
 		// this.classService.postNota(this.class.id, data).subscribe(() => {
@@ -280,12 +296,14 @@ export class SingleClassComponent implements OnInit {
 	changeMode(mode: string) {
 
 		if (mode === 'EDIT') {
+			// Define um ponto de verificação para restaurar os dados se necessário
 			this.checkpoint = {
 				class: JSON.parse(JSON.stringify(this.class)),
 				pesos: JSON.parse(JSON.stringify(this.pesos)),
 				notaColumns: [...this.notaColumns],
 				displayedColumns: [...this.displayedColumns],
 			};
+			this.toDelete = [];
 		}
 
 		if (mode === 'VIEW' && this.checkpoint) {
@@ -293,6 +311,7 @@ export class SingleClassComponent implements OnInit {
 			this.pesos = JSON.parse(JSON.stringify(this.checkpoint.pesos));
 			this.notaColumns = [...this.checkpoint.notaColumns];
 			this.displayedColumns = [...this.checkpoint.displayedColumns];
+			this.toDelete = [];
 
 			// Atualiza dataSource com os dados restaurados
 			this.dataSource = new MatTableDataSource(this.class.alunos);
@@ -322,13 +341,7 @@ export class SingleClassComponent implements OnInit {
 	 */
 	save() {
 		this.mode = 'SAVING';
-
-		console.log("Classe", this.class);
-		console.log("Displayed columns:", this.displayedColumns);
-		console.log("notaColumns:", this.notaColumns);
-		console.log("Pesos:", this.pesos);
-		console.log("Data_source", this.dataSource.data);
-
+		this.print_status();
 		const updatedData = this.dataSource.data.map((aluno: any) => ({
 			matricula: aluno.matricula,
 			nome: aluno.nome,
@@ -344,6 +357,16 @@ export class SingleClassComponent implements OnInit {
 		}));
 
 		console.log("Dados pos-tratamento", updatedData);
+
+
+		// Remove as notas deletadas
+		if (this.toDelete.length > 0) {
+
+			// Pode ser melhorado...
+			this.classService.deleteNota(this.class.id, this.toDelete).subscribe();
+		}
+
+		// TODO: Ideia: Quero que caso a operação de deletar notas falhe não haja post de notas..
 
 		this.classService.postNota(this.class.id, updatedData).subscribe({
 			next: () => {
@@ -543,5 +566,13 @@ export class SingleClassComponent implements OnInit {
 		this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
 		this.recalculateAllMedia();
 		this.snackBar.open(`${quantity} notas removidas com sucesso!`, 'Fechar', { duration: 3000 });
+	}
+
+	print_status() {
+		console.log("Classe", this.class);
+		console.log("Displayed columns:", this.displayedColumns);
+		console.log("notaColumns:", this.notaColumns);
+		console.log("Pesos:", this.pesos);
+		console.log("Data_source", this.dataSource.data);
 	}
 }
