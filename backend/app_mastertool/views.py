@@ -265,14 +265,15 @@ def adicionar_nota(request, id):
     if request.method == 'POST':
         data = request.data
 
-        # print(data)
-
         if not isinstance(data, list):
             print("CHEGADA DE DADOS ERRADA", data)
 
         try:
+            # Checar se a turma existe
             turma = Turma.objects.get(id=id)
+            # Para cada aluno da turma
             for aluno in data:
+                # Checa se o aluno existe
                 curr_aluno = Aluno.objects.get(matricula=aluno['matricula'])
                 # Adicionar ou Atualizar notas
                 for nota in aluno['notas']:
@@ -290,7 +291,7 @@ def adicionar_nota(request, id):
 
                         nota_existente.save()
 
-                return JsonResponse({'message': 'Dados da turma atualizados com sucesso'}, status=200)
+            return JsonResponse({'message': 'Dados da turma atualizados com sucesso'}, status=200)
 
         except Turma.DoesNotExist:
             return JsonResponse({'error': 'Turma não encontrada'}, status=404)
@@ -298,8 +299,6 @@ def adicionar_nota(request, id):
             return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-
-        
         # try:
         #     turma = Turma.objects.get(id=id)
 
