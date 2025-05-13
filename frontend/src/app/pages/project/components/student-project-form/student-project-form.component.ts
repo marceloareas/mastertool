@@ -1,85 +1,105 @@
 import {
-	Component,
-	EventEmitter,
-	inject,
-	Input,
-	Output,
-	SimpleChanges,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  SimpleChanges,
 } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { StudentService } from '../../../../services/student/student.service';
+import { Observable, map, startWith } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
-	selector: 'app-student-project-form',
-	standalone: true,
-	imports: [
-		ReactiveFormsModule,
-		MatFormFieldModule,
-		MatInputModule,
-		MatSelectModule,
-	],
-	templateUrl: './student-project-form.component.html',
-	styleUrls: ['./student-project-form.component.scss'],
+  selector: 'app-student-project-form',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatAutocompleteModule,
+    AsyncPipe,
+  ],
+  templateUrl: './student-project-form.component.html',
+  styleUrls: ['./student-project-form.component.scss'],
 })
-
 export class StudentProjectFormComponent {
-	private studentService = inject(StudentService);
+  private studentService = inject(StudentService);
 
-	@Input() project: any;
-	@Output() formProject: EventEmitter<any> = new EventEmitter();
+  @Input() project: any;
+  @Output() formProject: EventEmitter<any> = new EventEmitter();
 
-	constructor(private fb: FormBuilder) { }
-	students: any;
-	form: FormGroup = this.fb.group({
-		matricula: [''],
-		remove: false
-	});
+  constructor(private fb: FormBuilder) { }
+  
+  students: any[] = [];
+  filteredStudents!: Observable<any[]>;
+  studentControl = new FormControl('');
+  
+  form: FormGroup = this.fb.group({
+    matricula: [''],
+    remove: false
+  });
 
-	ngOnChanges(changes: SimpleChanges) {
-		if (changes['project'] && this.project) {
-			// Aguarda o Angular terminar o ciclo de renderização antes de chamar getStudents
-			setTimeout(() => {
-				this.getStudents();
-			});
-		}
-	}
+  ngOnInit() {
+    this.filteredStudents = this.studentControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || ''))
+    );
+  }
 
-	/**
-	 * Busca a lista de estudantes e ajusta a lógica com base nos dados de projetos.
-	 */
-	getStudents() {
-		this.studentService.get().subscribe((data) => {
-			// Info do projeto (id, nome, descricao, alunos[], ...)
-			const alunosProjeto = this.project?.alunos ?? [];
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['project'] && this.project) {
+      setTimeout(() => {
+        this.getStudents();
+      });
+    }
+  }
 
-			console.log('Alunos do Projeto:', alunosProjeto);
+  private _filter(value: string): any[] {
+    const filterValue = value.toLowerCase();
+    return this.students.filter(student => 
+      student.nome.toLowerCase().includes(filterValue) || 
+      student.matricula.toLowerCase().includes(filterValue)
+    );
+  }
 
-			// Dados de TODOS OS ALUNOS
-			console.log("Todos os alunos", data);
+  onOptionSelected(event: any) {
+    const selectedStudent = this.students.find(student => 
+      student.nome === event.option.value
+    );
+    
+    if (selectedStudent) {
+      this.form.patchValue({
+        matricula: selectedStudent.matricula
+      });
+    }
+  }
 
-			this.students = data.filter(
-				(alunoData: { nome: any; matricula: any }) =>
-					!alunosProjeto.some(
-						(alunoProjeto: { nome: any; matricula: any }) =>
-							alunoData.matricula === alunoProjeto.matricula &&
-							alunoData.nome === alunoProjeto.nome
-					)
-			);
+  getStudents() {
+    this.studentService.get().subscribe((data) => {
+      const alunosProjeto = this.project?.alunos ?? [];
+      
+      this.students = data.filter(
+        (alunoData: { nome: any; matricula: any }) =>
+          !alunosProjeto.some(
+            (alunoProjeto: { nome: any; matricula: any }) =>
+              alunoData.matricula === alunoProjeto.matricula &&
+              alunoData.nome === alunoProjeto.nome
+          )
+      );
+      
+      // Atualiza o filtro após carregar os estudantes
+      this.studentControl.updateValueAndValidity();
+    });
+  }
 
-			// Ordenar a exibição ??
-			// this.students.sort((a: any, b: any) => a.nome.localeCompare(b.nome));
-
-			console.log("Alunos disponíveis:", this.students);
-		});
-	}
-
-	/**
-	 * Emite os dados do formulário. Dependendo do modo, pode emitir dados para adicionar ou editar uma classe.
-	 */
-	save() {
-		this.formProject.emit(this.form.value);
-	}
+  save() {
+    this.formProject.emit(this.form.value);
+  }
 }

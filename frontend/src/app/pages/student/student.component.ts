@@ -1,99 +1,126 @@
-import { MatIconModule } from '@angular/material/icon';
 import { Component, ViewChild, inject } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalStudentComponent } from './components/modal-student/modal-student.component';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatLabel } from '@angular/material/form-field';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatInput } from '@angular/material/input';
 import { StudentService } from '../../services/student/student.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { startWith, map } from 'rxjs/operators';
 
 @Component({
-	selector: 'app-student',
-	standalone: true,
-	imports: [
-		MatDialogModule,
-		MatTableModule,
-		MatLabel,
-		MatFormFieldModule,
-		MatInput,
-		MatPaginatorModule,
-		MatIconModule,
-		MatButtonModule,
-		MatMenuModule,
-		MatSnackBarModule,
-	],
-	templateUrl: './student.component.html',
-	styleUrls: ['./student.component.scss'],
+  selector: 'app-student',
+  standalone: true,
+  imports: [
+    MatDialogModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInput,
+    MatPaginatorModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatSnackBarModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule,
+  ],
+  templateUrl: './student.component.html',
+  styleUrls: ['./student.component.scss'],
 })
 export class StudentComponent {
-	private dialog = inject(MatDialog);
-	private student = inject(StudentService);
-	private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+  private student = inject(StudentService);
+  private snackBar = inject(MatSnackBar);
 
-	@ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-	displayedColumns: string[] = ['matricula', 'nome', 'editar'];
-	dataSource!: MatTableDataSource<MatPaginator>;
+  displayedColumns: string[] = ['matricula', 'nome', 'editar'];
+  dataSource!: MatTableDataSource<any>;
 
-	ngAfterViewInit() {
-		this.dataSource.paginator = this.paginator;
-	}
+  studentControl = new FormControl('');
+  studentsList: any[] = [];
+  filteredStudents: any[] = [];
 
-	ngOnInit() {
-		this.getStudent();
-		// this.dataSource.paginator = this.paginator;
-	}
+  ngOnInit() {
+    this.getStudent();
 
-	/**
-	 * Obtém a lista de estudantes do serviço e popula a fonte de dados da tabela.
-	 */
-	getStudent() {
-		this.student.get().subscribe((data) => {
-			this.dataSource = new MatTableDataSource(data);
-			this.dataSource.paginator = this.paginator;
-		});
-	}
+    this.studentControl.valueChanges
+      .pipe(
+        startWith(''),
+        map(value => this._filter(value || ''))
+      )
+      .subscribe(filtered => {
+        this.filteredStudents = filtered;
+        this.dataSource.filter = (this.studentControl.value || '').trim().toLowerCase();
+      });
+  }
 
-	/**
-	 * Exclui um estudante pelo ID fornecido.
-	 * @param id ID do estudante a ser excluído.
-	 */
-	delete(id: string) {
-		this.student.delete(id).subscribe(() => {
-			this.snackBar.open('Aluno excluído com sucesso!', 'Fechar', {
-				duration: 5000,
-			});
-			this.getStudent();
-		});
-	}
+  ngAfterViewInit() {
+    if (this.dataSource) {
+      this.dataSource.paginator = this.paginator;
+    }
+  }
 
-	/**
-	 * Abre um modal para adicionar ou editar um estudante.
-	 * @param data Dados do estudante para edição, se disponível.
-	 * @param mode Modo do modal, padrão é 'ADD' para adicionar.
-	 */
-	openModal(matricula?: string, mode = 'ADD') {
-		this.dialog
-			.open(ModalStudentComponent, {
-				width: '600px',
-				data: { matricula, mode },
-			})
-			.afterClosed()
-			.subscribe(() => {
-				this.getStudent();
-			});
-	}
+  /**
+   * Obtém a lista de estudantes e configura a tabela e autocomplete.
+   */
+  getStudent() {
+    this.student.get().subscribe((data) => {
+      this.studentsList = data;
+      this.dataSource = new MatTableDataSource(data);
+      this.dataSource.paginator = this.paginator;
 
-	/**
-	 * Filtra os dados da tabela com base no valor de entrada.
-	 * @param event Evento de entrada que acionou o filtro.
-	 */
-	filter(event: Event) {
-		this.dataSource.filter = (event.target as HTMLInputElement)?.value;
-	}
+      // Configura função de filtro personalizada (para pegar nome no dataSource)
+      this.dataSource.filterPredicate = (data: any, filter: string) =>
+        data.nome.toLowerCase().includes(filter);
+      
+      this.filteredStudents = data;
+    });
+  }
+
+  /**
+   * Exclui um estudante pelo ID fornecido.
+   * @param id ID do estudante a ser excluído.
+   */
+  delete(id: string) {
+    this.student.delete(id).subscribe(() => {
+      this.snackBar.open('Aluno excluído com sucesso!', 'Fechar', {
+        duration: 5000,
+      });
+      this.getStudent();
+    });
+  }
+
+  /**
+   * Abre um modal para adicionar ou editar um estudante.
+   * @param matricula Matrícula do estudante para edição, se disponível.
+   * @param mode Modo do modal, padrão é 'ADD' para adicionar.
+   */
+  openModal(matricula?: string, mode = 'ADD') {
+    this.dialog
+      .open(ModalStudentComponent, {
+        width: '600px',
+        data: { matricula, mode },
+      })
+      .afterClosed()
+      .subscribe(() => {
+        this.getStudent();
+      });
+  }
+
+  /**
+   * Função para filtrar lista de alunos no autocomplete.
+   */
+  private _filter(value: string): any[] {
+    const filterValue = value.toLowerCase();
+    return this.studentsList.filter(student =>
+      student.nome.toLowerCase().includes(filterValue)
+    );
+  }
 }
