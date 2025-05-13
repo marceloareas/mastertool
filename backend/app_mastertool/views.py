@@ -26,30 +26,39 @@ def cadastrar_usuario(request):
     if request.method == 'POST':
         novo_cadastro = request.data
 
-        if novo_cadastro['senha']:
-            usuario = User.objects.filter(email=novo_cadastro['email']).first()
+        if not all(k in novo_cadastro for k in ('email', 'senha', 'username')):
+            return JsonResponse({'erro': 'Dados incompletos.'}, status=400)
 
-            if usuario:
-                return JsonResponse({'erro': 'Usuario já existente'}, status=400)
+        if User.objects.filter(email=novo_cadastro['email']).exists():
+            return JsonResponse({'erro': 'Email já cadastrado.'}, status=400)
 
-            usuario = User.objects.create_user(username=novo_cadastro['username'], email=novo_cadastro['email'], password=novo_cadastro['senha'])
-            usuario.save()
+        if User.objects.filter(username=novo_cadastro['username']).exists():
+            return JsonResponse({'erro': 'Username já cadastrado.'}, status=400)
 
-            return JsonResponse({'mensagem': 'Usuario criado com sucesso.'})
-        else:
-            return JsonResponse({'erro': 'Não foi possível criar o usuario.'}, status=400)
+        usuario = User.objects.create_user(
+            username=novo_cadastro['username'],
+            email=novo_cadastro['email'],
+            password=novo_cadastro['senha'],
+        )
+        usuario.save()
 
+        return JsonResponse({'mensagem': 'Usuário criado com sucesso.'})
 
 @api_view(['POST'])
 def login(request):
     if request.method == 'POST':
-        novo_cadastro = request.data
+        dados = request.data
 
-        usuario = authenticate(username=novo_cadastro['email'], password=novo_cadastro['senha'])
-        if usuario is not None:
-            login_django(request, usuario)
+        try:
+            usuario = User.objects.get(email=dados['email'])
+        except User.DoesNotExist:
+            return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
 
-            token = get_tokens_for_user(usuario)
+        usuario_auth = authenticate(username=usuario.username, password=dados['senha'])
+
+        if usuario_auth is not None:
+            login_django(request, usuario_auth)
+            token = get_tokens_for_user(usuario_auth)
             return JsonResponse({'mensagem': 'Autenticado com sucesso', 'token': token}, status=200)
         else:
             return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
