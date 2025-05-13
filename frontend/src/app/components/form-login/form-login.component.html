@@ -1,19 +1,42 @@
 <section>
-  <form [formGroup]="form">
-    <mat-form-field appearance="outline">
-      <mat-label>Usuário</mat-label>
-      <input matInput type="text" formControlName="email" />
-    </mat-form-field>
+  <ng-container *ngIf="mode === 'LOGIN'; else cadastroTemplate">
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="text" formControlName="email" />
+      </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Senha</mat-label>
-      <input matInput type="password" formControlName="senha"/>
-    </mat-form-field>
-  </form>
+      <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" formControlName="senha" />
+      </mat-form-field>
 
-  <div class="login__buttons">
-    <button (click)="submit(mode)">
-      {{ mode === "LOGIN" ? "Entrar": "Cadastrar" }}
-    </button>
-  </div>
+      <div class="login__buttons">
+        <button type="button" (click)="submit(mode)">Entrar</button>
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-template #cadastroTemplate>
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>Usuário</mat-label>
+        <input matInput type="text" formControlName="username" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="text" formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" formControlName="senha" />
+      </mat-form-field>
+
+      <div class="login__buttons">
+        <button type="button" (click)="submit(mode)">Cadastrar</button>
+      </div>
+    </form>
+  </ng-template>
 </section>

@@ -32,7 +32,7 @@ def cadastrar_usuario(request):
             if usuario:
                 return JsonResponse({'erro': 'Usuario já existente'}, status=400)
 
-            usuario = User.objects.create_user(username=novo_cadastro['email'], password=novo_cadastro['senha'])
+            usuario = User.objects.create_user(username=novo_cadastro['username'], email=novo_cadastro['email'], password=novo_cadastro['senha'])
             usuario.save()
 
             return JsonResponse({'mensagem': 'Usuario criado com sucesso.'})
