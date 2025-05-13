@@ -59,4 +59,12 @@ export class AuthenticationService {
     }
     this.isLogged.set(false);
   }
+
+  getProfile() {
+    return this.http.get<any>('http://127.0.0.1:8000/profile/');
+  }
+
+  changePassword(data: { currentPassword: string, newPassword: string, confirmPassword: string }) {
+    return this.http.post<any>('http://127.0.0.1:8000/change-password/', data);
+  }
 }

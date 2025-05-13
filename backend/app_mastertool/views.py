@@ -54,7 +54,34 @@ def login(request):
         else:
             return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    if request.method == 'GET':
+        user = request.user
+        return JsonResponse({
+            'email': user.email,
+            'username': user.username,
+            
+        })
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    if request.method == 'POST':
+        user = request.user
+        data = request.data
+        
+        if not user.check_password(data.get('currentPassword')):
+            return JsonResponse({'error': 'Senha atual incorreta'}, status=400)
+        
+        if data.get('newPassword') != data.get('confirmPassword'):
+            return JsonResponse({'error': 'As senhas não coincidem'}, status=400)
+        
+        user.set_password(data.get('newPassword'))
+        user.save()
+        
+        return JsonResponse({'message': 'Senha alterada com sucesso'})
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS ALUNOS ----------------------------------------
 # -----------------------------------------------------------------------------------------------
@@ -299,59 +326,6 @@ def adicionar_nota(request, id):
             return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-        # try:
-        #     turma = Turma.objects.get(id=id)
-
-        #     # ! TODO: Esta Lógica de verificação de campo 'titulo' está muito confusa, precisa ser reimplementada e adaptada ao frontend
-        #     # Excluir notas
-        #     if 'titulo' in data:
-        #         alunos = Aluno.objects.filter(turma=turma)
-        #         for aluno in alunos:
-        #             Nota.objects.filter(
-        #                 titulo=data['titulo'],
-        #                 turma=turma,
-        #                 aluno=aluno
-        #             ).first().delete()
-
-        #         return JsonResponse({'message': 'Nota removida com sucesso'}, status=200)
-        #     else:
-        #         # Preenchimento de nota ou add de nota, acredito
-
-        #         for aluno_data in data:
-        #             aluno = Aluno.objects.get(
-        #                 matricula=aluno_data['matricula'])
-
-        #             # Adicionar ou Atualizar notas
-        #             for nota in aluno_data['notas']:
-
-        #                 # Se a nota já existe, atualiza pelo id dela
-        #                 if 'id' in nota:
-        #                     nota_existente = Nota.objects.filter(
-        #                         aluno=aluno, turma=turma, id=nota['id']).first()
-
-        #                     nota_existente.titulo = nota['titulo']
-        #                     nota_existente.valor = nota['valor']
-        #                     nota_existente.peso = nota["peso"]
-
-        #                     nota_existente.save()
-        #                 else:
-        #                     # Se a nota não existe, cria ela e associa ao aluno
-        #                     Nota.objects.create(
-        #                         aluno=aluno,
-        #                         turma=turma,
-        #                         titulo=nota['titulo'],
-        #                         valor=nota['valor'],
-        #                         peso=nota["peso"]
-        #                     )
-        #         return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
-
-        # except Turma.DoesNotExist:
-        #     return JsonResponse({'error': 'Turma não encontrada'}, status=404)
-        # except Aluno.DoesNotExist:
-        #     return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
-        # except Exception as e:
-        #     return JsonResponse({'error': str(e)}, status=400)
-
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])

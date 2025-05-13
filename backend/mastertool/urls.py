@@ -17,6 +17,8 @@ urlpatterns = [
     # url de usuario
     path('cadastrar-usuario/', views.cadastrar_usuario, name='cadastrar_usuario'),
     path('login/', views.login, name='login'),
+    path('profile/', views.user_profile, name='user_profile'),
+    path('change-password/', views.change_password, name='change_password'),
 
     # url de turma
     path('turmas/', views.get_turmas, name='get_turmas'),

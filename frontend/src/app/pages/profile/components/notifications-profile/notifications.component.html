@@ -1,0 +1,38 @@
+<div class="notifications-container">
+  <h2>Notificações</h2>
+  
+  <div *ngFor="let notification of notifications" 
+       class="notification-card" 
+       [class.unread]="!notification.read"
+       [class.start-notification]="notification.type === 'start_date'"
+       [class.end-notification]="notification.type === 'end_date'"
+       (click)="onNotificationClick(notification)">
+    <div class="notification-header">
+      <mat-icon class="notification-icon">
+    
+        <ng-container *ngIf="notification.type === 'start_date'">
+          {{ notification.read ? 'play_circle_outline' : 'play_circle_filled' }}
+        </ng-container>
+        <ng-container *ngIf="notification.type === 'end_date'">
+          {{ notification.read ? 'notifications_none' : 'notifications_active' }}
+        </ng-container>
+      </mat-icon>
+      <div class="notification-title">
+        <h3>{{ notification.title }}</h3>
+        <span class="notification-date">{{ notification.date | date:'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+    <p class="notification-message">
+     
+      <mat-icon class="message-icon">
+        {{ notification.type === 'start_date' ? 'event_available' : 'event_busy' }}
+      </mat-icon>
+      {{ notification.message }}
+    </p>
+  </div>
+
+  <div *ngIf="notifications.length === 0" class="no-notifications">
+    <mat-icon>notifications_off</mat-icon>
+    <p>Nenhuma notificação no momento</p>
+  </div>
+</div>

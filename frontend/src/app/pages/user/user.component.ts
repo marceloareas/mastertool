@@ -1,10 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MatLabel } from '@angular/material/form-field';
 import { AuthenticationService } from '../../services/authentication/authentication.service';
+import { NotificationService } from '../../services/notification/notification.service';
+import { CommonModule } from '@angular/common';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @Component({
   selector: 'app-user',
@@ -15,14 +18,19 @@ import { AuthenticationService } from '../../services/authentication/authenticat
     MatIconModule,
     RouterLink,
     RouterOutlet,
-    MatLabel
+    MatLabel,
+    CommonModule,
+    MatBadgeModule
   ],
   templateUrl: './user.component.html',
   styleUrl: './user.component.scss',
 })
-export class UserComponent {
+export class UserComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(AuthenticationService);
+  private notificationService= inject(NotificationService)
+  
+  unreadNotifications = 0;
 
   pages = [
     {
@@ -37,12 +45,24 @@ export class UserComponent {
     },
     {
       title: 'Alunos',
-      icon: 'person',
+      icon: 'recent_actors',
       route: 'student',
+    },
+    {
+      title: 'Perfil',
+      icon: 'person',
+      route: 'profile',
     },
   ];
 
-  logout(){
+  ngOnInit() {
+    this.notificationService.notifications$.subscribe(() => {
+      this.unreadNotifications = this.notificationService.getUnreadCount();
+    });
+    this.notificationService.loadNotifications();
+  }
+
+  logout(): void {
     this.auth.logout();
     this.router.navigate(['']);
   }

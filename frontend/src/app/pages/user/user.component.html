@@ -2,24 +2,29 @@
   <mat-drawer mode="side" opened class="container__menu">
     <div class="teste">
       <div class="lista">
-      <ul>
-        @for (page of pages; track page.title ) {
-        <li class="container__menu__itens">
-          <a [routerLink]="page.route" class="container__menu__links">
-            <mat-icon>{{ page.icon }}</mat-icon>
-            {{ page.title }}
-          </a>
-        </li>
-        }
-      </ul>
-    </div>
+        <ul>
+          @for (page of pages; track page.title) {
+          <li class="container__menu__itens">
+            <a [routerLink]="page.route" class="container__menu__links">
+              <div class="icon-container">
+                <mat-icon>{{ page.icon }}</mat-icon>
+                @if (page.route === 'profile' && unreadNotifications > 0) {
+                <span class="notification-badge">{{ unreadNotifications }}</span>
+                }
+              </div>
+              {{ page.title }}
+            </a>
+          </li>
+          }
+        </ul>
+      </div>
+      
       <div class="button">
         <button mat-icon-button (click)="logout()">
-          <mat-icon> logout </mat-icon>
+          <mat-icon>logout</mat-icon>
         </button>
         <mat-label>Sair</mat-label>
       </div>
-
     </div>
   </mat-drawer>
   <mat-drawer-content class="container__content">
