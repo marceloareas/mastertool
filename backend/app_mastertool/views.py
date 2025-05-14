@@ -26,14 +26,14 @@ def cadastrar_usuario(request):
     if request.method == 'POST':
         novo_cadastro = request.data
 
-        if not novo_cadastro['email'] or not novo_cadastro['senha'] or not novo_cadastro['username'] or not novo_cadastro['first_name'] or not novo_cadastro['last_name']:
-            return JsonResponse({'erro': 'Dados incompletos.'}, status=400)
+        # if not novo_cadastro['email'] or not novo_cadastro['senha'] or not novo_cadastro['username'] or not novo_cadastro['first_name'] or not novo_cadastro['last_name']:
+        #     return JsonResponse({'erro': 'Dados incompletos.'}, status=400)
 
         if User.objects.filter(email=novo_cadastro['email']).exists():
-            return JsonResponse({'erro': 'Email já cadastrado.'}, status=400)
+            return JsonResponse({'message': 'Este email já está cadastrado.'}, status=400)
 
-        if User.objects.filter(username=novo_cadastro['username']).exists():
-            return JsonResponse({'erro': 'Username já cadastrado.'}, status=400)
+        # if User.objects.filter(username=novo_cadastro['username']).exists():
+        #     return JsonResponse({'erro': 'Username já cadastrado.'}, status=400)
 
         usuario = User.objects.create_user(
             username=novo_cadastro['username'],
@@ -44,7 +44,7 @@ def cadastrar_usuario(request):
         )
         usuario.save()
 
-        return JsonResponse({'mensagem': 'Usuário criado com sucesso.'})
+        return JsonResponse({'message': 'Usuário criado com sucesso.'}, status=200)
 
 @api_view(['POST'])
 def login(request):
