@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { first } from 'rxjs';
 
 @Component({
   selector: 'app-form-login',
@@ -38,6 +39,8 @@ export class FormLoginComponent {
     username: ['', Validators.required],
     email: ['', Validators.required],
     senha: ['', Validators.required],
+    first_name: ['', Validators.required],
+    last_name: ['', Validators.required]
   });
 
   /**

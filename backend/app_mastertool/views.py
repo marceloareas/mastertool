@@ -26,7 +26,7 @@ def cadastrar_usuario(request):
     if request.method == 'POST':
         novo_cadastro = request.data
 
-        if not all(k in novo_cadastro for k in ('email', 'senha', 'username')):
+        if not all(k in novo_cadastro for k in ('email', 'senha', 'username', 'first_name', 'last_name')):
             return JsonResponse({'erro': 'Dados incompletos.'}, status=400)
 
         if User.objects.filter(email=novo_cadastro['email']).exists():
@@ -38,6 +38,8 @@ def cadastrar_usuario(request):
         usuario = User.objects.create_user(
             username=novo_cadastro['username'],
             email=novo_cadastro['email'],
+            first_name=novo_cadastro['first_name'],
+            last_name=novo_cadastro['last_name'],
             password=novo_cadastro['senha'],
         )
         usuario.save()
