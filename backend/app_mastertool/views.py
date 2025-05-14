@@ -26,7 +26,7 @@ def cadastrar_usuario(request):
     if request.method == 'POST':
         novo_cadastro = request.data
 
-        if not all(k in novo_cadastro for k in ('email', 'senha', 'username', 'first_name', 'last_name')):
+        if not novo_cadastro['email'] or not novo_cadastro['senha'] or not novo_cadastro['username'] or not novo_cadastro['first_name'] or not novo_cadastro['last_name']:
             return JsonResponse({'erro': 'Dados incompletos.'}, status=400)
 
         if User.objects.filter(email=novo_cadastro['email']).exists():

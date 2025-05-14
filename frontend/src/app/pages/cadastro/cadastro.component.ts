@@ -46,7 +46,7 @@ export class CadastroComponent {
         this.router.navigate(['']);
       },
       error: (res) => {
-        this.snackbar.open('Usuário já cadastrado.', 'Fechar', {
+        this.snackbar.open('Ocorreu um erro ao se cadastrar.', 'Fechar', {
           duration: 3000,
           panelClass: ['snackbar-error'],
         });
