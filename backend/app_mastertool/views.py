@@ -26,30 +26,35 @@ def cadastrar_usuario(request):
     if request.method == 'POST':
         novo_cadastro = request.data
 
-        if novo_cadastro['senha']:
-            usuario = User.objects.filter(email=novo_cadastro['email']).first()
+        if User.objects.filter(email=novo_cadastro['email']).exists():
+            return JsonResponse({'message': 'Este email já está cadastrado.'}, status=400)
 
-            if usuario:
-                return JsonResponse({'erro': 'Usuario já existente'}, status=400)
+        usuario = User.objects.create_user(
+            username=novo_cadastro['username'],
+            email=novo_cadastro['email'],
+            first_name=novo_cadastro['first_name'],
+            last_name=novo_cadastro['last_name'],
+            password=novo_cadastro['senha'],
+        )
+        usuario.save()
 
-            usuario = User.objects.create_user(username=novo_cadastro['email'], password=novo_cadastro['senha'])
-            usuario.save()
-
-            return JsonResponse({'mensagem': 'Usuario criado com sucesso.'})
-        else:
-            return JsonResponse({'erro': 'Não foi possível criar o usuario.'}, status=400)
-
+        return JsonResponse({'message': 'Usuário criado com sucesso.'}, status=200)
 
 @api_view(['POST'])
 def login(request):
     if request.method == 'POST':
-        novo_cadastro = request.data
+        dados = request.data
 
-        usuario = authenticate(username=novo_cadastro['email'], password=novo_cadastro['senha'])
-        if usuario is not None:
-            login_django(request, usuario)
+        try:
+            usuario = User.objects.get(email=dados['email'])
+        except User.DoesNotExist:
+            return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
 
-            token = get_tokens_for_user(usuario)
+        usuario_auth = authenticate(username=usuario.username, password=dados['senha'])
+
+        if usuario_auth is not None:
+            login_django(request, usuario_auth)
+            token = get_tokens_for_user(usuario_auth)
             return JsonResponse({'mensagem': 'Autenticado com sucesso', 'token': token}, status=200)
         else:
             return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
@@ -57,13 +62,13 @@ def login(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_profile(request):
-    if request.method == 'GET':
-        user = request.user
-        return JsonResponse({
-            'email': user.email,
-            'username': user.username,
-            
-        })
+    user = request.user
+    return JsonResponse({
+        'email': user.email,
+        'username': user.username,
+        'first_name': user.first_name,
+        'last_name': user.last_name
+    })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -82,6 +87,30 @@ def change_password(request):
         user.save()
         
         return JsonResponse({'message': 'Senha alterada com sucesso'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user
+    data = request.data
+
+    new_email = data.get('email', user.email)
+    new_username = data.get('username', user.username)
+
+    if User.objects.exclude(id=user.id).filter(email=new_email).exists():
+        return JsonResponse({'error': 'Email já cadastrado por outra conta.'}, status=400)
+
+    if User.objects.exclude(id=user.id).filter(username=new_username).exists():
+        return JsonResponse({'error': 'Nome de Usuário já existe.'}, status=400)
+
+    user.email = new_email
+    user.username = new_username
+    user.first_name = data.get('first_name', user.first_name)
+    user.last_name = data.get('last_name', user.last_name)
+    user.save()
+
+    return JsonResponse({'message': 'Perfil atualizado com sucesso.'}, status=200)
+
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS ALUNOS ----------------------------------------
 # -----------------------------------------------------------------------------------------------
