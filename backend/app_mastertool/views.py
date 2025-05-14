@@ -26,14 +26,8 @@ def cadastrar_usuario(request):
     if request.method == 'POST':
         novo_cadastro = request.data
 
-        # if not novo_cadastro['email'] or not novo_cadastro['senha'] or not novo_cadastro['username'] or not novo_cadastro['first_name'] or not novo_cadastro['last_name']:
-        #     return JsonResponse({'erro': 'Dados incompletos.'}, status=400)
-
         if User.objects.filter(email=novo_cadastro['email']).exists():
             return JsonResponse({'message': 'Este email já está cadastrado.'}, status=400)
-
-        # if User.objects.filter(username=novo_cadastro['username']).exists():
-        #     return JsonResponse({'erro': 'Username já cadastrado.'}, status=400)
 
         usuario = User.objects.create_user(
             username=novo_cadastro['username'],
@@ -68,13 +62,13 @@ def login(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_profile(request):
-    if request.method == 'GET':
-        user = request.user
-        return JsonResponse({
-            'email': user.email,
-            'username': user.username,
-            
-        })
+    user = request.user
+    return JsonResponse({
+        'email': user.email,
+        'username': user.username,
+        'first_name': user.first_name,
+        'last_name': user.last_name
+    })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -93,6 +87,30 @@ def change_password(request):
         user.save()
         
         return JsonResponse({'message': 'Senha alterada com sucesso'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user
+    data = request.data
+
+    new_email = data.get('email', user.email)
+    new_username = data.get('username', user.username)
+
+    if User.objects.exclude(id=user.id).filter(email=new_email).exists():
+        return JsonResponse({'error': 'Email já cadastrado por outra conta.'}, status=400)
+
+    if User.objects.exclude(id=user.id).filter(username=new_username).exists():
+        return JsonResponse({'error': 'Nome de Usuário já existe.'}, status=400)
+
+    user.email = new_email
+    user.username = new_username
+    user.first_name = data.get('first_name', user.first_name)
+    user.last_name = data.get('last_name', user.last_name)
+    user.save()
+
+    return JsonResponse({'message': 'Perfil atualizado com sucesso.'}, status=200)
+
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS ALUNOS ----------------------------------------
 # -----------------------------------------------------------------------------------------------

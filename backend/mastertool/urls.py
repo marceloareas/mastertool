@@ -19,6 +19,7 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('profile/', views.user_profile, name='user_profile'),
     path('change-password/', views.change_password, name='change_password'),
+    path('update-profile/', views.update_profile, name='update_profile'), 
 
     # url de turma
     path('turmas/', views.get_turmas, name='get_turmas'),

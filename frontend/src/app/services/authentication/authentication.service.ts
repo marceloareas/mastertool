@@ -67,4 +67,17 @@ export class AuthenticationService {
   changePassword(data: { currentPassword: string, newPassword: string, confirmPassword: string }) {
     return this.http.post<any>('http://127.0.0.1:8000/change-password/', data);
   }
+
+  updateProfile(data: any) {
+  return this.http.post<any>('http://127.0.0.1:8000/update-profile/', data).pipe(
+    catchError(error => {
+      // Aqui garantimos que o erro seja repassado com a estrutura correta
+      return throwError(() => ({
+        error: error.error,
+        status: error.status,
+        message: error.message
+      }));
+    })
+  );
+}
 }
