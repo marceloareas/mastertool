@@ -22,6 +22,7 @@ export class NotificationService {
         .filter(project => project.data_fim)
         .map(project => {
           const endDate = new Date(project.data_fim);
+          endDate.setDate(endDate.getDate() + 1);
           const daysLeft = Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           
           return {
@@ -41,6 +42,7 @@ export class NotificationService {
         .filter(project => project.data_inicio)
         .map(project => {
           const startDate = new Date(project.data_inicio);
+          startDate.setDate(startDate.getDate() + 1);
           const daysLeft = Math.floor((startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           
           return {

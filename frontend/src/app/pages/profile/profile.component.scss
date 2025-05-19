@@ -184,3 +184,9 @@ mat-icon {
   background-color: #f44336;
   color: white;
 }
+
+.profile-nav button.active {
+  background-color: rgba(63, 81, 181, 0.12);
+  font-weight: bold;
+}
+

@@ -48,6 +48,7 @@ export class ProfileComponent implements OnInit {
   lastName: string = '';
   isEditing: boolean = false;
   notifications: any[] = [];
+  activeSection: 'perfil' | 'notificacoes' = 'perfil';
 
   public notificationService = inject(NotificationService);
 
@@ -108,39 +109,37 @@ export class ProfileComponent implements OnInit {
   }
 
   updateProfile(): void {
-  const updatedData = {
-    email: this.userEmail,
-    username: this.userUsername,
-    first_name: this.firstName,
-    last_name: this.lastName
-  };
+    const updatedData = {
+      email: this.userEmail,
+      username: this.userUsername,
+      first_name: this.firstName,
+      last_name: this.lastName
+    };
 
-  this.authService.updateProfile(updatedData).subscribe({
-    next: () => {
-      this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', {
-        duration: 3000
-      });
-      this.isEditing = false;
-    },
-    error: (error) => {
-      console.log('Erro completo:', error);
-      
-      const errorMessage = error.error?.error || 
-                         error.error?.message || 
-                         error.message || 
-                         'Erro ao atualizar perfil';
+    this.authService.updateProfile(updatedData).subscribe({
+      next: () => {
+        this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', {
+          duration: 3000
+        });
+        this.isEditing = false;
+      },
+      error: (error) => {
+        const errorMessage = error.error?.error || 
+                             error.error?.message || 
+                             error.message || 
+                             'Erro ao atualizar perfil';
 
-      this.snackBar.open(errorMessage, 'Fechar', {
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    }
-  });
-}
+        this.snackBar.open(errorMessage, 'Fechar', {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
   getInitials(): string {
     const first = this.firstName?.charAt(0) || '';
     const last = this.lastName?.charAt(0) || '';
     return (first + last).toUpperCase();
   }
-
 }
