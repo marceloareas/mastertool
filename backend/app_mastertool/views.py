@@ -400,7 +400,7 @@ def cadastrar_projeto(request):
         else:
             return JsonResponse({
                 'mensagem': 'Arquivo processado com sucesso.',
-                # FAZER O TRACEBACK NO FRONT E NOMEAR ESSA MERDA CORRETAMENTE
+                # TODO: FAZER O TRACEBACK NO FRONT E NOMEAR OS ATRIBUTOS CORRETAMENTE
                 'id_turma': id_projeto,
                 'alunos_criados': [aluno.nome for aluno in alunos_criados],
                 'alunos_nao_criados': alunos_nao_criados

@@ -316,24 +316,21 @@ def atualizar_projeto(id, data, usuario):
         if not projeto:
             return HttpResponseNotFound("Projeto não encontrado")
 
-        # Caso haja o campo matricula, então é add ou remoção de aluno... dependendo do campo 'remove'
+        # Caso haja o campo matricula, então é add ou remoção de aluno... dependendo do campo 'remove'.Do contrário é update das info do projeto
         if data.get("matricula"):
-            aluno = Aluno.objects.filter(
-                matricula=data['matricula'], usuario=usuario).first()
+            aluno = Aluno.objects.filter(matricula=data['matricula'], usuario=usuario).first()
 
             if data["remove"]:
                 projeto.aluno.remove(aluno)
             else:
                 projeto.aluno.add(aluno)
-
-        projeto.nome = data.get('nome', projeto.nome)
-        projeto.descricao = data.get('descricao', projeto.descricao)
-        projeto.data_inicio = parse_date(
-            data.get('data_inicio')) or projeto.data_inicio
-        projeto.data_fim = parse_date(
-            data.get('data_fim')) if data.get('data_fim') else None
-        projeto.periodo = data.get('periodo', projeto.periodo)
-        projeto.save()
+        else:
+            projeto.nome = data.get('nome', projeto.nome)
+            projeto.descricao = data.get('descricao', projeto.descricao)
+            projeto.data_inicio = parse_date(data.get('data_inicio')) or projeto.data_inicio
+            projeto.data_fim = parse_date(data.get('data_fim')) if data.get('data_fim') else None
+            projeto.periodo = data.get('periodo', projeto.periodo)
+            projeto.save()
 
         return {
             'mensagem': 'Projeto atualizado com sucesso.',

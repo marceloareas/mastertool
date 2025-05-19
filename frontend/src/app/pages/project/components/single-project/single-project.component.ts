@@ -17,30 +17,18 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; //
 @Component({
 	selector: 'app-single-project',
 	standalone: true,
-	imports: [
-		MatIcon,
-		MatButtonModule,
-		MatTableModule,
-		MatPaginatorModule,
-		ReactiveFormsModule,
-		MatFormFieldModule,
-		MatInputModule,
-		FormsModule,
-		CommonModule,
-		MatMenuModule,
-		MatSnackBarModule, // Importando MatSnackBarModule
-	],
+	imports: [ MatIcon, MatButtonModule, MatTableModule, MatPaginatorModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, FormsModule, CommonModule, MatMenuModule, MatSnackBarModule,],
 	templateUrl: './single-project.component.html',
 	styleUrls: ['./single-project.component.scss'],
 })
 
 export class SingleProjectComponent implements OnInit {
 	private projectService = inject(ProjectService);
-	private snackBar = inject(MatSnackBar);  // Injetando MatSnackBar
+	private snackBar = inject(MatSnackBar);
 
+	@Input() project!: any;
 	@Output() closeProjectEvent: EventEmitter<any> = new EventEmitter();
 	@Output() closeModalEvent: EventEmitter<any> = new EventEmitter();
-	@Input() project!: any;
 
 	@ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -66,7 +54,6 @@ export class SingleProjectComponent implements OnInit {
 	refreshTable() {
 		this.dataSource = new MatTableDataSource(this.project.turma);
 		this.dataSource.paginator = this.paginator;
-		// console.log('data', this.dataSource.data);
 	}
 
 	/**

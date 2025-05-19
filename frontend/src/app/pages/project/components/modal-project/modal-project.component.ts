@@ -101,7 +101,6 @@ export class ModalProjectComponent {
             duration: 3000,
           });
           this.dialogRef.close(true);
-          console.log("Registro atualizado", dataProject);
         });
     }
   }

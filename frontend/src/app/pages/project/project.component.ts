@@ -16,21 +16,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-project',
   standalone: true,
-  imports: [
-    ModalProjectComponent,  // Pode ser substituído por ModalProjectComponent, se houver
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatCardModule,
-    MatIcon,
-    MatButtonModule,
-    SingleProjectComponent, 
-    CommonModule,
-    MatMenuModule,
-    MatSnackBarModule,  // Importando MatSnackBarModule
-  ],
+  imports: [ ModalProjectComponent,  // Pode ser substituído por ModalProjectComponent, se houver
+    ReactiveFormsModule, MatDialogModule, MatCardModule, MatIcon, MatButtonModule, SingleProjectComponent, CommonModule, MatMenuModule, MatSnackBarModule,  // Importando MatSnackBarModule
+],
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
 })
+	
 export class ProjectComponent {
   private projectService = inject(ProjectService);
   private snackBar = inject(MatSnackBar);  // Injetando o MatSnackBar
