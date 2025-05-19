@@ -360,25 +360,74 @@ saveChanges() {
     }
   }
 
-  private exportCSVResumido() {
-    let csv = `Turma: ${this.class.nome}\nMatricula,Nome,Media\n`;
-    this.dataSource.data.forEach(student => {
-      csv += `${student.matricula},${student.nome},${student.media}\n`;
-    });
-    this.downloadCSV(csv, 'resumo_notas.csv');
-  }
+	private exportCSVResumido() {
+		let csv = `Turma: ${this.class.nome},Menor Nota Descartada: ${this.discardLowestNote ? 'Sim' : 'Não'}`;
+		csv += `\n`;
+		csv += `Matricula,Nome,Media\n`;
 
-  private exportCSVDetalhado() {
-    let csv = `Turma: ${this.class.nome}\nMatricula,Nome,${this.noteColumns.join(',')},Media\n`;
-    this.dataSource.data.forEach(student => {
-      const notes = this.noteColumns.map(title => {
-        const note = student.notas.find(n => n.title === title);
-        return note?.value ?? '';
-      }).join(',');
-      csv += `${student.matricula},${student.nome},${notes},${student.media}\n`;
-    });
-    this.downloadCSV(csv, 'detalhes_notas.csv');
-  }
+		let sum = 0;
+		let totalAlunos = 0;
+
+		this.dataSource.data.forEach(student => {
+			csv += `${student.matricula},${student.nome},${student.media}\n`;
+			if (student.media !== undefined) {
+				sum += student.media;
+				totalAlunos++;
+			}
+		});
+
+		const mediaGeral = totalAlunos > 0 ? (sum / totalAlunos).toFixed(2) : 0;
+		csv += `Médias:,,${mediaGeral}\n`;
+
+		const filename = `${this.class.periodo}_${this.class.nome.split(' ').join('_')}_relatorio_notas_resumido.csv`;
+		this.downloadCSV(csv, filename);
+	}
+
+	private exportCSVDetalhado() {
+		let csv = `Turma: ${this.class.nome},Menor Nota Descartada: ${this.discardLowestNote ? 'Sim' : 'Não'}`;
+		csv += `\n`;
+		csv += `Matricula,Nome,${this.noteColumns.join(',')},Media\n`;
+
+		// Para cada estudante
+		this.dataSource.data.forEach(student => {
+
+			// Array de notas do estudante
+			const notes = this.noteColumns.map(title => {
+				const note = student.notas.find(n => n.title === title);
+				return note?.value ?? '';
+			}).join(',');
+
+			csv += `${student.matricula},${student.nome},${notes},${student.media}\n`;
+		});
+
+		let sum = this.dataSource.data.reduce((sum, student) => sum + (student.media ?? 0), 0);
+		let totalAlunos = this.dataSource.data.filter(student => student.media !== undefined).length;
+
+		const averageRow: any[] = [];
+		const averages = this.noteColumns.reduce((acc, title) => ({ ...acc, [title]: [] }), {} as { [key: string]: number[] });
+		
+		this.dataSource.data.forEach(student => {
+			student.notas.forEach(note => {
+				if (averages[note.title] !== null) {
+					averages[note.title].push(note.value as number);
+				}
+			});
+		});
+
+		this.noteColumns.forEach(title => {
+			const values = averages[title];
+			// Seleciona apenas notas que estão preenchidas
+			const validValues = values.filter(value => value !== null && !isNaN(value));
+			const average = validValues.length > 0 ? (validValues.reduce((a, b) => a + b) / validValues.length).toFixed(2): '';
+			averageRow.push(average);
+		});
+		// Adiciona a linha de médias
+		csv += `Médias:,,${averageRow.join(',')},${(sum/totalAlunos).toFixed(2)}\n`;
+
+		const filename = `${this.class.periodo}_${this.class.nome.split(' ').join('_')}_relatorio_notas_detalhado.csv`;
+		this.downloadCSV(csv, filename);
+
+	}
 
   private downloadCSV(data: string, filename: string) {
     const blob = new Blob([data], { type: 'text/csv' });
