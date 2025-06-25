@@ -53,3 +53,20 @@
     }
   }
 }
+.senha-checklist {
+  margin-top: 0.5rem;
+  font-size: 14px;
+
+  p {
+    margin: 0;
+  }
+
+  .valido {
+    color: green;
+  }
+
+  .invalido {
+    color: red;
+    text-decoration: line-through;
+  }
+}

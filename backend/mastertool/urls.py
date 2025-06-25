@@ -39,4 +39,8 @@ urlpatterns = [
     path('projetos/excluir/<str:id>', views.excluir_projeto, name='excluir_projeto'),
     path('projetos/editar/<str:id>', views.editar_projeto, name='editar_projeto'),
 
+# urls de notificações
+    path('notificacoes/', views.get_notificacoes, name='get_notificacoes'),
+    path('notificacoes/marcar-lida/', views.marcar_notificacao_lida, name='marcar_notificacao_lida'),
+    path('notificacoes/gerar/', views.gerar_notificacoes_usuario, name='gerar_notificacoes_usuario'),
 ]

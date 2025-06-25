@@ -31,14 +31,17 @@ export class AuthenticationService {
     return this.http.post<any>('http://127.0.0.1:8000/login/', dados).pipe(
       tap((response) => {
         if (response.token) {
-          if (isPlatformBrowser(this.platformId)) {
-            localStorage.setItem('authToken', response.token.access);
-          }
+          localStorage.setItem('authToken', response.token.access);
           this.isLogged.set(true);
+
+          this.http
+            this.http.post('http://127.0.0.1:8000/notificacoes/gerar/', {})
+            .subscribe();
         } else {
           this.isLogged.set(false);
         }
       }),
+
       catchError((error) => {
         console.error('Erro ao fazer login:', error);
         return throwError('Erro ao fazer login. Por favor, tente novamente.');
@@ -64,20 +67,26 @@ export class AuthenticationService {
     return this.http.get<any>('http://127.0.0.1:8000/profile/');
   }
 
-  changePassword(data: { currentPassword: string, newPassword: string, confirmPassword: string }) {
+  changePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) {
     return this.http.post<any>('http://127.0.0.1:8000/change-password/', data);
   }
 
   updateProfile(data: any) {
-  return this.http.post<any>('http://127.0.0.1:8000/update-profile/', data).pipe(
-    catchError(error => {
-      // Aqui garantimos que o erro seja repassado com a estrutura correta
-      return throwError(() => ({
-        error: error.error,
-        status: error.status,
-        message: error.message
-      }));
-    })
-  );
-}
+    return this.http
+      .post<any>('http://127.0.0.1:8000/update-profile/', data)
+      .pipe(
+        catchError((error) => {
+          // Aqui garantimos que o erro seja repassado com a estrutura correta
+          return throwError(() => ({
+            error: error.error,
+            status: error.status,
+            message: error.message,
+          }));
+        })
+      );
+  }
 }

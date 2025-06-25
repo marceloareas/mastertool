@@ -16,7 +16,9 @@ export class ProjectService {
   };
 
   get = (id: string = '') => {
+    this.http.post('http://127.0.0.1:8000/notificacoes/gerar/', {}).subscribe();
     return this.http.get<any>('http://127.0.0.1:8000/projetos/' + id);
+    
   };
 
   delete = (id: string) => {

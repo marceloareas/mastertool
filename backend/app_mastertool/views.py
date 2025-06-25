@@ -12,6 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from .apis import *
 from .models import *
 
+from datetime import date, timedelta
+
 from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 from .models import Turma, Aluno, Nota
 import csv
@@ -478,3 +480,62 @@ def editar_projeto(request, id):
 
         projeto_atualizado = atualizar_projeto(id, data, usuario)
         return JsonResponse(projeto_atualizado, safe=False)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notificacoes(request):
+    usuario = request.user
+    notificacoes = Notificacao.objects.filter(usuario=usuario).order_by('data')
+    return JsonResponse([
+        {
+            'id': n.id,
+            'projectId': n.projeto.id,
+            'title': n.titulo,
+            'message': n.mensagem,
+            'date': n.data,
+            'type': n.tipo,
+            'read': n.lida
+        } for n in notificacoes
+    ], safe=False)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def marcar_notificacao_lida(request):
+    notificacao_id = request.data.get('id')
+    try:
+        notificacao = Notificacao.objects.get(id=notificacao_id, usuario=request.user)
+        notificacao.lida = True
+        notificacao.save()
+        return JsonResponse({'message': 'Notificação marcada como lida'})
+    except Notificacao.DoesNotExist:
+        return JsonResponse({'error': 'Notificação não encontrada'}, status=404)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def gerar_notificacoes_usuario(request):
+    usuario = request.user
+    hoje = date.today()
+    limite = hoje + timedelta(days=7)
+
+    projetos = Projeto.objects.filter(usuario=usuario)
+
+    for projeto in projetos:
+        if projeto.data_inicio and hoje <= projeto.data_inicio <= limite:
+            Notificacao.objects.get_or_create(
+                usuario=usuario,
+                projeto=projeto,
+                tipo='start_date',
+                data=projeto.data_inicio,
+                titulo=f'Início do projeto "{projeto.nome}" se aproximando',
+                mensagem=f'O projeto "{projeto.nome}" começa em {(projeto.data_inicio - hoje).days} dias.'
+            )
+        if projeto.data_fim and hoje <= projeto.data_fim <= limite:
+            Notificacao.objects.get_or_create(
+                usuario=usuario,
+                projeto=projeto,
+                tipo='end_date',
+                data=projeto.data_fim,
+                titulo=f'Prazo final do projeto "{projeto.nome}" se aproximando',
+                mensagem=f'O projeto "{projeto.nome}" termina em {(projeto.data_fim - hoje).days} dias.'
+            )
+    return JsonResponse({'message': 'Notificações atualizadas'})

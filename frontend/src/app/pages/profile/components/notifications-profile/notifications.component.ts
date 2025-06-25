@@ -22,9 +22,10 @@ export class NotificationsComponent {
   @Input() notifications: any[] = [];
   @Output() markAsRead = new EventEmitter<any>();
 
-  onNotificationClick(notification: any): void {
-    if (!notification.read) {
-      this.markAsRead.emit(notification.projectId);
-    }
+ onNotificationClick(notification: any): void {
+  if (!notification.read) {
+    this.markAsRead.emit(notification.id);
   }
+}
+
 }
