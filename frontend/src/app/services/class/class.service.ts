@@ -10,33 +10,33 @@ export class ClassService {
 
 	post = (dados: any) => {
 		return this.http.post<any>(
-			'http://127.0.0.1:8000/turmas/cadastrar/',
+			'http://backend:8000/turmas/cadastrar/',
 			dados
 		);
 	};
 
 	get = (id: string = '') => {
-		return this.http.get<any>('http://127.0.0.1:8000/turmas/' + id);
+		return this.http.get<any>('http://backend:8000/turmas/' + id);
 	};
 
 	delete = (id: string) => {
-		return this.http.delete<any>('http://127.0.0.1:8000/turmas/excluir/' + id);
+		return this.http.delete<any>('http://backend:8000/turmas/excluir/' + id);
 	};
 
 	put = (id: string, dados: any) => {
 		return this.http.put<any>(
-			'http://127.0.0.1:8000/turmas/editar/' + id,
+			'http://backend:8000/turmas/editar/' + id,
 			dados
 		);
 	};
 
 	postNota = (id: number, dados: any) => {
 		return this.http.post<any>(
-			'http://127.0.0.1:8000/notas/' + id,
+			'http://backend:8000/notas/' + id,
 			dados
 		);
 	};
 	deleteNota = (id: number, dados: any) => {
-		return this.http.delete<any>('http://127.0.0.1:8000/notas/deletar/' + id, { body: dados });
+		return this.http.delete<any>('http://backend:8000/notas/deletar/' + id, { body: dados });
 	};
 }

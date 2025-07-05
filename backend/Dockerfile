@@ -8,9 +8,9 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Instala dependências do sistema (necessárias para compilar psycopg2)
-RUN apt-get update && apt-get install -y \
-    libpq-dev gcc \
-    && apt-get clean
+RUN apt-get update && apt-get install -y libpq-dev procps gcc && apt-get clean
+
+RUN apt-get install -y curl netcat-traditional
 
 # Copia apenas o requirements.txt e instala as dependências
 COPY requirements.txt .
@@ -25,4 +25,5 @@ COPY . .
 EXPOSE 8000
 
 # Comando padrão: aplica migrações e roda o servidor
-CMD ["sh", "-c", "python manage.py migrate && python manage.py makemigrations && python manage.py runserver 0.0.0.0:8000"]
+CMD ["./startup.sh"]
+

@@ -4,6 +4,8 @@ services:
         context: ./frontend
     ports:
         - "4200:4200"
+    depends_on:
+      - backend
     volumes:
         - ./frontend:/app/frontend
 
@@ -17,19 +19,20 @@ services:
         POSTGRES_PASSWORD: 1234
     volumes:
         - postgres_data:/var/lib/postgresql/data
-    # ports:
-    #     - "5432:5432"
+    ports:
+        - "5432:5432"
 
 
   backend:
     build: 
         context: ./backend
-    command: python manage.py runserver
+
     environment:
-        - DATABASE_NAME=mastertool
+        - DATABASE_HOST=db
+        - DATABASE_PORT=5432
         - DATABASE_USER=postgres
         - DATABASE_PASSWORD=1234
-        - DATABASE_HOST=db
+        - DATABASE_NAME=mastertool
     depends_on:
         - db
     ports:
@@ -40,3 +43,4 @@ services:
 
 volumes:
   postgres_data:
+
