@@ -6,8 +6,7 @@ services:
         - "4200:4200"
     depends_on:
       - backend
-    volumes:
-        - ./frontend:/app/frontend
+
 
 
   db:
@@ -37,8 +36,6 @@ services:
         - db
     ports:
         - "8000:8000"
-    volumes:
-        - ./backend:/app/backend
 
 
 volumes:

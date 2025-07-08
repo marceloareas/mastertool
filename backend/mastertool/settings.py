@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-cs2t1i&#h_zkf$-#0wmm0rl5l$kv&s7s=9q86-wwzj=r8rfm!$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -60,7 +60,10 @@ MIDDLEWARE = [
 
 # TODO: Isso aqui, com certeza pode melhorar
 CORS_ALLOWED_ORIGINS = [
-    "http://frontend:4200",
+
+    "http://localhost:4200",
+
+    
 ]
 
 ROOT_URLCONF = 'mastertool.urls'
