@@ -12,6 +12,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource } from '@angular/material/table';
 import { StudentService } from '../../services/student/student.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
   selector: 'app-project',
@@ -26,13 +27,22 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export class ProjectComponent {
   private projectService = inject(ProjectService);
   private snackBar = inject(MatSnackBar);  // Injetando o MatSnackBar
-
+  public notificationService = inject(NotificationService);
   projectIsOpen = false;
   projects!: any;
+  notifications: any[] = [];
   singleProject!: any;
 
   constructor(public dialog: MatDialog) {
     this.getProjects();
+  }
+
+  ngOnInit(): void {
+    this.loadNotifications();
+
+    this.notificationService.notifications$.subscribe((notifications) => {
+      this.notifications = notifications;
+    });
   }
 
   /**
@@ -45,6 +55,10 @@ export class ProjectComponent {
         return project;
       });
     });
+  }
+
+    loadNotifications(): void {
+    this.notificationService.loadNotifications();
   }
 
   /**

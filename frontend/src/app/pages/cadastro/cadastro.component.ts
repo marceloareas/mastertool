@@ -21,6 +21,39 @@ export class CadastroComponent {
 	private _auth = inject(AuthenticationService);
 	private router = inject(Router);
 	private snackbar = inject(MatSnackBar);
+	form: FormGroup;
+
+	constructor() {
+		const fb = inject(FormBuilder);
+		this.form = fb.group({
+			username: ['', Validators.required],
+			email: ['', [Validators.required, Validators.email]],
+			first_name: ['', Validators.required],
+			last_name: ['', Validators.required],
+			senha: ['', Validators.required],
+		});
+	}
+
+	get senha(): string {
+		return this.form.get('senha')?.value || '';
+	}
+
+	temMaiuscula(): boolean {
+		return /[A-Z]/.test(this.senha);
+	}
+
+	temNumero(): boolean {
+		return /\d/.test(this.senha);
+	}
+
+	temSimbolo(): boolean {
+		return /[!@#$%^&*(),.?":{}|<>_\-+=/\\\[\]]/.test(this.senha);
+	}
+
+	tudoValido(): boolean {
+		return this.temMaiuscula() && this.temNumero() && this.temSimbolo();
+	}
+
 
 	onSubmit(data: any) {
 

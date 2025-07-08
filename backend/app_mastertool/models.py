@@ -42,3 +42,15 @@ class Projeto(models.Model):
 
     def __str__(self):
         return self.nome
+    
+class Notificacao(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificacoes')
+    projeto = models.ForeignKey(Projeto, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=20)
+    data = models.DateField()
+    titulo = models.CharField(max_length=255)
+    mensagem = models.TextField()
+    lida = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.usuario.username} - {self.titulo}'

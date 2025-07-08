@@ -36,3 +36,20 @@ button {
     padding-top: 0 !important;
   }
 }
+
+.senha-checklist {
+  font-size: 14px;
+
+  p {
+    margin: 0;
+  }
+
+  .valido {
+    color: green;
+  }
+
+  .invalido {
+    color: red;
+    text-decoration: line-through;
+  }
+}
