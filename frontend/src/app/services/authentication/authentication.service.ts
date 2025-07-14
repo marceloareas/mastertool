@@ -22,13 +22,13 @@ export class AuthenticationService {
 
   post = (dados: any) => {
     return this.http.post<any>(
-      'http://127.0.0.1:8000/cadastrar-usuario/',
+      'http://localhost:8000/cadastrar-usuario/',
       dados
     );
   };
 
   login = (dados: any) => {
-    return this.http.post<any>('http://127.0.0.1:8000/login/', dados).pipe(
+    return this.http.post<any>('http://localhost:8000/login/', dados).pipe(
       tap((response) => {
         if (response.token) {
           localStorage.setItem('authToken', response.token.access);
@@ -64,20 +64,21 @@ export class AuthenticationService {
   }
 
   getProfile() {
-    return this.http.get<any>('http://127.0.0.1:8000/profile/');
+    return this.http.get<any>('http://localhost:8000/profile/');
   }
+
 
   changePassword(data: {
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
   }) {
-    return this.http.post<any>('http://127.0.0.1:8000/change-password/', data);
+    return this.http.post<any>('http://localhost:8000/change-password/', data);
   }
 
   updateProfile(data: any) {
     return this.http
-      .post<any>('http://127.0.0.1:8000/update-profile/', data)
+      .post<any>('http://localhost:8000/update-profile/', data)
       .pipe(
         catchError((error) => {
           // Aqui garantimos que o erro seja repassado com a estrutura correta

@@ -11,23 +11,23 @@ export class StudentService {
 
   post = (dados: any) => {
     return this.http.post<any>(
-      'http://127.0.0.1:8000/alunos/cadastrar/',
+      'http://localhost:8000/alunos/cadastrar/',
       dados
     );
   };
 
   get = (id: string = '') => {
-    return this.http.get<any>('http://127.0.0.1:8000/alunos/' + id);
+    return this.http.get<any>('http://localhost:8000/alunos/' + id);
   };
 
   put = (id: string, dados: any) => {
     return this.http.put<any>(
-      'http://127.0.0.1:8000/alunos/editar/' + id,
+      'http://localhost:8000/alunos/editar/' + id,
       dados
     );
   };
 
   delete = (id: string) => {
-    return this.http.delete<any>('http://127.0.0.1:8000/alunos/excluir/' + id);
+    return this.http.delete<any>('http://localhost:8000/alunos/excluir/' + id);
   };  
 }
