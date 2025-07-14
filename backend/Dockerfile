@@ -8,7 +8,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Instala dependências do sistema (necessárias para compilar psycopg2)
-RUN apt-get update && apt-get install -y libpq-dev procps gcc && apt-get clean
+RUN apt-get update && apt-get install -y libpq-dev procps gcc bash && apt-get clean
 
 RUN apt-get install -y curl netcat-traditional
 
@@ -21,9 +21,12 @@ RUN pip install psycopg
 # Copia o restante da aplicação
 COPY . .
 
+COPY "startup.sh" "startup.sh"
+RUN chmod +x startup.sh
 # Expõe a porta padrão do Django
 EXPOSE 8000
 
 # Comando padrão: aplica migrações e roda o servidor
-CMD ["./startup.sh"]
+CMD ["sh", "./startup.sh"]
+
 
