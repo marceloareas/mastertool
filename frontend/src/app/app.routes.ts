@@ -46,6 +46,13 @@ export const routes: Routes = [
             (c) => c.StudentComponent
           ),
       },
+       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/profile/profile.component').then(
+            (c) => c.ProfileComponent
+          ),
+      },
     ],
   },
 ];

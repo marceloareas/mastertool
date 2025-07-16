@@ -23,9 +23,16 @@
       <h3><b>Data início:</b> {{ project.data_inicio | date: 'dd/MM/yyyy' }}</h3>
       <h3><b>Data fim:</b> {{ project.data_fim | date: 'dd/MM/yyyy' }}</h3>
       <h3>
-        <b>Status:</b> 
-        <span [ngClass]="project.status === 'CONCLUÍDO' ? 'status-concluido' : 'status-andamento'">{{project.status}}</span>
+        <b>Status: </b> 
+        <span [ngClass]="{
+            'status-concluido': project.status === 'CONCLUÍDO',
+            'status-andamento': project.status === 'ANDAMENTO',
+            'status-a-iniciar': project.status === 'A INICIAR'
+          }">
+          {{project.status}}
+        </span>
       </h3>
+      
     </div>
     <div class="single-project__infos__descricao">
       <h3><b>Descrição:</b> {{ project.descricao }}</h3>

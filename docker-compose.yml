@@ -1,0 +1,43 @@
+services:
+  frontend:
+    build:
+        context: ./frontend
+    ports:
+        - "4200:4200"
+    depends_on:
+      - backend
+
+
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+        POSTGRES_DB: mastertool
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: 1234
+    volumes:
+        - postgres_data:/var/lib/postgresql/data
+    ports:
+        - "5432:5432"
+
+
+  backend:
+    build: 
+        context: ./backend
+
+    environment:
+        - DATABASE_HOST=db
+        - DATABASE_PORT=5432
+        - DATABASE_USER=postgres
+        - DATABASE_PASSWORD=1234
+        - DATABASE_NAME=mastertool
+    depends_on:
+        - db
+    ports:
+        - "8000:8000"
+
+
+volumes:
+  postgres_data:
+

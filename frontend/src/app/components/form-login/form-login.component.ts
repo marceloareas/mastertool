@@ -6,6 +6,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
@@ -15,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
   selector: 'app-form-login',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
@@ -33,8 +35,11 @@ export class FormLoginComponent {
   constructor(private fb: FormBuilder) {}
 
   form: FormGroup = this.fb.group({
+    username: ['', Validators.required],
     email: ['', Validators.required],
     senha: ['', Validators.required],
+    first_name: ['', Validators.required],
+    last_name: ['', Validators.required],
   });
 
   /**
@@ -52,5 +57,21 @@ export class FormLoginComponent {
     } else {
       this.registerEvent.emit(this.form.value);
     }
+  }
+
+  get senha(): string {
+    return this.form.get('senha')?.value || '';
+  }
+
+  temMaiuscula(): boolean {
+    return /[A-Z]/.test(this.senha);
+  }
+
+  temNumero(): boolean {
+    return /\d/.test(this.senha);
+  }
+
+  temSimbolo(): boolean {
+    return /[!@#$%^&*(),.?":{}|<>_\-+=/\\\[\]]/.test(this.senha);
   }
 }

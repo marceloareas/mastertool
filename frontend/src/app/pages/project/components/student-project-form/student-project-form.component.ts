@@ -1,10 +1,19 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { StudentService } from '../../../../services/student/student.service';
+import { Observable, map, startWith } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-student-project-form',
@@ -14,6 +23,8 @@ import { StudentService } from '../../../../services/student/student.service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatAutocompleteModule,
+    AsyncPipe,
   ],
   templateUrl: './student-project-form.component.html',
   styleUrls: ['./student-project-form.component.scss'],
@@ -21,50 +32,73 @@ import { StudentService } from '../../../../services/student/student.service';
 export class StudentProjectFormComponent {
   private studentService = inject(StudentService);
 
+  @Input() project: any;
   @Output() formProject: EventEmitter<any> = new EventEmitter();
-  @Input() project: any; 
 
-  constructor(private fb: FormBuilder) {}
-  students: any;
+  constructor(private fb: FormBuilder) { }
+  
+  students: any[] = [];
+  filteredStudents!: Observable<any[]>;
+  studentControl = new FormControl('');
+  
   form: FormGroup = this.fb.group({
-    matricula: [''], 
+    matricula: [''],
+    remove: false
   });
 
   ngOnInit() {
-    this.getStudents();
+    this.filteredStudents = this.studentControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || ''))
+    );
   }
 
-  /**
-   * Busca a lista de estudantes e ajusta a lógica com base nos dados de projetos.
-   */
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['project'] && this.project) {
+      setTimeout(() => {
+        this.getStudents();
+      });
+    }
+  }
+
+  private _filter(value: string): any[] {
+    const filterValue = value.toLowerCase();
+    return this.students.filter(student => 
+      student.nome.toLowerCase().includes(filterValue) || 
+      student.matricula.toLowerCase().includes(filterValue)
+    );
+  }
+
+  onOptionSelected(event: any) {
+    const selectedStudent = this.students.find(student => 
+      student.nome === event.option.value
+    );
+    
+    if (selectedStudent) {
+      this.form.patchValue({
+        matricula: selectedStudent.matricula
+      });
+    }
+  }
+
   getStudents() {
     this.studentService.get().subscribe((data) => {
-      this.students = this.project.estudantes
-        .filter(
-          (aluno1: { nome: any; matricula: any }) =>
-            !data.some(
-              (aluno2: { nome: any; matricula: any }) =>
-                aluno1.nome === aluno2.nome &&
-                aluno1.matricula === aluno2.matricula
-            )
-        )
-        .concat(
-          data.filter(
-            (aluno2: { nome: any; matricula: any }) =>
-              !this.project.estudantes.some(
-                (aluno1: { nome: any; matricula: any }) =>
-                  aluno2.nome === aluno1.nome &&
-                  aluno2.matricula === aluno1.matricula
-              )
+      const alunosProjeto = this.project?.alunos ?? [];
+      
+      this.students = data.filter(
+        (alunoData: { nome: any; matricula: any }) =>
+          !alunosProjeto.some(
+            (alunoProjeto: { nome: any; matricula: any }) =>
+              alunoData.matricula === alunoProjeto.matricula &&
+              alunoData.nome === alunoProjeto.nome
           )
-        );
-      console.log(this.students);
+      );
+      
+      // Atualiza o filtro após carregar os estudantes
+      this.studentControl.updateValueAndValidity();
     });
   }
 
-  /**
-   * Emite os dados do formulário. Dependendo do modo, pode emitir dados para adicionar ou editar uma classe.
-   */
   save() {
     this.formProject.emit(this.form.value);
   }

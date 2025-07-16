@@ -10,25 +10,31 @@ export class ProjectService {
 
   post = (dados: any) => {
     return this.http.post<any>(
-      'http://127.0.0.1:8000/projetos/cadastrar/',
+      'http://localhost:8000/projetos/cadastrar/',
       dados
     );
   };
 
   get = (id: string = '') => {
-    return this.http.get<any>('http://127.0.0.1:8000/projetos/' + id);
+
+    this.http.post('http://localhost:8000/notificacoes/gerar/', {}).subscribe();
+    return this.http.get<any>('http://localhost:8000/projetos/' + id);
+   
   };
 
   delete = (id: string) => {
-    return this.http.delete<any>('http://127.0.0.1:8000/projetos/excluir/' + id);
+    return this.http.delete<any>('http://localhost:8000/projetos/excluir/' + id);
   };
 
   put = (id: string, dados: any) => {
-    console.log('put', id, dados);
     return this.http.put<any>(
-      'http://127.0.0.1:8000/projetos/editar/' + id,
+      'http://localhost:8000/projetos/editar/' + id,
       dados
     );
   };
+
+  getAll(): Observable<any[]> {
+    return this.http.get<any[]>('http://localhost:8000/projetos/');
+  }
 
 }

@@ -1,4 +1,27 @@
 
+
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$mastertool-front-primary: mat.define-palette(mat.$indigo-palette);
+$mastertool-front-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+$mastertool-front-warn: mat.define-palette(mat.$red-palette);
+
+$mastertool-front-theme: mat.define-light-theme((
+  color: (
+    primary: $mastertool-front-primary,
+    accent: $mastertool-front-accent,
+    warn: $mastertool-front-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0
+));
+
+@include mat.all-component-themes($mastertool-front-theme);
+
+
 * {
   box-sizing: border-box;
 }
@@ -13,6 +36,29 @@ body {
 html, body {
   height: 100%;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+ .snackbar-success {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+ .snackbar-error {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+.custom-tooltip {
+  background-color: #1976d2;
+  color: white; 
+  font-size: 14px;
+  border-radius: 4px; 
+  padding: 8px; 
+}
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

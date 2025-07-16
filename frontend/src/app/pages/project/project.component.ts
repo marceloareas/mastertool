@@ -11,33 +11,38 @@ import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource } from '@angular/material/table';
 import { StudentService } from '../../services/student/student.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
   selector: 'app-project',
   standalone: true,
-  imports: [
-    ModalProjectComponent,  // Pode ser substituído por ModalProjectComponent, se houver
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatCardModule,
-    MatIcon,
-    MatButtonModule,
-    SingleProjectComponent, 
-    CommonModule,
-    MatMenuModule,
-  ],
+  imports: [ ModalProjectComponent,  // Pode ser substituído por ModalProjectComponent, se houver
+    ReactiveFormsModule, MatDialogModule, MatCardModule, MatIcon, MatButtonModule, SingleProjectComponent, CommonModule, MatMenuModule, MatSnackBarModule,  // Importando MatSnackBarModule
+],
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
 })
+	
 export class ProjectComponent {
   private projectService = inject(ProjectService);
-
+  private snackBar = inject(MatSnackBar);  // Injetando o MatSnackBar
+  public notificationService = inject(NotificationService);
   projectIsOpen = false;
   projects!: any;
+  notifications: any[] = [];
   singleProject!: any;
 
   constructor(public dialog: MatDialog) {
     this.getProjects();
+  }
+
+  ngOnInit(): void {
+    this.loadNotifications();
+
+    this.notificationService.notifications$.subscribe((notifications) => {
+      this.notifications = notifications;
+    });
   }
 
   /**
@@ -52,18 +57,27 @@ export class ProjectComponent {
     });
   }
 
+    loadNotifications(): void {
+    this.notificationService.loadNotifications();
+  }
+
   /**
   * Lógica para retornar o status de um projeto.
   */
-  getStatus(project: any) {
+  getStatus(project: any): string {
     const today = new Date();
+    const dataInicio = project?.data_inicio ? new Date(project.data_inicio) : null;
     const dataFim = project?.data_fim ? new Date(project.data_fim) : null;
-
-    if (!dataFim || dataFim > today) {
-      return 'ANDAMENTO';
-    } else {
+  
+    if (dataInicio && dataInicio > today) {
+      return 'A INICIAR';
+    }
+  
+    if (dataFim && dataFim <= today) {
       return 'CONCLUÍDO';
     }
+  
+    return 'ANDAMENTO';
   }
 
   status(element: any): string {
@@ -118,7 +132,9 @@ export class ProjectComponent {
    */
   delete(id: string) {
     this.projectService.delete(id).subscribe(() => {
-      alert('Project excluído');
+      this.snackBar.open('Projeto excluído com sucesso', 'Fechar', {
+        duration: 5000,
+      });
       this.getProjects();
     });
   }

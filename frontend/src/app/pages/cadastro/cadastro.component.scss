@@ -40,6 +40,33 @@
       hr {
         width: 70%;
       }
+
+      .snackbar-success {
+        background-color: #4caf50;
+        color: white;
+      }
+      
+      .snackbar-error {
+        background-color: #f44336;
+        color: white;
+      }
     }
+  }
+}
+.senha-checklist {
+  margin-top: 0.5rem;
+  font-size: 14px;
+
+  p {
+    margin: 0;
+  }
+
+  .valido {
+    color: green;
+  }
+
+  .invalido {
+    color: red;
+    text-decoration: line-through;
   }
 }

@@ -1,17 +1,10 @@
-import {
-  Component,
-  Output,
-  EventEmitter,
-  Input,
-  ViewChild,
-  inject,
-  OnInit,
-} from '@angular/core';
+import { Component, Output, EventEmitter, Input, ViewChild, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ModalClassComponent } from '../modal-class/modal-class.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { StudentClassModalComponent } from '../student-class-modal/student-class-modal.component';
@@ -20,472 +13,452 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import saveAs from 'file-saver';
 
+interface Note {
+	id?: number;
+	title: string;
+	value: number | null;
+	weight: number;
+}
+
+interface Student {
+	matricula: string;
+	nome: string;
+	notas: Note[];
+	media: number | undefined;
+}
+
+interface ProcessedNote {
+	value: number;
+	weight: number;
+	title: string;
+	isDiscarded?: boolean;
+}
+
+
 @Component({
-  selector: 'app-single-class',
-  standalone: true,
-  imports: [
-    MatIcon,
-    MatButtonModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatMenuModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    CommonModule,
-  ],
-  templateUrl: './single-class.component.html',
-  styleUrls: ['./single-class.component.scss'],
+	selector: 'app-single-class',
+	standalone: true,
+	imports: [
+		MatIcon,
+		MatButtonModule,
+		MatTableModule,
+		MatPaginatorModule,
+		MatMenuModule,
+		ReactiveFormsModule,
+		MatFormFieldModule,
+		MatInputModule,
+		FormsModule,
+		CommonModule,
+		MatSnackBarModule,
+		MatTooltipModule,
+		MatCheckboxModule,
+		MatDialogModule
+	],
+	templateUrl: './single-class.component.html',
+	styleUrls: ['./single-class.component.scss'],
 })
 export class SingleClassComponent implements OnInit {
-  private classService = inject(ClassService);
+	private classService = inject(ClassService);
+	private snackBar = inject(MatSnackBar);
+	private dialog = inject(MatDialog);
 
-  @Output() closeClassEvent: EventEmitter<any> = new EventEmitter();
-  @Output() closeModalEvent: EventEmitter<any> = new EventEmitter();
-  @Input() class!: any;
+	@Input() set class(value: any) {
+		this._class = value;
+		this.loadClassData();
+	}
+	get class(): any {
+		return this._class;
+	}
+	private _class: any;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+	@Output() closeClassEvent = new EventEmitter();
+	@ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  displayedColumns: string[] = ['nome', 'editar'];
-  notaColumns: string[] = [];
-  dataSource!: MatTableDataSource<any>;
-  pesos: Record<string, number> = {};
+	dataSource = new MatTableDataSource<Student>([]);
+	noteColumns: string[] = [];
+	displayedColumns: string[] = ['nome'];
+	discardLowestNote = false;
+	isEditMode = false;
+	originalState: any;
 
-  mode: string = 'VIEW';
+	ngOnInit() {
+		this.loadClassData();
+	}
 
-  constructor(public dialog: MatDialog) { }
+	loadClassData() {
+		if (this.class?.id) {
+			this.classService.get(this.class.id).subscribe({
+				next: (data) => {
+					this._class = data;
+					this.initializeTable();
+				},
+				error: (err) => {
+					this.snackBar.open('Erro ao carregar dados da turma', 'Fechar', { duration: 3000 });
+					console.error(err);
+				}
+			});
+		} else if (this.class?.alunos) {
+			this.initializeTable();
+		}
+	}
 
-  /**
- * Recalcula todas as médias após atualizar as notas.
- */
-  recalculateAllMedia() {
-    this.dataSource.data.forEach((aluno: any) => {
-      aluno.media = this.media(aluno);
-    });
-    this.refreshTable();
-  }
+	initializeTable() {
+		if (this.class?.alunos?.length) {
+			// Get unique note titles (only N1-N4)
+			const allowedNotes = ['N1', 'N2', 'N3', 'N4'];
+			this.noteColumns = allowedNotes.filter(note =>
+				this.class.alunos.some((aluno: any) =>
+					aluno.notas?.some((n: any) => n.titulo === note)
+				)
+			);
 
-/**
- * Atualiza os dados no localStorage após qualquer alteração.
- */
-updateLocalStorage() {
-  localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
-  localStorage.setItem(`class_${this.class.id}_alunos`, JSON.stringify(this.class.alunos));
-}
+			// Format students data
+			const students: Student[] = this.class.alunos.map((aluno: any) => {
+				const notes: Note[] = this.noteColumns.map(title => {
+					const existingNote = aluno.notas?.find((n: any) => n.titulo === title);
+					return {
+						id: existingNote?.id,
+						title,
+						value: existingNote?.valor !== null && existingNote?.valor !== undefined
+							? parseFloat(existingNote.valor)
+							: null,
+						weight: existingNote?.peso ?? 1
+					};
+				});
 
+				return {
+					matricula: aluno.matricula,
+					nome: aluno.nome,
+					notas: notes,
+					media: this.calculateStudentMedia(notes)
+				};
+			});
 
-removeMultipleColumns(quantity: number) {
-  if (quantity < 1) {
-    alert('A quantidade de notas a remover deve ser pelo menos 1.');
-    return;
-  }
+			this.dataSource.data = students;
+			this.displayedColumns = ['nome', ...this.noteColumns, 'media', 'editar'];
+		} else {
+			this.dataSource.data = [];
+			this.noteColumns = [];
+			this.displayedColumns = ['nome'];
+		}
 
-  if (quantity > this.notaColumns.length) {
-    alert(
-      `Não é possível remover mais notas do que existem. Total de notas: ${this.notaColumns.length}`
-    );
-    return;
-  }
-
-  // Remove as menores notas
-  this.class.alunos.forEach((aluno: any) => {
-    aluno.notas = aluno.notas
-      .sort((a: any, b: any) => parseFloat(a.valor || 0) - parseFloat(b.valor || 0))
-      .slice(quantity); // Remove as menores
-  });
-
-  // Atualiza colunas e sincroniza dados
-  this.notaColumns = this.notaColumns.slice(quantity);
-  this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
-  this.updateLocalStorage();
-  this.recalculateAllMedia();
-  alert(`${quantity} notas removidas com sucesso!`);
-}
-
-
-/**
- * Solicita ao usuário a quantidade de notas a serem removidas.
- */
-promptRemoveColumns() {
-  const quantity = parseInt(prompt('Digite a quantidade de notas que deseja remover:') || '0', 10);
-  this.removeMultipleColumns(quantity);
-}
-
-
-  /**
-   * Método do ciclo de vida do Angular que é chamado após a construção do componente.
-   * Inicializa as colunas da tabela e atualiza os dados.
-   */
-  ngOnInit() {
-    // Recupera pesos do localStorage
-    const storedPesos = localStorage.getItem(`class_${this.class.id}_pesos`);
-    if (storedPesos) {
-      this.pesos = JSON.parse(storedPesos);
-    }
-
-    // Recupera alunos do localStorage
-    const storedAlunos = localStorage.getItem(`class_${this.class.id}_alunos`);
-    if (storedAlunos) {
-      this.class.alunos = JSON.parse(storedAlunos);
-    }
-
-    this.initializeColumns();
-    this.refreshTable();
-  }
-  
-
-  /**
-   * Inicializa as colunas da tabela com base nos títulos de cada notas dos alunos.
-   * Configura `notaColumns` e `displayedColumns`.
-   */
-  initializeColumns() {
-    if (this.class && this.class.alunos && this.class.alunos.length > 0) {
-      this.notaColumns = this.class.alunos[0].notas.map(
-        (nota: any) => nota.titulo
-      );
-      this.displayedColumns = ['nome', ...this.notaColumns, 'media', 'editar'];
-    }
-  }
-
-  /**
-   * Atualiza a fonte de dados da tabela e configura o paginador.
-   */
-  refreshTable() {
-    if (this.class && this.class.alunos) {
-      this.class.alunos.sort((a: any, b: any) => a.nome.localeCompare(b.nome));
-    }
-
-    this.dataSource = new MatTableDataSource(this.class.alunos);
-    this.dataSource.paginator = this.paginator;
-    this.updateLocalStorage();
-  }
-  
-
-  /**
-   * Obtém os dados da classe do serviço `classService` e atualiza a tabela.
-   */
-  getClass(resetPesos: boolean = true) {
-    this.classService.get(this.class.id).subscribe((data) => {
-      this.class = data;
-
-      if (resetPesos) {
-        this.pesos = {};
-        this.class.alunos.forEach((aluno: any) => {
-          aluno.notas.forEach((nota: any) => {
-            this.pesos[nota.titulo] = parseFloat(nota.peso) || 1.0;
-          });
-        });
-
-        localStorage.setItem(`class_${this.class.id}_pesos`, JSON.stringify(this.pesos));
-      }
-
-      this.refreshTable();
-    });
-  }
-
-  /**
-   * Adiciona uma nova coluna de notas à tabela e atualiza os dados dos alunos para incluir um objeto de nota vazio.
-   */
-  addNewColumn() {
-    const newColumn = `novaNota ${this.notaColumns.length + 1}`;
-    this.notaColumns.push(newColumn);
-    this.displayedColumns.splice(
-      this.displayedColumns.length - 2,
-      0,
-      newColumn
-    );
-
-    // Define o peso inicial como 1
-    this.pesos[newColumn] = 1;
-
-    this.dataSource.data.forEach((aluno: any) => {
-      aluno.notas.push({ titulo: newColumn, valor: null });
-    });
-
-    this.refreshTable();
-  }
-
-  /**
-   * Remove uma coluna de notas com base no nome e notifica o serviço `classService` para atualizar os dados no backend.
-   * @param name Nome da coluna a ser removida.
-   */
-  removeColumn(name: string) {
-    const data = { titulo: name };
-    // Remove a coluna da lista de notas
-    const index = this.notaColumns.indexOf(name);
-    if (index !== -1) {
-      this.notaColumns.splice(index, 1);
-    }
-
-    // Remove a coluna da lista de colunas exibidas
-    const colIndex = this.displayedColumns.indexOf(name);
-    if (colIndex !== -1) {
-      this.displayedColumns.splice(colIndex, 1);
-    }
-
-    this.classService.postNota(this.class.id, data).subscribe(() => {
-      this.closeModal();
-      this.getClass();
-    });
-  }
-
-  /**
-   * Atualiza o nome da coluna com base na entrada do usuário.
-   * @param event Evento de alteração do input.
-   * @param columnIndex Índice da coluna a ser atualizada.
-   */
-  updateColumnName(event: any, columnIndex: any) {
-    const newName = event.target.value.trim();
-    if (newName) {
-      const oldName = this.notaColumns[columnIndex];
-      this.notaColumns[columnIndex] = newName;
-      const oldTitleIndex = this.displayedColumns.indexOf(oldName);
-      if (oldTitleIndex !== -1) {
-        this.displayedColumns[oldTitleIndex] = newName;
-      }
-
-      // Atualiza o título da nota para todos os alunos
-      this.class.alunos.forEach((item: any) => {
-        item.notas.forEach((nota: any) => {
-          if (nota.titulo === oldName) {
-            nota.titulo = newName;
-          }
-        });
-      });
-
-      // Atualiza a tabela para refletir as mudanças
-      this.refreshTable();
-    }
-  }
-
-  /**
-   * Atualiza o valor da nota para um aluno em uma posição específica com base na entrada do usuário.
-   * @param event Evento de alteração do input.
-   * @param element Objeto do aluno.
-   * @param columnName Nome da coluna da nota a ser atualizada.
-   */
-  updateNota(event: Event, element: any, columnName: string) {
-    const inputElement = event.target as HTMLInputElement;
-    if (inputElement) {
-      const value = inputElement.value;
-
-      const notaIndex = element.notas.findIndex((nota: any) => nota.titulo === columnName);
-      if (notaIndex !== -1) {
-        element.notas[notaIndex].valor = value === '' ? null : value;
-        this.updateLocalStorage(); // Atualiza localStorage ao alterar a nota
-        console.log(`Nota atualizada: ${columnName} = ${value}`);
-      }
-    }
-  }
+		if (this.paginator) {
+			this.dataSource.paginator = this.paginator;
+		}
+	}
 
 
-  updatePeso(event: Event, columnName: string) {
-    const inputElement = event.target as HTMLInputElement;
-    if (inputElement) {
-      const newPeso = parseFloat(inputElement.value);
-      if (!isNaN(newPeso) && newPeso > 0) {
-        this.pesos[columnName] = newPeso;
-        this.updateLocalStorage(); // Atualiza localStorage ao alterar o peso
-        console.log(`Peso atualizado para "${columnName}": ${newPeso}`);
-      }
-    }
-  }
+	toggleEditMode() {
+		if (this.isEditMode) {
+			// Cancel editing - restore original state
+			this.loadClassData();
+		} else {
+			// Start editing - save original state
+			this.originalState = JSON.parse(JSON.stringify({
+				noteColumns: [...this.noteColumns],
+				data: [...this.dataSource.data]
+			}));
+		}
+		this.isEditMode = !this.isEditMode;
+	}
+
+	addNewNoteColumn() {
+		const newIndex = this.noteColumns.length + 1;
+		const newTitle = `N${newIndex}`;
+
+		if (this.noteColumns.includes(newTitle)) {
+			this.snackBar.open('Já existe uma nota com este nome', 'Fechar', { duration: 3000 });
+			return;
+		}
+
+		this.noteColumns.push(newTitle);
+		this.displayedColumns = ['nome', ...this.noteColumns, 'media', 'editar'];
+
+		// Add the new note to all students
+		this.dataSource.data = this.dataSource.data.map(student => ({
+			...student,
+			notas: [...student.notas, { title: newTitle, value: null, weight: 1 }],
+			media: this.calculateStudentMedia([...student.notas, { title: newTitle, value: null, weight: 1 }])
+		}));
+	}
+
+	removeNoteColumn(title: string) {
+		const index = this.noteColumns.indexOf(title);
+		if (index > -1) {
+			this.noteColumns.splice(index, 1);
+			this.displayedColumns = ['nome', ...this.noteColumns, 'media', 'editar'];
+
+			// Remove the note from all students
+			this.dataSource.data = this.dataSource.data.map(student => ({
+				...student,
+				notas: student.notas.filter(note => note.title !== title),
+				media: this.calculateStudentMedia(student.notas.filter(note => note.title !== title))
+			}));
+		}
+	}
+
+	getNoteValue(student: Student, noteTitle: string): number | null {
+		const note = student.notas.find(n => n.title === noteTitle);
+		return note ? note.value : null;
+	}
+
+	getNoteWeight(noteTitle: string): number {
+		const student = this.dataSource.data[0];
+		if (!student) return 1;
+		const note = student.notas.find(n => n.title === noteTitle);
+		return note ? note.weight : 1;
+	}
 
 
-  /**
-   * Altera o modo do componente (por exemplo, `VIEW` ou `EDIT`).
-   * @param mode Novo modo para o componente.
-   */
-  changeMode(mode: string) {
-    this.mode = mode;
-  }
 
-  /**
-   * Deleta um aluno com base na matrícula fornecida e atualiza a visualização.
-   * @param matricula Matrícula do aluno a ser removido.
-   */
-  deleteStudent(matricula: any) {
-    const data = { removerMatricula: matricula };
-    this.classService.put(this.class.id, data).subscribe(() => {
-      alert('Registro deletado');
-      this.getClass();
-      this.closeModal();
-    });
-  }
+	updateNoteWeight(event: Event, noteTitle: string) {
+		const input = event.target as HTMLInputElement;
+		const weight = input.value ? parseFloat(input.value) : 1;
 
-  /**
-   * Abre um modal para adicionar ou editar uma turma. Após o fechamento do modal, atualiza os dados da classe.
-   * @param singleClass Objeto da turma.
-   * @param mode Modo de operação do modal ('ADD' ou 'EDIT').
-   */
-  openModalClass(singleClass?: any, mode = 'ADD') {
-    this.dialog
-      .open(ModalClassComponent, {
-        data: { singleClass, mode },
-        width: '600px',
-      })
-      .afterClosed()
-      .subscribe(() => {
-        this.getClass();
-        this.closeModal();
-      });
-  }
+		this.dataSource.data = this.dataSource.data.map(student => {
+			const updatedNotes = student.notas.map(note =>
+				note.title === noteTitle ? { ...note, weight } : note
+			);
+			return {
+				...student,
+				notas: updatedNotes,
+				media: this.calculateStudentMedia(updatedNotes)
+			};
+		});
+	}
 
-  /**
-   * Abre um modal para adicionar um novo aluno à classe. Após o fechamento do modal, atualiza os dados da classe.
-   */
-  openModalStudent() {
-    this.dialog
-      .open(StudentClassModalComponent, {
-        data: { class: this.class },
-      })
-      .afterClosed()
-      .subscribe(() => {
-        this.getClass();
-        this.closeModal();
-      });
-  }
+	calculateStudentMedia(notes: Note[]): number {
+		// Filter valid notes (not null and not NaN)
+		let validNotes: ProcessedNote[] = notes
+			.filter(note => note.value !== null && !isNaN(note.value))
+			.map(note => ({
+				value: note.value as number,
+				weight: note.weight,
+				title: note.title
+			}));
 
-  /**
-   * Emite um evento para fechar a visualização da classe.
-   */
-  closeClass() {
-    this.closeClassEvent.emit();
-  }
+		// Find and discard the lowest note if enabled
+		if (this.discardLowestNote && validNotes.length > 1) {
+			const minValue = Math.min(...validNotes.map(n => n.value));
 
-  /**
-   * Emite um evento para fechar o modal aberto.
-   */
-  closeModal() {
-    this.closeModalEvent.emit();
-  }
+			// Find all notes with minimum value
+			const minNotes = validNotes.filter(n => n.value === minValue);
 
-  /**
-   * Salva as notas atualizadas no backend e muda o modo para `VIEW`.
-   */
-  save() {
-    this.mode = 'SAVING';
+			// If there are multiple notes with same minimum value, discard only one
+			if (minNotes.length > 1) {
+				// Mark the first occurrence as discarded
+				let discarded = false;
+				validNotes = validNotes.map(note => {
+					if (!discarded && note.value === minValue) {
+						discarded = true;
+						return { ...note, isDiscarded: true };
+					}
+					return note;
+				});
+			} else {
+				// Only one minimum note, mark it as discarded
+				validNotes = validNotes.map(note => ({
+					...note,
+					isDiscarded: note.value === minValue
+				}));
+			}
+		}
 
-    const updatedData = this.dataSource.data.map((aluno: any) => ({
-      matricula: aluno.matricula,
-      notas: aluno.notas.map((nota: any) => ({
-        id: nota.id,
-        titulo: nota.titulo,
-        valor: nota.valor,
-        peso: this.pesos[nota.titulo] || 1.0, // Agora envia corretamente o peso atualizado
-      })),
-    }));
+		// Filter out discarded notes
+		const notesForCalculation = validNotes.filter(note => !note.isDiscarded);
 
-    this.classService.postNota(this.class.id, updatedData).subscribe({
-      next: () => {
-        this.updateLocalStorage(); // Mantém os pesos no localStorage antes de chamar getClass()
-        alert('Notas e pesos atualizados com sucesso!');
-        this.getClass(false); // Evita resetar pesos após salvar
-        this.mode = 'VIEW';
-      },
-      error: (err) => {
-        alert('Erro ao salvar notas. Tente novamente.');
-        console.error(err);
-        this.mode = 'EDIT';
-      },
-    });
-  }
-  
+		if (notesForCalculation.length === 0) return 0;
 
-  getPeso(columnName: string): number {
-    return this.pesos[columnName] || 1; // Retorna 1 como padrão se não houver peso definido
-  }
+		const totalWeight = notesForCalculation.reduce((sum, note) => sum + note.weight, 0);
+		const weightedSum = notesForCalculation.reduce((sum, note) => sum + (note.value * note.weight), 0);
 
-  exportReport(type: string) {
-    if (type === 'resumido') {
-      this.exportCSVResumido();
-    } else if (type === 'detalhado') {
-      this.exportCSVDetalhado();
-    }
-  }
+		return parseFloat((weightedSum / totalWeight).toFixed(2));
+	}
 
-  exportCSVResumido() {
-    const csvData = this.generateCSVDataResumido();
-    const blob = new Blob([csvData], { type: 'text/csv' });
-    saveAs(blob, 'relatorio_turma_resumido.csv');
-  }
+	isDiscardedNote(student: Student, noteTitle: string): boolean {
+		if (!this.discardLowestNote || student.notas.length < 2) return false;
 
-  generateCSVDataResumido(): string {
-    let csvData = `Nome da Turma: ${this.class.nome}\n`;
-    csvData += 'Matricula,Nome,Media\n';
-    this.class.alunos.forEach((aluno: any) => {
-      csvData += `${aluno.matricula},${aluno.nome},${this.media(aluno)}\n`;
-    });
-    csvData += `,,Media da turma: ${this.calculateClassAverage()}`;
-    return csvData;
-  }
+		const validNotes = student.notas
+			.filter(note => note.value !== null && !isNaN(note.value as number));
 
-  calculateClassAverage(): string {
-    const totalAlunos = this.class.alunos.length;
-    const somaMedias = this.class.alunos.reduce((acc: number, aluno: any) => acc + parseFloat(this.media(aluno)), 0);
-    const mediaTurma = totalAlunos > 0 ? somaMedias / totalAlunos : 0;
-    return mediaTurma.toFixed(1);
-  }
+		if (validNotes.length < 2) return false;
 
-  exportCSVDetalhado() {
-    const csvData = this.generateCSVDataDetalhado();
-    const blob = new Blob([csvData], { type: 'text/csv' });
-    saveAs(blob, 'relatorio_turma_detalhado.csv');
-  }
+		const minValue = Math.min(...validNotes.map(note => note.value as number));
+		const note = student.notas.find(n => n.title === noteTitle);
 
-  generateCSVDataDetalhado(): string {
-    let csvData = `Nome da Turma: ${this.class.nome}\n`;
-    csvData += 'Matricula,Nome,' + this.notaColumns.join(',') + ',Media\n';
-  
-    this.class.alunos.forEach((aluno: any) => {
-      const notas = this.notaColumns.map(col => {
-        // Encontra a nota do aluno correspondente à coluna
-        const nota = aluno.notas.find((nota: any) => nota.titulo === col);
-        return nota ? nota.valor ?? '' : ''; 
-      }).join(',');
+		// Check if this is the first occurrence of the lowest note
+		if (note?.value === minValue) {
+			const firstMinNoteIndex = student.notas.findIndex(n =>
+				n.value !== null && !isNaN(n.value as number) && n.value === minValue
+			);
+			return student.notas.findIndex(n => n.title === noteTitle) === firstMinNoteIndex;
+		}
 
-      const alunoMedia = parseFloat(this.media(aluno));
-      const mediaFormatada = isNaN(alunoMedia) || alunoMedia === 0 ? '' : alunoMedia;
-      const media = notas.includes('') ? '' : parseFloat(this.media(aluno));
-      csvData += `${aluno.matricula},${aluno.nome},${notas},${mediaFormatada}\n`;
-    });
-  
-    csvData += `,,,,Media da turma: ${this.calculateClassAverage()}`;
-    return csvData;
-  }
+		return false;
+	}
 
-  /**
-   * Calcula a média ponderada das notas de um aluno.
-   * Ignora valores nulos ou inválidos e retorna a média formatada com uma casa decimal.
-   * @param element Objeto do aluno.
-   * @returns Média ponderada das notas formatada com uma casa decimal.
-   */
-  media(element: any): string {
-    const notasValidas = element.notas?.filter((nota: any) => {
-      const valor = parseFloat(nota.valor);
-      const peso = this.pesos[nota.titulo] || 1;
-      return !isNaN(valor) && valor !== null && peso > 0;
-    });
+	updateNoteValue(event: Event, student: Student, noteTitle: string) {
+		const input = event.target as HTMLInputElement;
+		const value = input.value !== '' ? parseFloat(input.value) : null;
 
-    if (!notasValidas || notasValidas.length === 0) {
-      return "0.0";
-    }
+		this.dataSource.data = this.dataSource.data.map(s => {
+			if (s.matricula === student.matricula) {
+				const updatedNotes = s.notas.map(note =>
+					note.title === noteTitle ? { ...note, value } : note
+				);
+				return {
+					...s,
+					notas: updatedNotes,
+					media: this.calculateStudentMedia(updatedNotes)
+				};
+			}
+			return s;
+		});
+	}
 
-    const { somaPonderada, somaPesos } = notasValidas.reduce(
-      (acc: { somaPonderada: number; somaPesos: number }, nota: any) => {
-        const valorNota = parseFloat(nota.valor);
-        const peso = this.pesos[nota.titulo] || 1;
-        acc.somaPonderada += valorNota * peso;
-        acc.somaPesos += peso;
-        return acc;
-      },
-      { somaPonderada: 0, somaPesos: 0 }
-    );
+	saveChanges() {
+		const studentsToUpdate = this.dataSource.data.map(student => ({
+			matricula: student.matricula,
+			nome: student.nome,
+			notas: student.notas.map(note => ({
+				id: note.id, // Inclua o ID da nota se existir
+				titulo: note.title,
+				valor: note.value,
+				peso: note.weight
+			}))
+		}));
 
-    const media = somaPesos > 0 ? somaPonderada / somaPesos : 0;
-    return media.toFixed(1);
-  }
+		this.classService.postNota(this.class.id, studentsToUpdate).subscribe({
+			next: () => {
+				this.snackBar.open('Notas salvas com sucesso!', 'Fechar', { duration: 3000 });
+				this.isEditMode = false;
+				this.loadClassData();
+			},
+			error: (err) => {
+				this.snackBar.open('Erro ao salvar notas', 'Fechar', { duration: 3000 });
+				console.error(err);
+			}
+		});
+	}
+
+	toggleDiscardLowestNote() {
+		this.dataSource.data = this.dataSource.data.map(student => ({
+			...student,
+			media: this.calculateStudentMedia(student.notas)
+		}));
+	}
+
+
+
+	exportReport(type: 'resumido' | 'detalhado') {
+		if (type === 'resumido') {
+			this.exportCSVResumido();
+		} else {
+			this.exportCSVDetalhado();
+		}
+	}
+
+	private exportCSVResumido() {
+		let csv = `Turma: ${this.class.nome},Menor Nota Descartada: ${this.discardLowestNote ? 'Sim' : 'Não'}`;
+		csv += `\n`;
+		csv += `Matricula,Nome,Media\n`;
+
+		let sum = 0;
+		let totalAlunos = 0;
+
+		this.dataSource.data.forEach(student => {
+			csv += `${student.matricula},${student.nome},${student.media}\n`;
+			if (student.media !== undefined) {
+				sum += student.media;
+				totalAlunos++;
+			}
+		});
+
+		const mediaGeral = totalAlunos > 0 ? (sum / totalAlunos).toFixed(2) : 0;
+		csv += `Médias:,,${mediaGeral}\n`;
+
+		const filename = `${this.class.periodo}_${this.class.nome.split(' ').join('_')}_relatorio_notas_resumido.csv`;
+		this.downloadCSV(csv, filename);
+	}
+
+	private exportCSVDetalhado() {
+		let csv = `Turma: ${this.class.nome},Menor Nota Descartada: ${this.discardLowestNote ? 'Sim' : 'Não'}`;
+		csv += `\n`;
+		csv += `Matricula,Nome,${this.noteColumns.join(',')},Media\n`;
+
+		// Para cada estudante
+		this.dataSource.data.forEach(student => {
+
+			// Array de notas do estudante
+			const notes = this.noteColumns.map(title => {
+				const note = student.notas.find(n => n.title === title);
+				return note?.value ?? '';
+			}).join(',');
+
+			csv += `${student.matricula},${student.nome},${notes},${student.media}\n`;
+		});
+
+		let sum = this.dataSource.data.reduce((sum, student) => sum + (student.media ?? 0), 0);
+		let totalAlunos = this.dataSource.data.filter(student => student.media !== undefined).length;
+
+		const averageRow: any[] = [];
+		const averages = this.noteColumns.reduce((acc, title) => ({ ...acc, [title]: [] }), {} as { [key: string]: number[] });
+		
+		this.dataSource.data.forEach(student => {
+			student.notas.forEach(note => {
+				if (averages[note.title] !== null) {
+					averages[note.title].push(note.value as number);
+				}
+			});
+		});
+
+		this.noteColumns.forEach(title => {
+			const values = averages[title];
+			// Seleciona apenas notas que estão preenchidas
+			const validValues = values.filter(value => value !== null && !isNaN(value));
+			const average = validValues.length > 0 ? (validValues.reduce((a, b) => a + b) / validValues.length).toFixed(2): '';
+			averageRow.push(average);
+		});
+		// Adiciona a linha de médias
+		csv += `Médias:,,${averageRow.join(',')},${(sum/totalAlunos).toFixed(2)}\n`;
+
+		const filename = `${this.class.periodo}_${this.class.nome.split(' ').join('_')}_relatorio_notas_detalhado.csv`;
+		this.downloadCSV(csv, filename);
+
+	}
+
+	private downloadCSV(data: string, filename: string) {
+		const blob = new Blob([data], { type: 'text/csv' });
+		saveAs(blob, filename);
+	}
+
+
+
+	deleteStudent(matricula: string) {
+		this.classService.put(this.class.id, { removerMatricula: matricula }).subscribe(() => {
+			this.snackBar.open('Aluno removido', 'Fechar', { duration: 3000 });
+			this.loadClassData();
+		});
+	}
+
+	openModalStudent() {
+		this.dialog.open(StudentClassModalComponent, {
+			data: { class: this.class }
+		}).afterClosed().subscribe(() => this.loadClassData());
+	}
+
+	openModalClass(mode: 'EDIT' | 'ADD' = 'EDIT') {
+		this.dialog.open(ModalClassComponent, {
+			data: { singleClass: this.class, mode },
+			width: '600px'
+		}).afterClosed().subscribe(() => this.loadClassData());
+	}
+
+	get hasStudents(): boolean {
+		return this.dataSource.data?.length > 0;
+	}
 }

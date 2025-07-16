@@ -2,13 +2,14 @@
   <div class="class__content">
     <mat-form-field>
       <mat-label>Aluno</mat-label>
-      <mat-select formControlName="matricula">
-        @for (student of students; track student) {
-        <mat-option [value]="student.matricula">{{
-          student.matricula +" - "+ student.nome
-        }}</mat-option>
+      <input type="text" matInput [formControl]="studentControl" [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+        @for (student of filteredStudents | async; track student.matricula) {
+          <mat-option [value]="student.nome">
+            {{ student.matricula + " - " + student.nome }}
+          </mat-option>
         }
-      </mat-select>
+      </mat-autocomplete>
     </mat-form-field>
   </div>
 </form>

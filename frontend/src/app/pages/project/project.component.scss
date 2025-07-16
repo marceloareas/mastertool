@@ -81,6 +81,23 @@
         border-radius: 5px;
         padding: 5px 10px;
       }
+      .status-a-iniciar {
+        background-color: #bbdefb; 
+        color: #0d47a1;            
+        border-radius: 5px;
+        padding: 5px 10px;
+      }
+
+      .snackbar-success {
+        background-color: #4caf50 !important;
+        color: white !important;
+      }
+      
+      .snackbar-error {
+        background-color: #f44336 !important;
+        color: white !important;
+      }
+      
     }
   }
 }

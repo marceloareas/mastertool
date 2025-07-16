@@ -1,5 +1,3 @@
-import { response } from 'express';
-import { FormClassComponent } from './../form-class/form-class.component';
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject, ViewChild, inject } from '@angular/core';
 import {
@@ -14,6 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ClassService } from '../../../../services/class/class.service';
 import { StudentService } from '../../../../services/student/student.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormClassComponent } from './../form-class/form-class.component';
 
 @Component({
   selector: 'app-modal-class',
@@ -29,12 +29,13 @@ import { StudentService } from '../../../../services/student/student.service';
     FormClassComponent,
   ],
   templateUrl: './modal-class.component.html',
-  styleUrl: './modal-class.component.scss',
+  styleUrls: ['./modal-class.component.scss'],
 })
 export class ModalClassComponent {
   private dialogRef = inject(DialogRef);
   private studentService = inject(StudentService);
   private classService = inject(ClassService);
+  private snackbar = inject(MatSnackBar);
 
   @ViewChild(FormClassComponent) formClassComponent!: FormClassComponent;
 
@@ -43,8 +44,8 @@ export class ModalClassComponent {
   ) {}
 
   ngOnInit() {
-    console.log(this.data.singleClass);
   }
+
   /**
    * Salva as informações da classe, criando uma nova classe ou atualizando uma existente.
    * @param event Dados do formulário que devem ser salvos.
@@ -67,15 +68,20 @@ export class ModalClassComponent {
             data = { turma: data.join('\r\n'), id: response.id_turma };
 
             this.studentService.post(data).subscribe(() => {
-              alert('Cadastrado com sucesso');
+              this.snackbar.open('Cadastrado com sucesso!', 'Fechar', {
+                duration: 3000,
+                panelClass: ['snackbar-success'],
+              });
               this.dialogRef.close(true);
             });
           }
         } else {
-          alert('Cadastrado com sucesso');
+          this.snackbar.open('Cadastrado com sucesso!', 'Fechar', {
+            duration: 3000,
+            panelClass: ['snackbar-success'],
+          });
+          this.dialogRef.close(true);
         }
-
-        this.dialogRef.close(true);
       });
     } else {
       const dataClass = {
@@ -85,7 +91,10 @@ export class ModalClassComponent {
       this.classService
         .put(this.data.singleClass.id, { ...dataClass, ...singleClass })
         .subscribe(() => {
-          alert('Registro atualizado');
+          this.snackbar.open('Registro atualizado!', 'Fechar', {
+            duration: 3000,
+            panelClass: ['snackbar-success'],
+          });
           this.dialogRef.close(true);
         });
     }

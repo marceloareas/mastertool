@@ -1,17 +1,22 @@
 from django.http import JsonResponse, HttpResponseNotFound
-from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import authenticate, login as login_django
-from rest_framework.permissions import IsAuthenticated
-from .apis import *
-from .models import *
-from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
-import csv
 from django.http import HttpResponse
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
+from .apis import *
+from .models import *
+
+from datetime import date, timedelta
+
+from .utils import get_tokens_for_user  # Importe a função do arquivo utils.py
 from .models import Turma, Aluno, Nota
+import csv
 
 
 # -----------------------------------------------------------------------------------------------
@@ -23,33 +28,90 @@ def cadastrar_usuario(request):
     if request.method == 'POST':
         novo_cadastro = request.data
 
-        if novo_cadastro['senha']:
-            usuario = User.objects.filter(email=novo_cadastro['email']).first()
+        if User.objects.filter(email=novo_cadastro['email']).exists():
+            return JsonResponse({'message': 'Este email já está cadastrado.'}, status=400)
 
-            if usuario:
-                return JsonResponse({'erro': 'Usuario já existente'}, status=400)
-            
-            usuario = User.objects.create_user(username=novo_cadastro['email'], password=novo_cadastro['senha'])
-            usuario.save()
+        usuario = User.objects.create_user(
+            username=novo_cadastro['username'],
+            email=novo_cadastro['email'],
+            first_name=novo_cadastro['first_name'],
+            last_name=novo_cadastro['last_name'],
+            password=novo_cadastro['senha'],
+        )
+        usuario.save()
 
-            return JsonResponse({'mensagem': 'Usuario criado com sucesso.'})
-        else:
-            return JsonResponse({'erro': 'Não foi possível criar o usuario.'}, status=400)
+        return JsonResponse({'message': 'Usuário criado com sucesso.'}, status=200)
 
 @api_view(['POST'])
 def login(request):
     if request.method == 'POST':
-        novo_cadastro = request.data
-        
-        usuario = authenticate(username=novo_cadastro['email'], password=novo_cadastro['senha'])
-        if usuario is not None:
-            login_django(request, usuario)
+        dados = request.data
 
-            token = get_tokens_for_user(usuario)
+        try:
+            usuario = User.objects.get(email=dados['email'])
+        except User.DoesNotExist:
+            return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
+
+        usuario_auth = authenticate(username=usuario.username, password=dados['senha'])
+
+        if usuario_auth is not None:
+            login_django(request, usuario_auth)
+            token = get_tokens_for_user(usuario_auth)
             return JsonResponse({'mensagem': 'Autenticado com sucesso', 'token': token}, status=200)
         else:
             return JsonResponse({'erro': 'Email ou senha inválidos'}, status=400)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+    return JsonResponse({
+        'email': user.email,
+        'username': user.username,
+        'first_name': user.first_name,
+        'last_name': user.last_name
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    if request.method == 'POST':
+        user = request.user
+        data = request.data
+        
+        if not user.check_password(data.get('currentPassword')):
+            return JsonResponse({'error': 'Senha atual incorreta'}, status=400)
+        
+        if data.get('newPassword') != data.get('confirmPassword'):
+            return JsonResponse({'error': 'As senhas não coincidem'}, status=400)
+        
+        user.set_password(data.get('newPassword'))
+        user.save()
+        
+        return JsonResponse({'message': 'Senha alterada com sucesso'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user
+    data = request.data
+
+    new_email = data.get('email', user.email)
+    new_username = data.get('username', user.username)
+
+    if User.objects.exclude(id=user.id).filter(email=new_email).exists():
+        return JsonResponse({'error': 'Email já cadastrado por outra conta.'}, status=400)
+
+    if User.objects.exclude(id=user.id).filter(username=new_username).exists():
+        return JsonResponse({'error': 'Nome de Usuário já existe.'}, status=400)
+
+    user.email = new_email
+    user.username = new_username
+    user.first_name = data.get('first_name', user.first_name)
+    user.last_name = data.get('last_name', user.last_name)
+    user.save()
+
+    return JsonResponse({'message': 'Perfil atualizado com sucesso.'}, status=200)
 
 # -----------------------------------------------------------------------------------------------
 # ----------------------------------------- VIEWS ALUNOS ----------------------------------------
@@ -127,22 +189,22 @@ def editar_aluno(request, matricula):
 def cadastrar_turma(request):
     if request.method == 'POST':
         usuario = request.user
-        resultado = cadastro_turma_txt(request.data, usuario)
+        # TODO: Rename function
+        resultado = cadastrar_turma_api(request.data, usuario)
 
+        id_turma = resultado.get('id_turma', [])
         alunos_criados = resultado.get('alunos_criados', [])
         alunos_nao_criados = resultado.get('alunos_nao_criados', [])
-        id_turma = resultado.get('id_turma', [])
 
-        if alunos_criados:
-            response_data = {
+        if not id_turma:
+            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+        else:
+            return JsonResponse({
                 'mensagem': 'Arquivo processado com sucesso.',
                 'id_turma': id_turma,
                 'alunos_criados': [aluno.nome for aluno in alunos_criados],
                 'alunos_nao_criados': alunos_nao_criados
-            }
-            return JsonResponse(response_data)
-        else:
-            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+            })
 
 
 @api_view(['GET'])
@@ -195,7 +257,7 @@ def exportar_relatorio_resumido(request, turma_id):
 
     media_turma = sum(sum(nota.valor for nota in Nota.objects.filter(aluno=aluno, turma=turma)) / len(
         Nota.objects.filter(aluno=aluno, turma=turma)) if Nota.objects.filter(aluno=aluno, turma=turma) else 0 for aluno
-                      in alunos) / len(alunos)
+        in alunos) / len(alunos)
     writer.writerow([])
     writer.writerow(['', 'Média da turma', media_turma])
 
@@ -221,7 +283,7 @@ def exportar_relatorio_detalhado(request, turma_id):
 
     media_turma = sum(sum(nota.valor for nota in Nota.objects.filter(aluno=aluno, turma=turma)) / len(
         Nota.objects.filter(aluno=aluno, turma=turma)) if Nota.objects.filter(aluno=aluno, turma=turma) else 0 for aluno
-                      in alunos) / len(alunos)
+        in alunos) / len(alunos)
     writer.writerow([])
     writer.writerow(['', '', 'Média da turma', media_turma])
 
@@ -235,55 +297,88 @@ def exportar_relatorio_detalhado(request, turma_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def adicionar_nota(request, id):
+    """
+    # Exemplo de payload que chega:
+
+        [
+            {
+                'matricula': '2022944BCC',
+                'nome': 'Bernado Macedo',
+                'notas': [
+                    {'titulo': 'P2', 'valor': None, 'peso': 1},
+                    {'titulo': 'Nota 2', 'valor': None, 'peso': 1}
+                ]
+            },
+            {
+                'matricula': '2021944BCC',
+                'nome': 'Rodrigo Parracho',
+                'notas': [
+                    {'titulo': 'P2', 'valor': None, 'peso': 1},
+                    {'titulo': 'Nota 2', 'valor': None, 'peso': 1}
+                ]
+            }
+        ]
+    """
+
     if request.method == 'POST':
         data = request.data
-        usuario = request.user
+
+        if not isinstance(data, list):
+            print("CHEGADA DE DADOS ERRADA", data)
 
         try:
+            # Checar se a turma existe
             turma = Turma.objects.get(id=id)
+            # Para cada aluno da turma
+            for aluno in data:
+                # Checa se o aluno existe
+                curr_aluno = Aluno.objects.get(matricula=aluno['matricula'])
+                # Adicionar ou Atualizar notas
+                for nota in aluno['notas']:
 
-            # Excluir notas
-            if 'titulo' in data:
-                alunos = Aluno.objects.filter(turma=turma)
-                for aluno in alunos:
-                    Nota.objects.filter(
-                        titulo=data['titulo'],
-                        turma=turma,
-                        aluno=aluno
-                    ).first().delete()
-            else:
-                for aluno_editar in data:
-                    aluno = Aluno.objects.get(matricula=aluno_editar['matricula'])
+                    # Se a nota não existe, cria ela e associa ao aluno
+                    if 'id' not in nota:
+                        Nota.objects.create(aluno=curr_aluno, turma=turma, titulo=nota['titulo'], valor=nota['valor'], peso=nota["peso"])
+                    else:
+                        # Se a nota já existe, atualiza pelo id dela
+                        nota_existente = Nota.objects.filter(id=nota['id'], aluno=curr_aluno, turma=turma).first()
 
-                    # Adicionar ou Atualizar notas
-                    for nota in aluno_editar['notas']:
+                        nota_existente.titulo = nota['titulo']
+                        nota_existente.valor = nota['valor']
+                        nota_existente.peso = nota["peso"]
 
-                        # Atualiza o valor da nota existente
-                        if 'id' in nota:
-                            nota_existente = Nota.objects.filter(
-                                aluno=aluno,
-                                turma=turma,
-                                id=nota['id']
-                            ).first()
-                            nota_existente.titulo = nota['titulo']
-                            nota_existente.valor = nota['valor']
-                            nota_existente.save()
-                        else:
-                            # Cria uma nova nota
-                            Nota.objects.create(
-                                aluno=aluno,
-                                turma=turma,
-                                titulo=nota['titulo'],
-                                valor=nota['valor']
-                            )
+                        nota_existente.save()
 
-            return JsonResponse({'message': 'Notas adicionadas com sucesso'}, status=200)
-        except Aluno.DoesNotExist:
-            return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
+            return JsonResponse({'message': 'Dados da turma atualizados com sucesso'}, status=200)
+
         except Turma.DoesNotExist:
             return JsonResponse({'error': 'Turma não encontrada'}, status=404)
+        except Aluno.DoesNotExist:
+            return JsonResponse({'error': 'Aluno não encontrado'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def deletar_nota(request, id):
+    # Dado um id de uma turma e o nome de uma nota, deletar todas as notas correspondentes da turma em especifico
+
+    nomes_notas = request.data
+
+    # Checar se o id da turma é válido
+    if Turma.objects.filter(id=id).first() is None:
+        return JsonResponse({'error': 'Turma não encontrada'}, status=404)
+
+    for nota in nomes_notas:
+        # Checar se existe essa nota
+        if Nota.objects.filter(turma=id, titulo=nota).first() is None:
+            # return JsonResponse({'error': 'Nota não encontrada'}, status=404)
+            continue
+
+        # Deletar a nota
+        Nota.objects.filter(turma=id, titulo=nota).delete()
+
+    return JsonResponse({'message': 'Notas deletadas com sucesso'}, status=200)
 
 
 # -----------------------------------------------------------------------------------------------
@@ -295,24 +390,23 @@ def adicionar_nota(request, id):
 def cadastrar_projeto(request):
     if request.method == 'POST':
         usuario = request.user
-        data = request.data
 
-        resultado  = cadastro_projeto_txt(request.data, usuario)
+        resultado = cadastrar_projeto_api(request.data, usuario)
 
+        id_projeto = resultado.get('id_projeto', [])
         alunos_criados = resultado.get('alunos_criados', [])
         alunos_nao_criados = resultado.get('alunos_nao_criados', [])
-        id_turma = resultado.get('id_turma', [])
 
-        if alunos_criados:
-            response_data = {
+        if not id_projeto:
+            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+        else:
+            return JsonResponse({
                 'mensagem': 'Arquivo processado com sucesso.',
-                'id_turma': id_turma,
+                # TODO: FAZER O TRACEBACK NO FRONT E NOMEAR OS ATRIBUTOS CORRETAMENTE
+                'id_turma': id_projeto,
                 'alunos_criados': [aluno.nome for aluno in alunos_criados],
                 'alunos_nao_criados': alunos_nao_criados
-            }
-            return JsonResponse(response_data)
-        else:
-            return JsonResponse({'erro': 'Não foi possível processar o arquivo.'}, status=400)
+            })
 
 
 @api_view(['GET'])
@@ -323,7 +417,8 @@ def get_projetos(request, id=None):
     try:
         if id:
             projeto = Projeto.objects.get(id=id, usuario=usuario)
-            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+            alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome}
+                           for aluno in projeto.aluno.all()]
 
             projeto_json = {
                 'id': projeto.id,
@@ -341,7 +436,8 @@ def get_projetos(request, id=None):
             projetos_json = []
 
             for projeto in projetos:
-                alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome} for aluno in projeto.aluno.all()]
+                alunos_json = [{'matricula': aluno.matricula, 'nome': aluno.nome}
+                               for aluno in projeto.aluno.all()]
 
                 projetos_json.append({
                     'id': projeto.id,
@@ -381,7 +477,65 @@ def editar_projeto(request, id):
     if request.method == 'PUT':
         usuario = request.user
         data = request.data
-        
+
         projeto_atualizado = atualizar_projeto(id, data, usuario)
         return JsonResponse(projeto_atualizado, safe=False)
-        
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notificacoes(request):
+    usuario = request.user
+    notificacoes = Notificacao.objects.filter(usuario=usuario).order_by('data')
+    return JsonResponse([
+        {
+            'id': n.id,
+            'projectId': n.projeto.id,
+            'title': n.titulo,
+            'message': n.mensagem,
+            'date': n.data,
+            'type': n.tipo,
+            'read': n.lida
+        } for n in notificacoes
+    ], safe=False)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def marcar_notificacao_lida(request):
+    notificacao_id = request.data.get('id')
+    try:
+        notificacao = Notificacao.objects.get(id=notificacao_id, usuario=request.user)
+        notificacao.lida = True
+        notificacao.save()
+        return JsonResponse({'message': 'Notificação marcada como lida'})
+    except Notificacao.DoesNotExist:
+        return JsonResponse({'error': 'Notificação não encontrada'}, status=404)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def gerar_notificacoes_usuario(request):
+    usuario = request.user
+    hoje = date.today()
+    limite = hoje + timedelta(days=7)
+
+    projetos = Projeto.objects.filter(usuario=usuario)
+
+    for projeto in projetos:
+        if projeto.data_inicio and hoje <= projeto.data_inicio <= limite:
+            Notificacao.objects.get_or_create(
+                usuario=usuario,
+                projeto=projeto,
+                tipo='start_date',
+                data=projeto.data_inicio,
+                titulo=f'Início do projeto "{projeto.nome}" se aproximando',
+                mensagem=f'O projeto "{projeto.nome}" começa em {(projeto.data_inicio - hoje).days} dias.'
+            )
+        if projeto.data_fim and hoje <= projeto.data_fim <= limite:
+            Notificacao.objects.get_or_create(
+                usuario=usuario,
+                projeto=projeto,
+                tipo='end_date',
+                data=projeto.data_fim,
+                titulo=f'Prazo final do projeto "{projeto.nome}" se aproximando',
+                mensagem=f'O projeto "{projeto.nome}" termina em {(projeto.data_fim - hoje).days} dias.'
+            )
+    return JsonResponse({'message': 'Notificações atualizadas'})

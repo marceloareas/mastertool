@@ -33,7 +33,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -59,8 +58,12 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware'
 ]
 
+# TODO: Isso aqui, com certeza pode melhorar
 CORS_ALLOWED_ORIGINS = [
+
     "http://localhost:4200",
+
+    
 ]
 
 ROOT_URLCONF = 'mastertool.urls'
@@ -93,7 +96,9 @@ DATABASES = {
         'NAME': os.environ.get('DATABASE_NAME'),
         'USER': os.environ.get('DATABASE_USER'),
         'PASSWORD' : os.environ.get('DATABASE_PASSWORD'),
-        'HOST' : 'localhost'
+        'HOST' : 'db',
+        'PORT' : '5432',
+        
     }
 }
 

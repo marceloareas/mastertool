@@ -6,20 +6,38 @@ import {
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import {
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogTitle,
+} from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-form-class',
   standalone: true,
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    ReactiveFormsModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatDialogClose,
+    MatIconModule,
+    MatButtonModule],
   templateUrl: './form-class.component.html',
   styleUrl: './form-class.component.scss',
 })
 export class FormClassComponent {
+  showInfo = false;
   @Input() data: any;
   @Input() mode: any;
   @Output() formClass: EventEmitter<any> = new EventEmitter();
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) { }
 
   class: FormGroup = this.fb.group({
     nome: [''],

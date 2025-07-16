@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.urls import include, path
 from app_mastertool import views
 
+# Tipos de URLs do proj
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -15,6 +17,9 @@ urlpatterns = [
     # url de usuario
     path('cadastrar-usuario/', views.cadastrar_usuario, name='cadastrar_usuario'),
     path('login/', views.login, name='login'),
+    path('profile/', views.user_profile, name='user_profile'),
+    path('change-password/', views.change_password, name='change_password'),
+    path('update-profile/', views.update_profile, name='update_profile'), 
 
     # url de turma
     path('turmas/', views.get_turmas, name='get_turmas'),
@@ -25,6 +30,7 @@ urlpatterns = [
 
     # # url de notas
     path('notas/<str:id>', views.adicionar_nota, name='adicionar_nota'),
+    path('notas/deletar/<str:id>', views.deletar_nota, name='excluir_nota'),
 
     # url de projetos
     path('projetos/', views.get_projetos, name='get_projetos'),
@@ -33,4 +39,8 @@ urlpatterns = [
     path('projetos/excluir/<str:id>', views.excluir_projeto, name='excluir_projeto'),
     path('projetos/editar/<str:id>', views.editar_projeto, name='editar_projeto'),
 
+# urls de notificações
+    path('notificacoes/', views.get_notificacoes, name='get_notificacoes'),
+    path('notificacoes/marcar-lida/', views.marcar_notificacao_lida, name='marcar_notificacao_lida'),
+    path('notificacoes/gerar/', views.gerar_notificacoes_usuario, name='gerar_notificacoes_usuario'),
 ]

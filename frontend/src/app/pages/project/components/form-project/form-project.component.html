@@ -19,22 +19,38 @@
   </div>
 
   <div class="project__content">
-    
-      <mat-form-field appearance="outline">
-        <mat-label>Data de Início</mat-label>
-        <input matInput formControlName="data_inicio" type="date" />
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Data de Fim</mat-label>
-        <input matInput formControlName="data_fim" type="date" />
-      </mat-form-field>
-    
+
+    <mat-form-field appearance="outline">
+      <mat-label>Data de Início</mat-label>
+      <input matInput formControlName="data_inicio" type="date" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Data de Fim</mat-label>
+      <input matInput formControlName="data_fim" type="date" />
+    </mat-form-field>
+
   </div>
 
   @if(mode == "ADD"){
-    <label for="avatar">Subir arquivo:</label>
-    <input type="file" id="avatar" (change)="onFileChange($event)" />
-  }
-
+    <mat-dialog-content class="mat-typography">
+      <p>Suba um arquivo txt com os dados dos alunos</p>
+      <div class="file-upload-container">
+        <input (change)="onFileChange($event)" type="file" id="fileUpload" accept=".txt" />
+        <button mat-icon-button class="info-button" (click)="showInfo = !showInfo">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+      </div>
+      
+      @if(showInfo) {
+      <div class="info-box">
+        <h4>Formato do arquivo .txt:</h4>
+        <p>• Uma linha por aluno</p>
+        <p>• Formato: "matrícula, nome do aluno"</p>
+        <p>• Exemplo: <code>1111111BCC, João Silva</code></p>
+        <p>• Sem cabeçalho</p>
+        <p>• Codificação UTF-8</p>
+      </div>
+      }
+    </mat-dialog-content>
+    }
 </form>
-

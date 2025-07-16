@@ -1,143 +1,126 @@
 <section class="single-class">
   <div class="bar__top">
     <div class="bar__top__content">
-      <button mat-icon-button (click)="closeClass()">
+      <button mat-icon-button (click)="closeClassEvent.emit()">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <h2>{{ class.nome }}</h2>
       <h3>{{ class.periodo }}</h3>
     </div>
-    <div class="bar__top__button">
+
+    <div class="bar__top__actions">
       <button mat-stroked-button (click)="openModalStudent()">
         Adicionar Aluno
       </button>
-      <button mat-stroked-button (click)="openModalClass(class, 'EDIT')">
-        Editar turma
+      <button mat-stroked-button (click)="openModalClass('EDIT')">
+        Editar Turma
       </button>
-      <div class="bar__top__button">
-        <button mat-stroked-button (click)="promptRemoveColumns()">
-          Remover Notas
-        </button>
-        <button mat-flat-button color="primary" (click)="exportReport('resumido')">Exportar CSV Resumido</button>
-        <button mat-flat-button color="primary" (click)="exportReport('detalhado')">Exportar CSV Detalhado</button>
-      </div>
-      
+
+      <mat-checkbox [(ngModel)]="discardLowestNote" (change)="toggleDiscardLowestNote()" [disabled]="isEditMode">
+        Descartar menor nota
+      </mat-checkbox>
+
+      <button mat-flat-button color="primary" (click)="exportReport('resumido')"
+        [disabled]="!hasStudents || isEditMode">
+        Exportar CSV Resumido
+      </button>
+
+      <button mat-flat-button color="primary" (click)="exportReport('detalhado')"
+        [disabled]="!hasStudents || isEditMode">
+        Exportar CSV Detalhado
+      </button>
     </div>
   </div>
 
-  <div class="single-class__top">
-    <div class="action-button">
-      @if(mode === 'VIEW'){
-      <button mat-flat-button color="primary" (click)="changeMode('EDIT')">
-        Editar Notas
-      </button>
-      } @else{
-      <button mat-stroked-button color="primary" (click)="addNewColumn()">
+  <div class="single-class__actions">
+    @if (!isEditMode) {
+    <button mat-flat-button color="primary" (click)="toggleEditMode()" [disabled]="!hasStudents">
+      Editar Notas
+    </button>
+    } @else {
+    <div class="edit-actions">
+      <button mat-stroked-button color="primary" (click)="addNewNoteColumn()">
         Adicionar Nota
       </button>
-      <div class="bar__top__button">
-        <button mat-stroked-button (click)="changeMode('VIEW')">
+
+      <div class="edit-buttons">
+        <button mat-stroked-button (click)="toggleEditMode()">
           Cancelar
         </button>
-        <button mat-flat-button color="primary" (click)="save()">Salvar</button>
-        
+        <button mat-flat-button color="primary" (click)="saveChanges()">
+          Salvar
+        </button>
       </div>
-      }
     </div>
+    }
   </div>
 
-  <table mat-table [dataSource]="this.class.alunos" class="mat-elevation-z8">
-    <!-- Nome Column -->
-    <ng-container matColumnDef="nome">
-      <th mat-header-cell *matHeaderCellDef width="200px">Alunos</th>
-      <td mat-cell *matCellDef="let element">
-        {{ element.matricula }} - {{ element.nome }}
-      </td>
-    </ng-container>
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
-    <!-- Dynamic Nota Columns -->
-    @for(notaCol of notaColumns; track notaCol ){
-    <ng-container [matColumnDef]="notaCol">
-      <th mat-header-cell *matHeaderCellDef width="100px">
-        <div class="header-cell">
-          <input
-            [ngClass]="mode === 'EDIT' ? 'edit' : ''"
-            matInput
-            type="text"
-            [value]="notaCol"
-            (blur)="updateColumnName($event, $index)"
-            placeholder="Digite o nome"
-          />
-          <!-- Peso -->
-            <span style="margin-left: 10px">Peso</span>
-            <input
-              matInput
-              type="number"
-              [value]="getPeso(notaCol)"
-              (input)="updatePeso($event, notaCol)"
-              [disabled]="mode === 'VIEW'"
-              placeholder="Peso"
-              style="width: 30px; margin-right: 20px"
-            />
-          @if(mode !== 'VIEW'){
-          <button
-            mat-icon-button
-            class="button__delete"
-            (click)="removeColumn(notaCol)"
-          >
-            <mat-icon class="icon__delete" fontIcon="delete"></mat-icon>
+      <ng-container matColumnDef="nome">
+        <th mat-header-cell *matHeaderCellDef>Alunos</th>
+        <td mat-cell *matCellDef="let student">
+          {{ student.matricula }} - {{ student.nome }}
+        </td>
+      </ng-container>
+
+
+      @for (noteTitle of noteColumns; track noteTitle) {
+      <ng-container [matColumnDef]="noteTitle">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="note-header">
+            <span>{{ noteTitle }}</span>
+            @if (isEditMode) {
+            <div class="weight-control">
+              <span>P</span>
+              <input type="number" min="1" value="1" (input)="updateNoteWeight($event, noteTitle)"
+                [value]="getNoteWeight(noteTitle)">
+            </div>
+            <button mat-icon-button (click)="removeNoteColumn(noteTitle)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            }
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let student">
+          <input type="number" min="0" step="0.01" [value]="getNoteValue(student, noteTitle)"
+            (change)="updateNoteValue($event, student, noteTitle)" [disabled]="!isEditMode"
+            [class.discarded]="isDiscardedNote(student, noteTitle)">
+
+        </td>
+      </ng-container>
+
+      }
+
+
+      <ng-container matColumnDef="media">
+        <th mat-header-cell *matHeaderCellDef>Média</th>
+        <td mat-cell *matCellDef="let student">
+          {{ student.media }}
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="editar">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let student">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
           </button>
-          }
-        </div>
-      </th>
-      <td mat-cell *matCellDef="let element">
-        <input
-          [ngClass]="mode === 'EDIT' ? 'edit' : ''"
-          matInput
-          type="number"
-          [value]="element.notas[$index]?.valor"
-          (input)="updateNota($event, element, notaCol)"
-          [disabled]="mode === 'VIEW'"
-        />
-      </td>
-    </ng-container>
-    }
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="deleteStudent(student.matricula)">
+              <mat-icon>delete</mat-icon>
+              Remover
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="media">
-      <th mat-header-cell *matHeaderCellDef width="50px">Média</th>
-      <td mat-cell *matCellDef="let element">{{ media(element) }}</td>
-    </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
 
-    <!-- Ações Column -->
-    <ng-container matColumnDef="editar">
-      <th
-        mat-header-cell
-        *matHeaderCellDef
-        class="action-header"
-        mat-sort-header
-        width="60px"
-      >
-        Ações
-      </th>
-      <td mat-cell *matCellDef="let element" class="action-cell">
-        <button mat-icon-button [matMenuTriggerFor]="menu">
-          <mat-icon fontIcon="more_vert"></mat-icon>
-        </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="deleteStudent(element.matricula)">
-            <mat-icon fontIcon="delete"></mat-icon> Remover
-          </button>
-        </mat-menu>
-      </td>
-    </ng-container>
-
-    <!-- Header and Row Definitions -->
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
-  <mat-paginator
-    [pageSizeOptions]="[5, 10, 15]"
-    showFirstLastButtons
-    aria-label="Select page of periodic elements"
-  ></mat-paginator>
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
 </section>

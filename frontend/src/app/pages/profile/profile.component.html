@@ -1,0 +1,133 @@
+<div class="profile-container">
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav mode="side" opened>
+      <div class="profile-sidebar">
+        <div class="user-info">
+          <div class="avatar">{{ getInitials() }}</div>
+          <h2>{{ userUsername }}</h2>
+        </div>
+
+        <nav class="profile-nav">
+          <button mat-flat-button color="primary" 
+                  [class.active]="activeSection === 'perfil'"
+                  (click)="activeSection = 'perfil'">
+            <mat-icon>person</mat-icon>
+            Perfil
+          </button>
+
+          <button mat-flat-button color="primary"
+                  [class.active]="activeSection === 'notificacoes'"
+                  (click)="activeSection = 'notificacoes'">
+            <mat-icon>notifications</mat-icon>
+            Notificações
+          </button>
+
+          <button mat-flat-button color="primary" (click)="openChangePasswordDialog()">
+            <mat-icon>lock</mat-icon>
+            Alterar Senha
+          </button>
+        </nav>
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="profile-content">
+        <div class="profile-view">
+
+          <!-- Seção Perfil -->
+          <ng-container *ngIf="activeSection === 'perfil'">
+            <h1>Meu Perfil</h1>
+
+            <div *ngIf="!isEditing">
+              <mat-card>
+                <mat-list>
+                  <mat-list-item>
+                    <div class="list-item-content">
+                      <mat-icon color="primary">email</mat-icon>
+                      <div class="text-content">
+                        <div matLine class="label">Email</div>
+                        <div matLine class="value">{{ userEmail }}</div>
+                      </div>
+                    </div>
+                  </mat-list-item>
+                  <mat-divider></mat-divider>
+
+                  <mat-list-item>
+                    <div class="list-item-content">
+                      <mat-icon color="primary">badge</mat-icon>
+                      <div class="text-content">
+                        <div matLine class="label">Usuário</div>
+                        <div matLine class="value">{{ userUsername }}</div>
+                      </div>
+                    </div>
+                  </mat-list-item>
+                  <mat-divider></mat-divider>
+
+                  <mat-list-item>
+                    <div class="list-item-content">
+                      <mat-icon color="primary">person</mat-icon>
+                      <div class="text-content">
+                        <div matLine class="label">Nome</div>
+                        <div matLine class="value">{{ firstName }}</div>
+                      </div>
+                    </div>
+                  </mat-list-item>
+                  <mat-divider></mat-divider>
+
+                  <mat-list-item>
+                    <div class="list-item-content">
+                      <mat-icon color="primary">person_outline</mat-icon>
+                      <div class="text-content">
+                        <div matLine class="label">Sobrenome</div>
+                        <div matLine class="value">{{ lastName }}</div>
+                      </div>
+                    </div>
+                  </mat-list-item>
+                </mat-list>
+                <div class="button-group">
+                  <button mat-raised-button color="primary" (click)="enableEdit()">Editar Perfil</button>
+                </div>
+              </mat-card>
+            </div>
+
+            <form *ngIf="isEditing" class="edit-form">
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput [(ngModel)]="userEmail" name="email">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Nome de Usuário</mat-label>
+                <input matInput [(ngModel)]="userUsername" name="username">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Nome</mat-label>
+                <input matInput [(ngModel)]="firstName" name="firstName">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Sobrenome</mat-label>
+                <input matInput [(ngModel)]="lastName" name="lastName">
+              </mat-form-field>
+
+              <div class="button-group">
+                <button mat-flat-button color="primary" (click)="updateProfile()">Salvar</button>
+                <button mat-button (click)="cancelEdit()">Cancelar</button>
+              </div>
+            </form>
+          </ng-container>
+
+          <!-- Seção Notificações -->
+          <ng-container *ngIf="activeSection === 'notificacoes'">
+            <app-notifications 
+              [notifications]="notifications" 
+              (markAsRead)="onMarkAsRead($event)">
+            </app-notifications>
+          </ng-container>
+
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>
